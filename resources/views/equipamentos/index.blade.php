@@ -41,8 +41,12 @@
                     <td class="py-4 px-6">
                         @if($equip->cliente)
                         {{ $equip->cliente->nome }}
+                        @elseif($equip->estoque)
+                        {{-- Se não tem cliente, mas tem estoque vinculado --}}
+                        <span class="text-blue-600 font-bold">{{ $equip->estoque->nome }}</span>
                         @else
-                        <span class="text-blue-600 font-bold">Estoque</span>
+                        {{-- Caso de segurança se ambos forem nulos --}}
+                        <span class="text-gray-400 italic">Não alocado</span>
                         @endif
                     </td>
                     <td class="py-4 px-6 text-sm">{{ $equip->data_movimentacao ? $equip->data_movimentacao->format('d/m/Y') : '-' }}</td>
