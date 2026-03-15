@@ -23,9 +23,12 @@ class DatabaseSeeder extends Seeder
 
         //Criação de testes
         $this->call([
-            EquipamentoSeeder::class,
             ClientesSeeder::class,
+            EstoqueSeeder::class,
+            CategoriaEquipamentoSeeder::class, 
+            CadastroEquipamentosSeeder::class,
             TecnicosSeeder::class,
+            EquipamentoSeeder::class,
         ]);
     }
 }

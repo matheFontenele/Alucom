@@ -3,6 +3,8 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\GuiaAdiController;
 use App\Http\Controllers\ClientesController;
+use App\Http\Controllers\EstoqueController;
+use App\Http\Controllers\EquipamentoController;
 use App\Http\Controllers\TecnicosController;
 
 Route::get('/', function () {
@@ -21,5 +23,11 @@ Route::prefix('guia')->group(function () {
 // Clientes
 Route::resource('clientes', ClientesController::class);
 
+// Estoques
+Route::resource('estoques', EstoqueController::class);
+
 //Tecnicos
 Route::resource('tecnicos', TecnicosController::class);
+
+//Equipamentos
+Route::resource('equipamentos', EquipamentoController::class);
