@@ -49,6 +49,10 @@
                 <i class="ph ph-desktop text-xl"></i> Equipamentos
             </a>
 
+            <a href="{{ route('movimentacoes.index') }}"
+                class="flex items-center gap-3 p-3 rounded-lg transition {{ request()->routeIs('movimentacoes.*') ? 'bg-red-600 text-white shadow-lg shadow-red-900/20' : 'hover:bg-slate-800 hover:text-white text-slate-300' }}">
+                <i class="ph ph-arrows-clockwise text-xl"></i> Movimentações
+            </a>
         </nav>
         <div class="p-4 border-t border-slate-800">
             <div class="flex items-center gap-3 p-2">

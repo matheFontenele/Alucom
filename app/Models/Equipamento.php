@@ -46,4 +46,10 @@ class Equipamento extends Model
     {
         return $this->belongsTo(Estoque::class);
     }
+
+    //Relacionamento com movimentacoes
+    public function movimentacoes()
+    {
+        return $this->hasMany(Movimentacao::class);
+    }
 }

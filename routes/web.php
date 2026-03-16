@@ -6,6 +6,7 @@ use App\Http\Controllers\ClientesController;
 use App\Http\Controllers\EstoqueController;
 use App\Http\Controllers\EquipamentoController;
 use App\Http\Controllers\TecnicosController;
+use App\Http\Controllers\MovimentacaoController;
 
 Route::get('/', function () {
     return redirect()->route('guia-adi.index');
@@ -31,3 +32,6 @@ Route::resource('tecnicos', TecnicosController::class);
 
 //Equipamentos
 Route::resource('equipamentos', EquipamentoController::class);
+
+//Movimentações
+Route::resource('movimentacoes', MovimentacaoController::class);
