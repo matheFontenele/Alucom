@@ -13,7 +13,8 @@ class Equipamento extends Model
         'tombo',
         'nome',
         'serial',
-        'situacao',
+        'status',
+        'sub_staus',
         'cliente_id',
         'data_movimentacao'
     ];

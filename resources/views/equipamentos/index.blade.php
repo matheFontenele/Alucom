@@ -5,51 +5,73 @@
     <h1 class="text-2xl font-bold mb-6">Gestão de Equipamentos - Alucom</h1>
 
     <div class="mb-4">
-        <button class="bg-blue-600 text-white px-4 py-2 rounded">Novo Equipamento</button>
+        <button class="bg-blue-600 text-white px-4 py-2 rounded shadow hover:bg-blue-700 transition">
+            <i class="ph ph-plus-circle"></i> Novo Equipamento
+        </button>
     </div>
 
     <div class="bg-white shadow-md rounded-lg overflow-hidden">
         <table class="min-w-full leading-normal">
             <thead>
-                <tr class="bg-gray-100 text-gray-600 uppercase text-sm">
+                <tr class="bg-gray-100 text-gray-600 uppercase text-[11px] tracking-wider">
                     <th class="py-3 px-6 text-left">Tombo</th>
                     <th class="py-3 px-6 text-left">Nome</th>
                     <th class="py-3 px-6 text-left">Categoria / Sub</th>
                     <th class="py-3 px-6 text-left">Serial</th>
-                    <th class="py-3 px-6 text-left">Situação</th>
-                    <th class="py-3 px-6 text-left">Cliente</th>
+                    <th class="py-3 px-6 text-left">Status / Situação</th>
+                    <th class="py-3 px-6 text-left">Localização Atual</th>
                     <th class="py-3 px-6 text-left">Data</th>
                 </tr>
             </thead>
-            <tbody>
+            <tbody class="text-gray-700">
                 @foreach($equipamentos as $equip)
-                <tr class="border-b">
-                    <td class="py-4 px-6">{{ $equip->tombo }}</td>
-                    <td class="py-4 px-6 font-bold">{{ $equip->nome }}</td>
+                <tr class="border-b hover:bg-gray-50 transition">
+                    <td class="py-4 px-6 text-sm">{{ $equip->tombo }}</td>
+                    <td class="py-4 px-6 font-bold text-slate-800">{{ $equip->nome }}</td>
                     <td class="py-4 px-6 text-sm">
                         {{ $equip->categoria->nome }}
-                        <span class="text-gray-400">/</span>
-                        {{ $equip->subcategoria->nome ?? '-' }}
+                        <span class="text-gray-300">/</span>
+                        <span class="text-gray-500 text-xs">{{ $equip->subcategoria->nome ?? '-' }}</span>
                     </td>
-                    <td class="py-4 px-6">{{ $equip->serial ?? 'N/A' }}</td>
+                    <td class="py-4 px-6 font-mono text-[11px] text-gray-500">{{ $equip->serial ?? 'N/A' }}</td>
+
                     <td class="py-4 px-6">
-                        <span class="px-2 py-1 rounded text-xs 
-                            {{ $equip->situacao == 'Disponivel' ? 'bg-green-200 text-green-800' : 'bg-yellow-200 text-yellow-800' }}">
-                            {{ $equip->situacao }}
-                        </span>
+                        <div class="flex flex-col">
+                            {{-- Status Principal --}}
+                            <span class="px-2 py-1 rounded text-[11px] font-bold uppercase tracking-wide w-fit
+            {{ $equip->status == 'Disponivel' ? 'bg-emerald-100 text-emerald-800' : '' }}
+            {{ $equip->status == 'Alugado' ? 'bg-blue-100 text-blue-800' : '' }}
+            {{ $equip->status == 'Manutenção' ? 'bg-red-100 text-red-800' : '' }}
+            {{ $equip->status == 'Reservado' ? 'bg-purple-100 text-purple-800' : '' }}
+            {{ $equip->status == 'Devolução' ? 'bg-amber-100 text-amber-800' : '' }}">
+                                {{ $equip->status }}
+                            </span>
+
+                            {{-- Sub-status --}}
+                            @if($equip->situacao)
+                            <span class="text-[10px] text-gray-400 font-medium mt-0.5 ml-0.5 italic">
+                                {{ $equip->situacao }}
+                            </span>
+                            @endif
+                        </div>
                     </td>
+
                     <td class="py-4 px-6">
                         @if($equip->cliente)
-                        {{ $equip->cliente->nome }}
+                        <span class="text-slate-700 text-sm flex items-center gap-1">
+                            <i class="ph ph-buildings text-blue-500"></i> {{ $equip->cliente->nome }}
+                        </span>
                         @elseif($equip->estoque)
-                        {{-- Se não tem cliente, mas tem estoque vinculado --}}
-                        <span class="text-blue-600 font-bold">{{ $equip->estoque->nome }}</span>
+                        <span class="text-blue-600 font-bold text-sm flex items-center gap-1">
+                            <i class="ph ph-package"></i> {{ $equip->estoque->nome }}
+                        </span>
                         @else
-                        {{-- Caso de segurança se ambos forem nulos --}}
-                        <span class="text-gray-400 italic">Não alocado</span>
+                        <span class="text-gray-400 text-xs italic">Não alocado</span>
                         @endif
                     </td>
-                    <td class="py-4 px-6 text-sm">{{ $equip->data_movimentacao ? $equip->data_movimentacao->format('d/m/Y') : '-' }}</td>
+                    <td class="py-4 px-6 text-xs text-gray-400">
+                        {{ $equip->data_movimentacao ? $equip->data_movimentacao->format('d/m/Y') : '-' }}
+                    </td>
                 </tr>
                 @endforeach
             </tbody>

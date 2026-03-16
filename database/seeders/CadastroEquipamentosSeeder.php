@@ -31,7 +31,8 @@ class CadastroEquipamentosSeeder extends Seeder
             'tombo'           => '50010',
             'nome'            => 'Notebook Dell Latitude 3420',
             'serial'          => 'DELL50010X',
-            'situacao'        => 'Alugado',
+            'status' => 'Alugado',
+            'situacao' => 'No Cliente',
             'cliente_id'      => $unidadeFortaleza->id,
             'estoque_id'      => null,
             'data_movimentacao' => now(),
@@ -44,7 +45,8 @@ class CadastroEquipamentosSeeder extends Seeder
             'tombo'           => '50011',
             'nome'            => 'Notebook Lenovo L14',
             'serial'          => 'LENO50011Y',
-            'situacao'        => 'Disponivel',
+            'status' => 'Disponivel',
+            'situacao' => 'Em Rota',
             'cliente_id'      => null,
             'estoque_id'      => $estoqueBase->id, // Guardado no Almoxarifado
             'data_movimentacao' => now(),
@@ -57,9 +59,10 @@ class CadastroEquipamentosSeeder extends Seeder
             'tombo'           => '70020',
             'nome'            => 'Nobreak SMS 1200VA',
             'serial'          => 'SMS70020Z',
-            'situacao'        => 'Manutenção',
-            'cliente_id'      => null,
-            'estoque_id'      => $estoqueSC->id, // Guardado no Laboratório
+            'status' => 'Devolução',
+            'situacao' => 'Aguardando Coleta',
+            'cliente_id'      => $unidadeFortaleza->id,
+            'estoque_id'      => null,
             'data_movimentacao' => now(),
         ]);
     }

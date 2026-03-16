@@ -20,7 +20,8 @@ return new class extends Migration
             $table->string('tombo', 5)->unique();
             $table->string('nome');
             $table->string('serial')->unique()->nullable();
-            $table->string('situacao');
+            $table->string('status'); // Alugado, Devolução, Disponivel, Manutenção, Reservado
+            $table->string('situacao')->nullable(); // No Cliente, Em Rota, Aguardando Coleta, etc.
             $table->timestamp('data_movimentacao')->nullable();
             $table->timestamps();
         });
