@@ -5,7 +5,9 @@
     <div class="flex justify-between items-center mb-6">
         <h1 class="text-2xl font-bold text-gray-800">Gestão de Estoques</h1>
         <button class="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition">
-            + Novo Local de Estoque
+            <a href="{{ route('estoques.create') }}" class="bg-indigo-600 ...">
+                + Novo Local de Estoque
+            </a>
         </button>
     </div>
 
@@ -35,8 +37,8 @@
             </div>
 
             <div class="mt-6 flex gap-2">
-                <a href="{{ route('estoques.show', $estoque->id) }}" 
-                   class="flex-1 text-center bg-gray-50 text-gray-700 px-3 py-2 rounded-md text-sm font-semibold hover:bg-gray-100 border border-gray-200">
+                <a href="{{ route('estoques.show', $estoque->id) }}"
+                    class="flex-1 text-center bg-gray-50 text-gray-700 px-3 py-2 rounded-md text-sm font-semibold hover:bg-gray-100 border border-gray-200">
                     Ver Inventário
                 </a>
                 <button class="p-2 text-gray-400 hover:text-red-600">

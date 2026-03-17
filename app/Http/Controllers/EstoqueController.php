@@ -23,7 +23,7 @@ class EstoqueController extends Controller
      */
     public function create()
     {
-        //
+        return view('estoques.create');
     }
 
     /**
@@ -31,7 +31,14 @@ class EstoqueController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $data = $request->validate([
+            'nome'        => 'required|string|max:255',
+            'localizacao' => 'required|string|max:255',
+        ]);
+
+        Estoque::create($data);
+
+        return redirect()->route('estoques.index')->with('success', 'Local de estoque criado com sucesso!');
     }
 
     /**
