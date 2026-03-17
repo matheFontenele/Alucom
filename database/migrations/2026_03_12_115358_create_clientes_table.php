@@ -21,7 +21,7 @@ return new class extends Migration
             // Dados Identificadores
             $table->string('nome');
             $table->enum('tipo', ['ministerio', 'unidade'])->default('unidade');
-            $table->string('cnpj')->unique();
+            $table->string('cnpj');
             
             // Localização e Contrato
             $table->string('contrato')->nullable();

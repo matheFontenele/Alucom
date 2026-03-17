@@ -16,7 +16,15 @@
         <div class="bg-slate-900 p-6 text-white">
             <h3 class="font-black text-xl">Formulário de Cadastro</h3>
         </div>
-
+        {{-- Em caso de não salvar --}} @if ($errors->any())
+        <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-xl mb-6">
+            <ul class="list-disc pl-5">
+                @foreach ($errors->all() as $error)
+                <li class="font-bold text-sm">{{ $error }}</li>
+                @endforeach
+            </ul>
+        </div>
+        @endif
         <form action="{{ route('clientes.store') }}" method="POST" class="p-8 space-y-6">
             @csrf
 

@@ -39,7 +39,8 @@ class EstoqueController extends Controller
      */
     public function show(Estoque $estoque)
     {
-        //
+        $estoque->load('equipamentos');
+        return view('estoques.show', compact('estoque'));
     }
 
     /**

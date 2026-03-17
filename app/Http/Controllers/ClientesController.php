@@ -11,8 +11,7 @@ class ClientesController extends Controller
     //Função principal
     public function index(Request $request)
     {
-        $query = Clientes::query();
-
+        $query = Clientes::query()->whereNull('parent_id');
         // Busca por Nome ou CNPJ
         if ($request->filled('search')) {
             $query->where(function ($q) use ($request) {
@@ -40,15 +39,20 @@ class ClientesController extends Controller
     {
         $data = $request->validate([
             'nome'      => 'required|string|max:255',
-            'cnpj'      => 'required|string|unique:clientes,cnpj',
+            'cnpj'      => 'required|string',
             'estado'    => 'required|string|max:2',
             'cidade'    => 'required|string|max:255',
             'endereco'  => 'required|string|max:255',
             'contrato'  => 'required|in:Alucom,Moreia,ZapLok',
             'sla'       => 'nullable|array',
-            'parent_id' => 'nullable|exists:clientes,id', // Valida se o pai existe
+            'parent_id' => 'nullable|exists:clientes,id',
             'tipo'      => 'required|in:ministerio,unidade',
         ]);
+
+        // Força o parent_id como null se for ministério, por segurança
+        if ($data['tipo'] === 'ministerio') {
+            $data['parent_id'] = null;
+        }
 
         Clientes::create($data);
 
