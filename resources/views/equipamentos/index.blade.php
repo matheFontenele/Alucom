@@ -23,6 +23,7 @@
                     <th class="py-3 px-6 text-left">Status / Situação</th>
                     <th class="py-3 px-6 text-left">Localização Atual</th>
                     <th class="py-3 px-6 text-left">Data</th>
+                    <th class="py-3 px-6 text-center">Ações</th>
                 </tr>
             </thead>
             <tbody class="text-gray-700">
@@ -72,7 +73,26 @@
                         @endif
                     </td>
                     <td class="py-4 px-6 text-xs text-gray-400">
-                        {{ $equip->data_movimentacao ? $equip->data_movimentacao->format('d/m/Y') : '-' }}
+                        {{-- Usa a data de criação do registro no sistema --}}
+                        {{ $equip->created_at->format('d/m/Y') }}
+                    </td>
+                    {{-- Coluna de Ações Estilizada --}}
+                    <td class="py-4 px-6 text-center">
+                        <div class="flex justify-center items-center gap-3">
+                            <a href="{{ route('equipamentos.show', $equip->id) }}" class="text-gray-400 hover:text-blue-600 transition" title="Visualizar Detalhes">
+                                <i class="ph ph-eye text-lg"></i>
+                            </a>
+                            <a href="{{ route('equipamentos.edit', $equip->id) }}" class="text-gray-400 hover:text-amber-500 transition" title="Editar Equipamento">
+                                <i class="ph ph-pencil-line text-lg"></i>
+                            </a>
+                            <form action="{{ route('equipamentos.destroy', $equip->id) }}" method="POST" onsubmit="return confirm('Tem certeza que deseja excluir?')">
+                                @csrf
+                                @method('DELETE')
+                                <button type="submit" class="text-gray-400 hover:text-red-600 transition">
+                                    <i class="ph ph-trash text-lg"></i>
+                                </button>
+                            </form>
+                        </div>
                     </td>
                 </tr>
                 @endforeach
