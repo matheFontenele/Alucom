@@ -35,3 +35,8 @@ Route::resource('equipamentos', EquipamentoController::class);
 
 //Movimentações
 Route::resource('movimentacoes', MovimentacaoController::class);
+
+//Rota de identificação de Categorias e SubCategorias
+Route::get('/api/categorias/{categoria}/subcategorias', function ($categoriaId) {
+    return App\Models\Subcategoria::where('categoria_id', $categoriaId)->get();
+});

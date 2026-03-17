@@ -25,7 +25,11 @@ class EquipamentoController extends Controller
      */
     public function create()
     {
-        //
+        $categorias = \App\Models\Categoria::orderBy('nome')->get();
+        $clientes = \App\Models\Clientes::whereNull('parent_id')->orderBy('nome')->get();
+        $estoques = \App\Models\Estoque::orderBy('nome')->get();
+
+        return view('equipamentos.create', compact('categorias', 'clientes', 'estoques'));
     }
 
     /**
@@ -33,7 +37,21 @@ class EquipamentoController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $data = $request->validate([
+            'nome'           => 'required|string|max:255',
+            'tombo'          => 'required|string|max:5|unique:equipamentos,tombo',
+            'serial'         => 'nullable|string|unique:equipamentos,serial',
+            'categoria_id'   => 'required|exists:categorias,id',
+            'subcategoria_id' => 'nullable|exists:subcategorias,id',
+            'cliente_id'     => 'nullable|exists:clientes,id',
+            'estoque_id'     => 'nullable|exists:estoques,id',
+            'status'         => 'required|in:Alugado,Devolução,Disponivel,Manutenção,Reservado',
+            'situacao'       => 'nullable|string',
+        ]);
+
+        \App\Models\Equipamento::create($data);
+
+        return redirect()->route('equipamentos.index')->with('success', 'Equipamento cadastrado!');
     }
 
     /**

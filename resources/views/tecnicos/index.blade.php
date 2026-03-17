@@ -7,7 +7,7 @@
             <h1 class="text-3xl font-black text-slate-800 tracking-tighter">Rede de Técnicos</h1>
             <p class="text-slate-500 font-medium">Gerencie prestadores de serviço e parceiros regionais.</p>
         </div>
-        <a href="{{ route('tecnicos.create') }}" class="bg-red-600 text-white px-6 py-3 rounded-2xl font-black shadow-lg shadow-red-200 hover:scale-105 transition-all flex items-center gap-2">
+        <a href="{{ route('tecnicos.create') }}" class="bg-blue-900 text-white px-6 py-3 rounded-2xl font-black shadow-lg shadow-red-200 hover:scale-105 transition-all flex items-center gap-2">
             <i class="ph ph-plus-circle text-lg"></i> CADASTRAR TÉCNICO
         </a>
     </div>

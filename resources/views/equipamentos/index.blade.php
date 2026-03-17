@@ -5,8 +5,10 @@
     <h1 class="text-2xl font-bold mb-6">Gestão de Equipamentos - Alucom</h1>
 
     <div class="mb-4">
-        <button class="bg-blue-600 text-white px-4 py-2 rounded shadow hover:bg-blue-700 transition">
-            <i class="ph ph-plus-circle"></i> Novo Equipamento
+        <button class="bg-blue-900 text-white px-4 py-2 rounded shadow hover:bg-blue-700 transition">
+            <a href="{{ route('equipamentos.create') }}">
+                Novo Equipamento
+            </a>
         </button>
     </div>
 
