@@ -67,7 +67,12 @@ class EquipamentoController extends Controller
      */
     public function edit(Equipamento $equipamento)
     {
-        //
+        // Carregamos as mesmas dependências do Create, mas para o Equipamento específico
+        $categorias = \App\Models\Categoria::orderBy('nome')->get();
+        $clientes = \App\Models\Clientes::whereNull('parent_id')->orderBy('nome')->get();
+        $estoques = \App\Models\Estoque::orderBy('nome')->get();
+
+        return view('equipamentos.edit', compact('equipamento', 'categorias', 'clientes', 'estoques'));
     }
 
     /**
@@ -75,7 +80,16 @@ class EquipamentoController extends Controller
      */
     public function update(Request $request, Equipamento $equipamento)
     {
-        //
+        $data = $request->validate([
+            'nome'   => 'required|string|max:255',
+            'tombo'  => 'required|string|max:10|unique:equipamentos,tombo,' . $equipamento->id,
+            'serial' => 'nullable|string|unique:equipamentos,serial,' . $equipamento->id,
+            'categoria_id' => 'required|exists:categorias,id',
+        ]);
+
+        $equipamento->update($data);
+
+        return redirect()->route('equipamentos.index')->with('success', 'Cadastro do equipamento atualizado!');
     }
 
     /**
@@ -83,6 +97,7 @@ class EquipamentoController extends Controller
      */
     public function destroy(Equipamento $equipamento)
     {
-        //
+        $equipamento->delete();
+        return redirect()->route('equipamentos.index')->with('success', 'Equipamento excluído!');
     }
 }

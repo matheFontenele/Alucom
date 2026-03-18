@@ -85,10 +85,11 @@
                             <a href="{{ route('equipamentos.edit', $equip->id) }}" class="text-gray-400 hover:text-amber-500 transition" title="Editar Equipamento">
                                 <i class="ph ph-pencil-line text-lg"></i>
                             </a>
-                            <form action="{{ route('equipamentos.destroy', $equip->id) }}" method="POST" onsubmit="return confirm('Tem certeza que deseja excluir?')">
+                            {{-- Deletar equipamento--}}
+                            <form action="{{ route('equipamentos.destroy', $equip->id) }}" method="POST" class="form-delete">
                                 @csrf
                                 @method('DELETE')
-                                <button type="submit" class="text-gray-400 hover:text-red-600 transition">
+                                <button type="button" class="btn-delete text-gray-400 hover:text-red-600 transition" title="Excluir">
                                     <i class="ph ph-trash text-lg"></i>
                                 </button>
                             </form>
@@ -100,4 +101,40 @@
         </table>
     </div>
 </div>
+<script>
+    // 1. Alerta de Confirmação de Exclusão
+    document.querySelectorAll('.btn-delete').forEach(button => {
+        button.addEventListener('click', function(e) {
+            const form = this.closest('.form-delete');
+
+            Swal.fire({
+                title: 'Tem certeza?',
+                text: "Esta ação não poderá ser revertida!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#1e3a8a',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Sim, excluir!',
+                cancelButtonText: 'Cancelar',
+                reverseButtons: true
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    form.submit();
+                }
+            })
+        });
+    });
+
+    // 2. Alerta de Sucesso (após redirecionamento do Controller)
+    @if(session('success'))
+        Swal.fire({
+            icon: 'success',
+            title: 'Sucesso!',
+            text: "{{ session('success') }}",
+            timer: 3000,
+            showConfirmButton: false,
+            confirmButtonColor: '#1e3a8a'
+        });
+    @endif
+</script>
 @endsection
