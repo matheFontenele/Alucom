@@ -13,66 +13,93 @@ class MovimentacaoController extends Controller
 {
     public function index()
     {
-        $movimentacoes = Movimentacao::with(['equipamento', 'cliente', 'estoque'])
+        $movimentacoes = Movimentacao::with(['equipamento'])
             ->orderBy('data_movimentacao', 'desc')
             ->paginate(20);
 
         return view('movimentacoes.index', compact('movimentacoes'));
     }
 
+
+    public function create()
+    {
+        $equipamentos = Equipamento::all();
+        $clientes = Clientes::all();
+        $estoques = Estoque::all();
+
+        return view('movimentacoes.create', compact('equipamentos', 'clientes', 'estoques'));
+    }
     public function store(Request $request)
     {
         $request->validate([
-            'equipamento_id' => 'required|exists:equipamentos,id',
-            'tipo'           => 'required|in:Aluguel,Devolução,Substituição',
+            'equipamento_id' => 'required',
+            'tipo' => 'required',
+            'origem' => 'required',
+            'destino' => 'required',
             'data_movimentacao' => 'required|date',
         ]);
 
-        $equipamento = Equipamento::findOrFail($request->equipamento_id);
+        $equipamento = \App\Models\Equipamento::findOrFail($request->equipamento_id);
+        $statusAtual = $equipamento->status;
+        $novoTipo = $request->tipo;
 
-        return DB::transaction(function () use ($request, $equipamento) {
-            
-            switch ($request->tipo) {
-                case 'Aluguel':
-                    // REGRA: Somente se estiver em estoque
-                    if ($equipamento->cliente_id !== null) {
-                        return back()->withErrors(['erro' => 'Este equipamento já está com um cliente.']);
-                    }
-                    
-                    $equipamento->update([
-                        'cliente_id' => $request->cliente_id,
-                        'estoque_id' => null,
-                        'situacao'   => 'Alugado'
-                    ]);
-                    break;
+        // --- APLICAÇÃO DAS REGRAS ALUCOM ---
 
-                case 'Devolução':
-                    // REGRA: Não pode devolver para um cliente
-                    if (!$request->estoque_id) {
-                        return back()->withErrors(['erro' => 'Selecione um estoque para a devolução.']);
-                    }
-                    
-                    $equipamento->update([
-                        'cliente_id' => null,
-                        'estoque_id' => $request->estoque_id,
-                        'situacao'   => 'Disponivel'
-                    ]);
-                    break;
-
-                case 'Substituição':
-                    // REGRA: Equipamento saindo deve estar em cliente, entrando deve vir de estoque
-                    // (Lógica para o item que está entrando no cliente)
-                    $equipamento->update([
-                        'cliente_id' => $request->cliente_id,
-                        'estoque_id' => null,
-                        'situacao'   => 'Alugado'
-                    ]);
-                    break;
+        // 1. Devolução: Cliente -> Estoque
+        if ($novoTipo === 'Devolução') {
+            if (!in_array($statusAtual, ['Alugado', 'Reservado'])) {
+                return back()->with('error', 'Só é possível devolver equipamentos Alugados ou Reservados.');
             }
+            $equipamento->status = 'Devolução';
+            $equipamento->cliente_id = null; // Sai do cliente
+        }
 
-            Movimentacao::create($request->all());
+        // 2. Aluguel: Estoque -> Cliente
+        elseif ($novoTipo === 'Aluguel') {
+            if (!in_array($statusAtual, ['Disponivel', 'Reservado'])) {
+                return back()->with('error', 'O item deve estar Disponível ou Reservado para ser alugado.');
+            }
+            $equipamento->status = 'Alugado';
+            $equipamento->estoque_id = null; // Sai do estoque
+        }
 
-            return redirect()->route('movimentacoes.index')->with('success', 'Movimentação realizada!');
-        });
+        // 3. Manutenção: Só após Devolução
+        elseif ($novoTipo === 'Manutenção') {
+            if ($statusAtual !== 'Devolução') {
+                return back()->with('error', 'O equipamento deve passar pelo status de Devolução antes da Manutenção.');
+            }
+            $equipamento->status = 'Manutenção';
+        }
+
+        // 4. Liberação: Após Devolução ou Manutenção
+        elseif ($novoTipo === 'Liberação') {
+            if (!in_array($statusAtual, ['Devolução', 'Manutenção'])) {
+                return back()->with('error', 'Só é possível liberar itens vindo de Devolução ou Manutenção.');
+            }
+            $equipamento->status = 'Disponivel';
+        }
+
+        // 5. Reservado: Só se estiver Liberado (Disponível)
+        elseif ($novoTipo === 'Reservado') {
+            if ($statusAtual !== 'Disponivel') {
+                return back()->with('error', 'Apenas equipamentos Disponíveis podem ser reservados.');
+            }
+            $equipamento->status = 'Reservado';
+        }
+
+        // 6. Substituição: Gera devolução do antigo
+        elseif ($novoTipo === 'Substituição') {
+            if ($statusAtual !== 'Alugado') {
+                return back()->with('error', 'Substituição só permitida para itens Alugados.');
+            }
+            $equipamento->status = 'Devolução';
+            $equipamento->cliente_id = null;
+        }
+
+        // Salva a movimentação e atualiza o equipamento
+        \App\Models\Movimentacao::create($request->all());
+        $equipamento->save();
+
+        return redirect()->route('movimentacoes.index')->with('success', 'Movimentação registrada com sucesso!');
     }
 }

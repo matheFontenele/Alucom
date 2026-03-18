@@ -14,13 +14,11 @@ return new class extends Migration
         Schema::create('movimentacoes', function (Blueprint $table) {
             $table->id();
             $table->foreignId('equipamento_id')->constrained('equipamentos');
-
-            $table->foreignId('cliente_id')->nullable()->constrained('clientes');
-            $table->foreignId('estoque_id')->nullable()->constrained('estoques');
-
-            $table->string('tipo'); // Aluguel, Devolução, Substituição
-            $table->timestamp('data_movimentacao');
-            $table->text('observacao')->nullable(); // Para o alerta da substituição
+            $table->enum('tipo', ['Devolução', 'Aluguel', 'Manutenção', 'Liberação', 'Substituição', 'Reservado']);
+            $table->string('origem');
+            $table->string('destino');
+            $table->dateTime('data_movimentacao');
+            $table->text('observacao')->nullable();
             $table->timestamps();
         });
     }
