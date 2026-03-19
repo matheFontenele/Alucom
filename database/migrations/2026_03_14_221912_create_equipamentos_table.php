@@ -17,7 +17,7 @@ return new class extends Migration
             $table->foreignId('subcategoria_id')->nullable()->constrained();
             $table->foreignId('cliente_id')->nullable()->constrained('clientes');
             $table->foreignId('estoque_id')->nullable()->constrained('estoques');
-            $table->string('tombo', 5)->unique();
+            $table->string('tombo')->nullable();
             $table->string('nome');
             $table->string('serial')->unique()->nullable();
             $table->string('status'); // Alugado, Devolução, Disponivel, Manutenção, Reservado

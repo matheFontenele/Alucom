@@ -40,3 +40,7 @@ Route::resource('movimentacoes', MovimentacaoController::class);
 Route::get('/api/categorias/{categoria}/subcategorias', function ($categoriaId) {
     return App\Models\Subcategoria::where('categoria_id', $categoriaId)->get();
 });
+
+//Rota de detalhes de itens detro do estoque
+Route::get('/estoques/{estoque}/detalhes/{nome}', [App\Http\Controllers\EstoqueController::class, 'detalhesItem'])
+    ->name('estoques.detalhes-item');

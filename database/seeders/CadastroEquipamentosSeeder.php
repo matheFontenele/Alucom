@@ -13,57 +13,73 @@ class CadastroEquipamentosSeeder extends Seeder
 {
     public function run(): void
     {
-        // 1. Localizar Categorias e Subcategorias
-        $catComp = Categoria::where('nome', 'Computadores')->first();
-        $subNote = Subcategoria::where('nome', 'Notebook')->first();
+        // Localização de IDs necessários
+        $catComp = Categoria::firstOrCreate(['nome' => 'Computadores']);
+        $subNote = Subcategoria::firstOrCreate(['nome' => 'Notebook', 'categoria_id' => $catComp->id]);
+        
+        $catSup = Categoria::firstOrCreate(['nome' => 'Suprimentos']);
+        $subToner = Subcategoria::firstOrCreate(['nome' => 'Toner', 'categoria_id' => $catSup->id]);
 
-        $catProt = Categoria::where('nome', 'Proteção e Energia')->first();
-        $subNobreak = Subcategoria::where('nome', 'Nobreaks')->first();
-
-        // 2. Localizar Clientes e Estoques
-        $unidadeFortaleza = Clientes::where('nome', 'like', '%Fortaleza%')->first();
         $estoqueBase = Estoque::where('nome', 'Alucom Base')->first();
         $estoqueSC = Estoque::where('nome', 'Alucom SC')->first();
-        // 3. Equipamento ALUGADO (Vinculado a Cliente, estoque_id nulo)
-        Equipamento::create([
-            'categoria_id'    => $catComp->id,
-            'subcategoria_id' => $subNote->id,
-            'tombo'           => '50010',
-            'nome'            => 'Notebook Dell Latitude 3420',
-            'serial'          => 'DELL50010X',
-            'status' => 'Alugado',
-            'situacao' => 'No Cliente',
-            'cliente_id'      => $unidadeFortaleza->id,
-            'estoque_id'      => null,
-            'data_movimentacao' => now(),
-        ]);
+        $estoqueLab = Estoque::where('nome', 'Laboratório Técnico')->first();
+        $cliente = Clientes::where('tipo', 'unidade')->first();
 
-        // 4. Equipamento EM ESTOQUE (cliente_id nulo, vinculado a um Estoque)
-        Equipamento::create([
-            'categoria_id'    => $catComp->id,
-            'subcategoria_id' => $subNote->id,
-            'tombo'           => '50011',
-            'nome'            => 'Notebook Lenovo L14',
-            'serial'          => 'LENO50011Y',
-            'status' => 'Disponivel',
-            'situacao' => 'Em Rota',
-            'cliente_id'      => null,
-            'estoque_id'      => $estoqueBase->id, // Guardado no Almoxarifado
-            'data_movimentacao' => now(),
-        ]);
+        // 1. Populando ALUCOM BASE (5 itens para teste de agrupamento)
+        for ($i = 1; $i <= 5; $i++) {
+            Equipamento::create([
+                'categoria_id' => $catComp->id,
+                'subcategoria_id' => $subNote->id,
+                'tombo' => '500' . $i,
+                'nome' => 'Notebook Lenovo L14', // Nomes iguais para testar seu novo agrupamento
+                'serial' => 'SN-LENO-BASE-' . $i,
+                'status' => 'Disponivel',
+                'estoque_id' => $estoqueBase->id,
+                'data_movimentacao' => now(),
+            ]);
+        }
 
-        // 5. Equipamento EM MANUTENÇÃO (No Laboratório)
-        Equipamento::create([
-            'categoria_id'    => $catProt->id,
-            'subcategoria_id' => $subNobreak->id,
-            'tombo'           => '70020',
-            'nome'            => 'Nobreak SMS 1200VA',
-            'serial'          => 'SMS70020Z',
-            'status' => 'Devolução',
-            'situacao' => 'Aguardando Coleta',
-            'cliente_id'      => $unidadeFortaleza->id,
-            'estoque_id'      => null,
-            'data_movimentacao' => now(),
-        ]);
+        // 2. Populando ALUCOM SC (5 itens)
+        for ($i = 1; $i <= 5; $i++) {
+            Equipamento::create([
+                'categoria_id' => $catComp->id,
+                'subcategoria_id' => $subNote->id,
+                'tombo' => '600' . $i,
+                'nome' => 'Notebook Dell Latitude 3420',
+                'serial' => 'SN-DELL-SC-' . $i,
+                'status' => 'Disponivel',
+                'estoque_id' => $estoqueSC->id,
+                'data_movimentacao' => now(),
+            ]);
+        }
+
+        // 3. Populando LABORATÓRIO (5 itens)
+        for ($i = 1; $i <= 5; $i++) {
+            Equipamento::create([
+                'categoria_id' => $catComp->id,
+                'subcategoria_id' => $subNote->id,
+                'tombo' => '700' . $i,
+                'nome' => 'Notebook HP ProBook',
+                'serial' => 'SN-HP-LAB-' . $i,
+                'status' => 'Manutenção',
+                'estoque_id' => $estoqueLab->id,
+                'data_movimentacao' => now(),
+            ]);
+        }
+
+        // 4. Itens Mesclados (Restante para completar 20 no total do sistema)
+        // Criando 5 Insumos (Toners) em estoque
+        for ($i = 1; $i <= 5; $i++) {
+            Equipamento::create([
+                'categoria_id' => $catSup->id,
+                'subcategoria_id' => $subToner->id,
+                'tombo' => null, // Insumo geralmente não tem tombo
+                'nome' => 'Toner Kyocera TK-1175',
+                'serial' => 'LOTE-TK-' . rand(100,999),
+                'status' => 'Disponivel',
+                'estoque_id' => $estoqueBase->id,
+                'data_movimentacao' => now(),
+            ]);
+        }
     }
 }

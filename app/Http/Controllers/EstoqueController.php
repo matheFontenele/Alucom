@@ -44,10 +44,29 @@ class EstoqueController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(Estoque $estoque)
+    public function show($id, Request $request)
     {
-        $estoque->load('equipamentos');
-        return view('estoques.show', compact('estoque'));
+        $estoque = Estoque::findOrFail($id);
+
+        // Começamos a consulta de equipamentos deste estoque
+        $query = $estoque->equipamentos();
+
+        // FILTRO 1: Busca por nome/modelo
+        if ($request->filled('search')) {
+            $query->where('nome', 'like', '%' . $request->search . '%');
+        }
+
+        // FILTRO 2: Status (Lista Suspensa)
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
+        }
+
+        // AGRUPAMENTO: Soma quantidades ignorando tombo/serial
+        $equipamentosAgrupados = $query->select('nome', 'status', \DB::raw('count(*) as total'))
+            ->groupBy('nome', 'status')
+            ->get();
+
+        return view('estoques.show', compact('estoque', 'equipamentosAgrupados'));
     }
 
     /**
@@ -72,5 +91,27 @@ class EstoqueController extends Controller
     public function destroy(Estoque $estoque)
     {
         //
+    }
+
+    public function detalhesItem(Request $request, $estoqueId, $nome)
+    {
+        $estoque = \App\Models\Estoque::findOrFail($estoqueId);
+
+        // Inicia a query filtrando pelo estoque e nome do grupo
+        $query = \App\Models\Equipamento::where('estoque_id', $estoqueId)
+            ->where('nome', $nome);
+
+        // Aplica o filtro de busca (se houver)
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function ($q) use ($search) {
+                $q->where('serial', 'like', "%{$search}%")
+                    ->orWhere('tombo', 'like', "%{$search}%");
+            });
+        }
+
+        $itens = $query->get();
+
+        return view('estoques.detalhes-item', compact('estoque', 'itens', 'nome'));
     }
 }

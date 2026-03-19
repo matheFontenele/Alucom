@@ -2,24 +2,15 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+use App\Models\Estoque;
 use Illuminate\Database\Seeder;
 
 class EstoqueSeeder extends Seeder
 {
-    /**
-     * Run the database seeds.
-     */
     public function run(): void
     {
-        \App\Models\Estoque::create([
-            'nome' => 'Alucom Base',
-            'localizacao' => 'Sede Alucom - Fortaleza CE'
-        ]);
-
-        \App\Models\Estoque::create([
-            'nome' => 'Alucom SC',
-            'localizacao' => 'Florianopolis - SC'
-        ]);
+        Estoque::create(['nome' => 'Alucom Base', 'localizacao' => 'Sede Alucom - Fortaleza CE']);
+        Estoque::create(['nome' => 'Alucom SC', 'localizacao' => 'Florianópolis - SC']);
+        Estoque::create(['nome' => 'Laboratório Técnico', 'localizacao' => 'Setor de Reparos - Fortaleza CE']);
     }
 }
