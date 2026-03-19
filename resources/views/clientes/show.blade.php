@@ -32,7 +32,7 @@
                         $colorClasses = match($cliente->contrato) {
                         'Alucom' => 'bg-red-50 text-red-600 border-red-100',
                         'Moreia' => 'bg-amber-50 text-amber-600 border-amber-100',
-                        'Zaploc' => 'bg-emerald-50 text-emerald-600 border-emerald-100',
+                        'ZapLoc' => 'bg-emerald-50 text-emerald-600 border-emerald-100',
                         'IP' => 'bg-blue-50 text-blue-600 border-blue-100',
                         default => 'bg-slate-100 text-slate-700 border-slate-200',
                         };
@@ -60,63 +60,120 @@
             </div>
         </div>
 
-        {{-- Seção de Unidades Vinculadas --}}
-        <div class="md:col-span-2">
+        {{-- Coluna Direita: Unidades e Equipamentos --}}
+        <div class="md:col-span-2 flex flex-col gap-8">
+            
+            {{-- Seção de Unidades Vinculadas (Apenas para Ministério) --}}
             @if($cliente->tipo == 'ministerio')
-            <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
-                <h2 class="text-xl font-black text-slate-800 tracking-tight">Unidades Vinculadas</h2>
+            <div>
+                <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
+                    <h2 class="text-xl font-black text-slate-800 tracking-tight">Unidades Vinculadas</h2>
 
-                {{-- Barra de Filtro de Unidades --}}
-                <form action="{{ route('clientes.show', $cliente->id) }}" method="GET" class="flex gap-2 w-full md:w-auto">
-                    <div class="relative flex-1">
-                        <input type="text" name="search_unidade" value="{{ request('search_unidade') }}"
-                            placeholder="Buscar unidade ou cidade..."
-                            class="w-full md:w-64 rounded-xl border-slate-200 bg-white p-2 pl-9 text-xs font-bold outline-none focus:ring-2 focus:ring-red-500 shadow-sm">
-                        <i class="ph ph-magnifying-glass absolute left-3 top-2.5 text-slate-400 font-bold text-sm"></i>
-                    </div>
-                    <button type="submit" class="bg-slate-800 text-white p-2 rounded-xl hover:bg-slate-700 transition-all">
-                        <i class="ph ph-funnel font-bold"></i>
-                    </button>
-                    <a href="{{ route('clientes.create', ['parent_id' => $cliente->id]) }}" class="bg-red-600 text-white text-[10px] px-4 py-2 rounded-xl font-black uppercase tracking-widest hover:bg-red-700 transition-all shadow-md shadow-red-100 flex items-center gap-2">
-                        <i class="ph ph-plus-circle font-bold"></i> Unidade
-                    </a>
-                </form>
-            </div>
+                    {{-- Barra de Filtro de Unidades --}}
+                    <form action="{{ route('clientes.show', $cliente->id) }}" method="GET" class="flex gap-2 w-full md:w-auto">
+                        <div class="relative flex-1">
+                            <input type="text" name="search_unidade" value="{{ request('search_unidade') }}"
+                                placeholder="Buscar unidade ou cidade..."
+                                class="w-full md:w-64 rounded-xl border-slate-200 bg-white p-2 pl-9 text-xs font-bold outline-none focus:ring-2 focus:ring-red-500 shadow-sm">
+                            <i class="ph ph-magnifying-glass absolute left-3 top-2.5 text-slate-400 font-bold text-sm"></i>
+                        </div>
+                        <button type="submit" class="bg-slate-800 text-white p-2 rounded-xl hover:bg-slate-700 transition-all">
+                            <i class="ph ph-funnel font-bold"></i>
+                        </button>
+                        <a href="{{ route('clientes.create', ['parent_id' => $cliente->id]) }}" class="bg-red-600 text-white text-[10px] px-4 py-2 rounded-xl font-black uppercase tracking-widest hover:bg-red-700 transition-all shadow-md shadow-red-100 flex items-center gap-2">
+                            <i class="ph ph-plus-circle font-bold"></i> Unidade
+                        </a>
+                    </form>
+                </div>
 
-            <div class="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden">
-                <table class="w-full text-left border-collapse">
-                    <thead class="bg-slate-50 border-b border-slate-100">
-                        <tr>
-                            <th class="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Nome da Unidade</th>
-                            <th class="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Cidade/UF</th>
-                            <th class="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest text-right">Ações</th>
-                        </tr>
-                    </thead>
-                    <tbody class="divide-y divide-slate-50">
-                        @forelse($unidades as $unidade) {{-- Use a variável $unidades filtrada do Controller --}}
-                        <tr class="hover:bg-slate-50/50 transition-colors">
-                            <td class="px-6 py-4 font-bold text-slate-700 text-sm">{{ $unidade->nome }}</td>
-                            <td class="px-6 py-4">
-                                <div class="flex items-center gap-1.5 text-xs text-slate-500 font-bold">
-                                    <i class="ph ph-map-pin text-red-500"></i>
-                                    {{ $unidade->cidade }} - {{ $unidade->estado }}
-                                </div>
-                            </td>
-                            <td class="px-6 py-4 text-right">
-                                <a href="{{ route('clientes.show', $unidade->id) }}" class="text-red-600 font-black text-[10px] uppercase hover:bg-red-50 px-3 py-1.5 rounded-lg transition-all">Ver Detalhes</a>
-                            </td>
-                        </tr>
-                        @empty
-                        <tr>
-                            <td colspan="3" class="px-6 py-12 text-center text-slate-400 italic text-sm">
-                                {{ request('search_unidade') ? 'Nenhuma unidade encontrada para esta busca.' : 'Nenhuma unidade cadastrada.' }}
-                            </td>
-                        </tr>
-                        @endforelse
-                    </tbody>
-                </table>
+                <div class="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden">
+                    <table class="w-full text-left border-collapse">
+                        <thead class="bg-slate-50 border-b border-slate-100">
+                            <tr>
+                                <th class="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Nome da Unidade</th>
+                                <th class="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Cidade/UF</th>
+                                <th class="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest text-right">Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-50">
+                            @forelse($unidades as $unidade)
+                            <tr class="hover:bg-slate-50/50 transition-colors">
+                                <td class="px-6 py-4 font-bold text-slate-700 text-sm">{{ $unidade->nome }}</td>
+                                <td class="px-6 py-4">
+                                    <div class="flex items-center gap-1.5 text-xs text-slate-500 font-bold">
+                                        <i class="ph ph-map-pin text-red-500"></i>
+                                        {{ $unidade->cidade }} - {{ $unidade->estado }}
+                                    </div>
+                                </td>
+                                <td class="px-6 py-4 text-right">
+                                    <a href="{{ route('clientes.show', $unidade->id) }}" class="text-red-600 font-black text-[10px] uppercase hover:bg-red-50 px-3 py-1.5 rounded-lg transition-all">Ver Detalhes</a>
+                                </td>
+                            </tr>
+                            @empty
+                            <tr>
+                                <td colspan="3" class="px-6 py-12 text-center text-slate-400 italic text-sm">
+                                    {{ request('search_unidade') ? 'Nenhuma unidade encontrada para esta busca.' : 'Nenhuma unidade cadastrada.' }}
+                                </td>
+                            </tr>
+                            @endforelse
+                        </tbody>
+                    </table>
+                </div>
             </div>
             @endif
+
+            {{-- NOVA SEÇÃO: Equipamentos Alocados --}}
+            <div>
+                <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
+                    <h2 class="text-xl font-black text-slate-800 tracking-tight">Equipamentos Alocados</h2>
+                    
+                    <div class="bg-slate-100 px-4 py-1.5 rounded-xl border border-slate-200 flex items-center gap-2">
+                        <span class="text-slate-500 text-[10px] font-bold uppercase tracking-widest">Total</span>
+                        <span class="text-lg font-black text-slate-800">{{ $equipamentos->count() }}</span>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden">
+                    <table class="w-full text-left border-collapse">
+                        <thead class="bg-slate-50 border-b border-slate-100">
+                            <tr>
+                                <th class="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Equipamento / Categoria</th>
+                                <th class="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Tombo / Nº Série</th>
+                                <th class="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest text-center">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-50">
+                            @forelse($equipamentos as $equip)
+                            <tr class="hover:bg-slate-50/50 transition-colors">
+                                <td class="px-6 py-4">
+                                    <div class="font-bold text-slate-700 text-sm">{{ $equip->nome }}</div>
+                                    <div class="text-[10px] text-slate-400 uppercase mt-0.5 tracking-tight">{{ $equip->categoria->nome ?? 'Sem Categoria' }}</div>
+                                </td>
+                                <td class="px-6 py-4">
+                                    <div class="text-sm font-bold text-red-600 bg-red-50/50 inline-block px-1 rounded">{{ $equip->tombo ?? 'S/T' }}</div>
+                                    <div class="text-xs text-slate-500 font-mono mt-0.5">{{ $equip->serial }}</div>
+                                </td>
+                                <td class="px-6 py-4 text-center">
+                                    <span class="px-2 py-1 text-[10px] font-black rounded-lg uppercase bg-emerald-100 text-emerald-700">
+                                        {{ $equip->status }}
+                                    </span>
+                                </td>
+                            </tr>
+                            @empty
+                            <tr>
+                                <td colspan="3" class="px-6 py-12">
+                                    <div class="flex flex-col items-center justify-center text-slate-400">
+                                        <i class="ph ph-desktop text-4xl mb-2 text-slate-300"></i>
+                                        <span class="italic text-sm">Nenhum equipamento alocado para esta unidade/cliente no momento.</span>
+                                    </div>
+                                </td>
+                            </tr>
+                            @endforelse
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            
         </div>
     </div>
 </div>

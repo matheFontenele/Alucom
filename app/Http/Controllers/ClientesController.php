@@ -98,28 +98,22 @@ class ClientesController extends Controller
         return redirect()->route('clientes.index')->with('success', 'Cliente atualizado com sucesso!');
     }
 
-    public function show(Request $request, $id)
+    public function show(Request $request, string $id)
     {
-        // Busca o cliente principal
-        $cliente = Clientes::findOrFail($id);
+        $cliente = \App\Models\Clientes::findOrFail($id);
 
-        // Inicia a query das unidades vinculadas (relacionamento)
-        $queryUnidades = $cliente->unidades();
-
-        // Aplica o filtro de busca de região/nome se existir
+        // Filtro de unidades
+        $queryUnidades = \App\Models\Clientes::where('parent_id', $cliente->id);
         if ($request->filled('search_unidade')) {
-            $search = $request->search_unidade;
-            $queryUnidades->where(function ($q) use ($search) {
-                $q->where('nome', 'like', "%{$search}%")
-                    ->orWhere('cidade', 'like', "%{$search}%")
-                    ->orWhere('estado', 'like', "%{$search}%");
-            });
+            $queryUnidades->where('nome', 'like', '%' . $request->search_unidade . '%')
+                ->orWhere('cidade', 'like', '%' . $request->search_unidade . '%');
         }
-
-        // Pega os resultados
         $unidades = $queryUnidades->get();
 
-        // Envia tanto o $cliente quanto as $unidades para a view
-        return view('clientes.show', compact('cliente', 'unidades'));
+        // Busca de equipamentos vinculados
+        $equipamentos = \App\Models\Equipamento::where('cliente_id', $cliente->id)->get();
+
+        // O ERRO ESTAVA AQUI: Faltava o 'equipamentos' dentro do compact()
+        return view('clientes.show', compact('cliente', 'unidades', 'equipamentos'));
     }
 }
