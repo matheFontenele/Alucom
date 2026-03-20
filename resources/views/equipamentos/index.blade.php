@@ -4,12 +4,36 @@
 <div class="container mx-auto p-6">
     <h1 class="text-2xl font-bold mb-6">Gestão de Equipamentos - Alucom</h1>
 
-    <div class="mb-4">
-        <button class="bg-blue-900 text-white px-4 py-2 rounded shadow hover:bg-blue-700 transition">
-            <a href="{{ route('equipamentos.create') }}">
-                Novo Equipamento
+    {{-- Barra de Filtros --}}
+
+    <div class="bg-white p-4 rounded-t-lg shadow-sm mb-4 border border-gray-200">
+        <form action="{{ route('equipamentos.index') }}" method="GET" class="flex flex-col md:flex-row gap-4">
+            <div class="relative flex-1">
+                <i class="ph ph-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
+                <input type="text" name="search" value="{{ request('search') }}"
+                    placeholder="Buscar por Tombo, Serial ou Nome..."
+                    class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 outline-none">
+            </div>
+
+            <select name="status" class="border border-gray-300 rounded-xl px-4 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none font-medium">
+                <option value="">Todos os Status</option>
+                <option value="Disponivel" {{ request('status') == 'Disponivel' ? 'selected' : '' }}>Disponível</option>
+                <option value="Alugado" {{ request('status') == 'Alugado' ? 'selected' : '' }}>Alugado</option>
+                <option value="Manutenção" {{ request('status') == 'Manutenção' ? 'selected' : '' }}>Manutenção</option>
+                <option value="Devolução" {{ request('status') == 'Devolução' ? 'selected' : '' }}>Devolução</option>
+                <option value="Reservado" {{ request('status') == 'Reservado' ? 'selected' : '' }}>Reservado</option>
+            </select>
+
+            <button type="submit" class="bg-blue-900 text-white px-6 py-2 rounded-xl font-bold text-sm hover:bg-blue-800 transition shadow">
+                Filtrar
+            </button>
+
+            @if(request()->anyFilled(['search', 'status']))
+            <a href="{{ route('equipamentos.index') }}" class="text-gray-500 hover:text-red-600 flex items-center text-sm font-medium transition">
+                Limpar
             </a>
-        </button>
+            @endif
+        </form>
     </div>
 
     <div class="bg-white shadow-md rounded-lg overflow-hidden">
@@ -127,14 +151,14 @@
 
     // 2. Alerta de Sucesso (após redirecionamento do Controller)
     @if(session('success'))
-        Swal.fire({
-            icon: 'success',
-            title: 'Sucesso!',
-            text: "{{ session('success') }}",
-            timer: 3000,
-            showConfirmButton: false,
-            confirmButtonColor: '#1e3a8a'
-        });
+    Swal.fire({
+        icon: 'success',
+        title: 'Sucesso!',
+        text: "{{ session('success') }}",
+        timer: 3000,
+        showConfirmButton: false,
+        confirmButtonColor: '#1e3a8a'
+    });
     @endif
 </script>
 @endsection

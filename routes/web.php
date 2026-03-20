@@ -7,6 +7,7 @@ use App\Http\Controllers\EstoqueController;
 use App\Http\Controllers\EquipamentoController;
 use App\Http\Controllers\TecnicosController;
 use App\Http\Controllers\MovimentacaoController;
+use App\Http\Controllers\CatalogoController;
 
 Route::get('/', function () {
     return redirect()->route('guia-adi.index');
@@ -35,6 +36,9 @@ Route::resource('equipamentos', EquipamentoController::class);
 
 //Movimentações
 Route::resource('movimentacoes', MovimentacaoController::class);
+
+//Catalogo
+Route::get('/catalogo', [CatalogoController::class, 'index'])->name('catalogos.index');
 
 //Rota de identificação de Categorias e SubCategorias
 Route::get('/api/categorias/{categoria}/subcategorias', function ($categoriaId) {

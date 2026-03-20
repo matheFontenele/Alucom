@@ -3,6 +3,7 @@
 @section('content')
 <div class="container mx-auto p-6">
     {{-- Cabeçalho e Voltar --}}
+
     <div class="mb-8">
         <a href="{{ route('estoques.index') }}" class="text-red-600 hover:text-red-800 font-medium flex items-center gap-2 mb-4 transition">
             <i class="ph ph-arrow-left font-bold"></i> Voltar para Gestão de Estoques
@@ -14,6 +15,18 @@
                 <p class="text-gray-500 flex items-center gap-2 mt-2">
                     <i class="ph ph-map-pin-line text-red-500"></i> {{ $estoque->localizacao }}
                 </p>
+
+                {{-- Margem mt-6 adicionada aqui --}}
+                <div class="flex gap-3 mt-6">
+                    <a href="{{ route('equipamentos.create', ['estoque_id' => $estoque->id, 'tipo' => 'equipamento']) }}"
+                        class="bg-blue-900 hover:bg-blue-800 text-white text-xs px-4 py-2 rounded-lg font-bold flex items-center gap-2 transition shadow">
+                        <i class="ph ph-plus-circle text-lg"></i> Novo Equipamento
+                    </a>
+                    <a href="{{ route('equipamentos.create', ['estoque_id' => $estoque->id, 'tipo' => 'insumo']) }}"
+                        class="bg-blue-600 hover:bg-emerald-700 text-white text-xs px-4 py-2 rounded-lg font-bold flex items-center gap-2 transition shadow">
+                        <i class="ph ph-drop text-lg"></i> Novo Insumo
+                    </a>
+                </div>
             </div>
 
             {{-- Card de Resumo de Quantidade --}}
@@ -31,7 +44,8 @@
 
     {{-- Barra de Filtros --}}
     <div class="bg-white p-4 rounded-t-2xl border border-gray-200 border-b-0 flex flex-col md:flex-row gap-4 items-center justify-between">
-        <form action="{{ route('estoques.show', $estoque->id) }}" method="GET" class="flex flex-wrap gap-3 w-full md:w-auto">
+        {{-- Espaçamento gap-6 adicionado aqui --}}
+        <form action="{{ route('estoques.show', $estoque->id) }}" method="GET" class="flex flex-wrap gap-6 w-full md:w-auto">
             {{-- Busca por Nome/Modelo --}}
             <div class="relative">
                 <i class="ph ph-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
@@ -101,7 +115,8 @@
                             <a href="{{ route('estoques.detalhes-item', [$estoque->id, $item->nome]) }}"
                                 class="text-slate-400 hover:text-red-600 transition" title="Ver itens individuais">
                                 <i class="ph ph-eye text-xl"></i>
-                            </a> </button>
+                            </a> 
+                        </button>
                     </td>
                 </tr>
                 @empty
