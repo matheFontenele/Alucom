@@ -16,13 +16,13 @@ class CadastroEquipamentosSeeder extends Seeder
         // 1. Preparação de Categorias e Subcategorias
         $catComp = Categoria::firstOrCreate(['nome' => 'Computadores']);
         $subNote = Subcategoria::firstOrCreate(['nome' => 'Notebook', 'categoria_id' => $catComp->id]);
-        
+
         $catImp = Categoria::firstOrCreate(['nome' => 'Impressoras']);
         $subLaser = Subcategoria::firstOrCreate(['nome' => 'Laser Mono', 'categoria_id' => $catImp->id]);
 
         $catProt = Categoria::firstOrCreate(['nome' => 'Proteção e Energia']);
         $subNobreak = Subcategoria::firstOrCreate(['nome' => 'Nobreaks', 'categoria_id' => $catProt->id]);
-        
+
         $catSup = Categoria::firstOrCreate(['nome' => 'Suprimentos']);
         $subToner = Subcategoria::firstOrCreate(['nome' => 'Toner', 'categoria_id' => $catSup->id]);
 
@@ -39,6 +39,61 @@ class CadastroEquipamentosSeeder extends Seeder
         // ---------------------------------------------------------
         // 3. ITENS EM ESTOQUE (Disponíveis ou Manutenção)
         // ---------------------------------------------------------
+
+        // 10 Toners Kyocera Pretos (Insumos) na Base
+        for ($i = 1; $i <= 10; $i++) {
+            Equipamento::create([
+                'categoria_id' => $catSup->id,
+                'subcategoria_id' => $subToner->id,
+                'tipo' => 'insumo', // Definindo como insumo
+                'nome' => 'Toner Kyocera TK-1175',
+                'serial' => 'LOTE-TK-P-' . rand(100, 999),
+                'status' => 'Disponivel',
+                'cor' => 'Preto',
+                'observacoes' => 'Rendimento 12k páginas',
+                'estoque_id' => $estoqueBase->id,
+                'cliente_id' => null,
+                'data_movimentacao' => now(),
+            ]);
+        }
+
+        // Criando Toners Coloridos para a Epson WF-C5710 no Estoque SC
+        $cores = [
+            ['nome' => 'Ciano', 'obs' => 'Bolsa de tinta L'],
+            ['nome' => 'Magenta', 'obs' => 'Bolsa de tinta L'],
+            ['nome' => 'Amarelo', 'obs' => 'Bolsa de tinta L'],
+        ];
+
+        foreach ($cores as $cor) {
+            for ($i = 1; $i <= 3; $i++) {
+                Equipamento::create([
+                    'categoria_id' => $catSup->id,
+                    'subcategoria_id' => $subToner->id,
+                    'tipo' => 'insumo',
+                    'nome' => 'Bolsa de Tinta Epson T941',
+                    'serial' => "LOTE-EPS-{$cor['nome']}-0$i",
+                    'status' => 'Disponivel',
+                    'cor' => $cor['nome'],
+                    'observacoes' => $cor['obs'],
+                    'estoque_id' => $estoqueSC->id,
+                    'data_movimentacao' => now(),
+                ]);
+            }
+        }
+
+        // Exemplo de Equipamento com Observação de defeito no Laboratório
+        Equipamento::create([
+            'categoria_id' => $catComp->id,
+            'subcategoria_id' => $subNote->id,
+            'tipo' => 'equipamento',
+            'tombo' => '7009',
+            'nome' => 'Notebook Dell Latitude 3420',
+            'serial' => 'SN-DELL-DEF-01',
+            'status' => 'Manutenção',
+            'observacoes' => 'Tela piscando e teclado faltando tecla "E"',
+            'estoque_id' => $estoqueLab->id,
+            'data_movimentacao' => now(),
+        ]);
 
         // Notebooks no Estoque SC
         for ($i = 1; $i <= 5; $i++) {

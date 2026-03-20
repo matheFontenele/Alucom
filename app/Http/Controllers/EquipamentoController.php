@@ -38,8 +38,10 @@ class EquipamentoController extends Controller
     public function store(Request $request)
     {
         $data = $request->validate([
+            'tipo'           => 'required|in:equipamento,insumo',
             'nome'           => 'required|string|max:255',
-            'tombo'          => 'required|string|max:5|unique:equipamentos,tombo',
+            // Tombo só é obrigatório se for equipamento
+            'tombo'          => $request->tipo === 'equipamento' ? 'required|string|max:10|unique:equipamentos,tombo' : 'nullable|string',
             'serial'         => 'nullable|string|unique:equipamentos,serial',
             'categoria_id'   => 'required|exists:categorias,id',
             'subcategoria_id' => 'nullable|exists:subcategorias,id',
@@ -47,11 +49,18 @@ class EquipamentoController extends Controller
             'estoque_id'     => 'nullable|exists:estoques,id',
             'status'         => 'required|in:Alugado,Devolução,Disponivel,Manutenção,Reservado',
             'situacao'       => 'nullable|string',
+            'cor'            => 'nullable|string', // Para toners
+            'observacoes'    => 'nullable|string', // Para ambos
         ]);
 
-        \App\Models\Equipamento::create($data);
+        Equipamento::create($data);
 
-        return redirect()->route('equipamentos.index')->with('success', 'Equipamento cadastrado!');
+        // Redireciona de volta para o estoque específico se houver, ou para o index
+        if ($request->estoque_id) {
+            return redirect()->route('estoques.show', $request->estoque_id)->with('success', 'Item cadastrado no estoque!');
+        }
+
+        return redirect()->route('equipamentos.index')->with('success', 'Item cadastrado com sucesso!');
     }
 
     /**
@@ -81,17 +90,23 @@ class EquipamentoController extends Controller
     public function update(Request $request, Equipamento $equipamento)
     {
         $data = $request->validate([
-            'nome'   => 'required|string|max:255',
-            'tombo'  => 'required|string|max:10|unique:equipamentos,tombo,' . $equipamento->id,
-            'serial' => 'nullable|string|unique:equipamentos,serial,' . $equipamento->id,
-            'categoria_id' => 'required|exists:categorias,id',
+            'tipo'           => 'required|in:equipamento,insumo',
+            'nome'           => 'required|string|max:255',
+            'tombo'          => $request->tipo === 'equipamento'
+                ? 'required|string|max:10|unique:equipamentos,tombo,' . $equipamento->id
+                : 'nullable|string',
+            'serial'         => 'nullable|string|unique:equipamentos,serial,' . $equipamento->id,
+            'categoria_id'   => 'required|exists:categorias,id',
+            'subcategoria_id' => 'nullable|exists:subcategorias,id',
+            'status'         => 'required|string',
+            'cor'            => 'nullable|string',
+            'observacoes'    => 'nullable|string',
         ]);
 
         $equipamento->update($data);
 
-        return redirect()->route('equipamentos.index')->with('success', 'Cadastro do equipamento atualizado!');
+        return redirect()->route('equipamentos.index')->with('success', 'Cadastro atualizado!');
     }
-
     /**
      * Remove the specified resource from storage.
      */
