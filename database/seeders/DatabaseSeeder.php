@@ -29,6 +29,7 @@ class DatabaseSeeder extends Seeder
             CadastroEquipamentosSeeder::class,
             TecnicosSeeder::class,
             EquipamentoSeeder::class,
+            CatalogoSeeder::class,
         ]);
     }
 }
