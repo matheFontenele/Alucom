@@ -38,29 +38,48 @@ class EquipamentoController extends Controller
     public function store(Request $request)
     {
         $data = $request->validate([
-            'tipo'           => 'required|in:equipamento,insumo',
-            'nome'           => 'required|string|max:255',
-            // Tombo só é obrigatório se for equipamento
-            'tombo'          => $request->tipo === 'equipamento' ? 'required|string|max:10|unique:equipamentos,tombo' : 'nullable|string',
-            'serial'         => 'nullable|string|unique:equipamentos,serial',
-            'categoria_id'   => 'required|exists:categorias,id',
-            'subcategoria_id' => 'nullable|exists:subcategorias,id',
-            'cliente_id'     => 'nullable|exists:clientes,id',
-            'estoque_id'     => 'nullable|exists:estoques,id',
-            'status'         => 'required|in:Alugado,Devolução,Disponivel,Manutenção,Reservado',
-            'situacao'       => 'nullable|string',
-            'cor'            => 'nullable|string', // Para toners
-            'observacoes'    => 'nullable|string', // Para ambos
+            'tipo'         => 'required|in:equipamento,insumo',
+            'nome'         => 'required|string', // Nome vem do select do catálogo
+            'estoque_id'   => 'required|exists:estoques,id',
+            'status'       => 'required',
+            // Se for equipamento, o tombo pode ser enviado. Se for insumo, usamos a quantidade.
+            'tombo'        => 'nullable|string',
+            'serial'       => 'nullable|string',
+            'quantidade'   => 'nullable|integer|min:1',
+            'cor'          => 'nullable|string',
         ]);
 
-        Equipamento::create($data);
+        // Lógica para Insumos (Cria vários registros baseados na quantidade)
+        if ($request->tipo === 'insumo') {
+            $qtd = $request->input('quantidade', 1);
 
-        // Redireciona de volta para o estoque específico se houver, ou para o index
-        if ($request->estoque_id) {
-            return redirect()->route('estoques.show', $request->estoque_id)->with('success', 'Item cadastrado no estoque!');
+            for ($i = 0; $i < $qtd; $i++) {
+                \App\Models\Equipamento::create([
+                    'tipo'       => 'insumo',
+                    'nome'       => $data['nome'],
+                    'estoque_id' => $data['estoque_id'],
+                    'status'     => $data['status'] ?? 'Disponivel',
+                    'cor'        => $request->cor, // Se o catálogo tiver cor, você pode puxar automático
+                    'data_movimentacao' => now(),
+                ]);
+            }
+            $mensagem = "{$qtd} unidades de {$data['nome']} adicionadas!";
+        }
+        // Lógica para Equipamento Único
+        else {
+            \App\Models\Equipamento::create([
+                'tipo'       => 'equipamento',
+                'nome'       => $data['nome'],
+                'tombo'      => $data['tombo'],
+                'serial'     => $data['serial'],
+                'estoque_id' => $data['estoque_id'],
+                'status'     => $data['status'] ?? 'Disponivel',
+                'data_movimentacao' => now(),
+            ]);
+            $mensagem = "Equipamento {$data['nome']} cadastrado!";
         }
 
-        return redirect()->route('equipamentos.index')->with('success', 'Item cadastrado com sucesso!');
+        return redirect()->back()->with('success', $mensagem);
     }
 
     /**

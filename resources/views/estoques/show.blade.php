@@ -3,35 +3,36 @@
 @section('content')
 <div class="container mx-auto p-6">
     {{-- Cabeçalho e Voltar --}}
-
     <div class="mb-8">
-        <a href="{{ route('estoques.index') }}" class="text-red-600 hover:text-red-800 font-medium flex items-center gap-2 mb-4 transition">
-            <i class="ph ph-arrow-left font-bold"></i> Voltar para Gestão de Estoques
+        <a href="{{ route('estoques.index') }}" class="text-slate-400 hover:text-slate-600 font-bold flex items-center gap-2 mb-4 transition">
+            <i class="ph ph-arrow-left"></i> Voltar para Gestão de Estoques
         </a>
 
         <div class="flex flex-col md:flex-row justify-between items-start md:items-end gap-4">
             <div>
                 <h1 class="text-4xl font-black text-slate-900 tracking-tight">{{ $estoque->nome }}</h1>
-                <p class="text-gray-500 flex items-center gap-2 mt-2">
-                    <i class="ph ph-map-pin-line text-red-500"></i> {{ $estoque->localizacao }}
+                <p class="text-gray-500 flex items-center gap-2 mt-2 font-medium">
+                    <i class="ph ph-map-pin-line text-blue-500"></i> {{ $estoque->localizacao }}
                 </p>
 
-                {{-- Margem mt-6 adicionada aqui --}}
                 <div class="flex gap-3 mt-6">
-                    <a href="{{ route('equipamentos.create', ['estoque_id' => $estoque->id, 'tipo' => 'equipamento']) }}"
-                        class="bg-blue-900 hover:bg-blue-800 text-white text-xs px-4 py-2 rounded-lg font-bold flex items-center gap-2 transition shadow">
-                        <i class="ph ph-plus-circle text-lg"></i> Novo Equipamento
-                    </a>
-                    <a href="{{ route('equipamentos.create', ['estoque_id' => $estoque->id, 'tipo' => 'insumo']) }}"
-                        class="bg-blue-600 hover:bg-emerald-700 text-white text-xs px-4 py-2 rounded-lg font-bold flex items-center gap-2 transition shadow">
+                    {{-- Botão que abre Modal Equipamento --}}
+                    <button onclick="document.getElementById('modal-equipamento').classList.remove('hidden')"
+                        class="bg-slate-900 hover:bg-slate-800 text-white text-xs px-5 py-3 rounded-xl font-bold flex items-center gap-2 transition shadow-lg">
+                        <i class="ph ph-plus-circle text-lg text-blue-400"></i> Novo Equipamento
+                    </button>
+
+                    {{-- Botão que abre Modal Insumo --}}
+                    <button onclick="document.getElementById('modal-insumo').classList.remove('hidden')"
+                        class="bg-blue-600 hover:bg-blue-700 text-white text-xs px-5 py-3 rounded-xl font-bold flex items-center gap-2 transition shadow-lg shadow-blue-100">
                         <i class="ph ph-drop text-lg"></i> Novo Insumo
-                    </a>
+                    </button>
                 </div>
             </div>
 
-            {{-- Card de Resumo de Quantidade --}}
+            {{-- Card de Resumo --}}
             <div class="bg-slate-900 text-white p-4 rounded-2xl shadow-xl flex items-center gap-4 min-w-[200px]">
-                <div class="bg-red-600 p-3 rounded-xl">
+                <div class="bg-blue-600 p-3 rounded-xl">
                     <i class="ph ph-stack text-2xl"></i>
                 </div>
                 <div>
@@ -44,93 +45,171 @@
 
     {{-- Barra de Filtros --}}
     <div class="bg-white p-4 rounded-t-2xl border border-gray-200 border-b-0 flex flex-col md:flex-row gap-4 items-center justify-between">
-        {{-- Espaçamento gap-6 adicionado aqui --}}
-        <form action="{{ route('estoques.show', $estoque->id) }}" method="GET" class="flex flex-wrap gap-6 w-full md:w-auto">
-            {{-- Busca por Nome/Modelo --}}
+        <form action="{{ route('estoques.show', $estoque->id) }}" method="GET" class="flex flex-wrap gap-4 w-full md:w-auto">
             <div class="relative">
                 <i class="ph ph-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
                 <input type="text" name="search" value="{{ request('search') }}"
                     placeholder="Buscar por nome ou modelo..."
-                    class="pl-10 pr-4 py-2 border-gray-200 rounded-xl text-sm focus:ring-red-500 focus:border-red-500 w-full md:w-80 shadow-sm">
+                    class="pl-10 pr-4 py-2 border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 w-full md:w-80 shadow-sm outline-none">
             </div>
 
-            {{-- Filtro de Status --}}
-            <select name="status" class="border-gray-200 rounded-xl text-sm focus:ring-red-500 focus:border-red-500 shadow-sm">
+            <select name="status" class="border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 shadow-sm outline-none px-4">
                 <option value="">Todos os Status</option>
                 <option value="Disponivel" {{ request('status') == 'Disponivel' ? 'selected' : '' }}>Disponível</option>
                 <option value="Alugado" {{ request('status') == 'Alugado' ? 'selected' : '' }}>Alugado</option>
                 <option value="Manutenção" {{ request('status') == 'Manutenção' ? 'selected' : '' }}>Manutenção</option>
-                <option value="Reservado" {{ request('status') == 'Reservado' ? 'selected' : '' }}>Reservado</option>
             </select>
 
-            <button type="submit" class="bg-red-600 text-white px-6 py-2 rounded-xl font-bold text-sm hover:bg-red-700 transition shadow-md">
+            <button type="submit" class="bg-slate-800 text-white px-6 py-2 rounded-xl font-bold text-sm hover:bg-slate-900 transition">
                 Filtrar
             </button>
 
             @if(request()->anyFilled(['search', 'status']))
-            <a href="{{ route('estoques.show', $estoque->id) }}" class="text-gray-400 hover:text-red-600 flex items-center text-sm">
+            <a href="{{ route('estoques.show', $estoque->id) }}" class="text-gray-400 hover:text-red-600 flex items-center text-sm font-bold">
                 Limpar
             </a>
             @endif
         </form>
     </div>
 
-    {{-- Tabela de Equipamentos Agrupados --}}
-    <div class="bg-white border border-gray-200 rounded-b-2xl shadow-sm overflow-hidden">
+    {{-- Tabela --}}
+    <div class="bg-white border border-gray-200 rounded-b-2xl shadow-sm overflow-hidden mb-12">
         <table class="min-w-full divide-y divide-gray-200">
-            <thead class="bg-gray-50">
+            <thead class="bg-slate-50">
                 <tr>
-                    <th class="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Equipamento / Modelo</th>
-                    <th class="px-6 py-4 text-center text-xs font-bold text-gray-500 uppercase tracking-wider">Status</th>
-                    <th class="px-6 py-4 text-center text-xs font-bold text-gray-500 uppercase tracking-wider">Quantidade em Estoque</th>
-                    <th class="px-6 py-4 text-right text-xs font-bold text-gray-500 uppercase tracking-wider">Ações</th>
+                    <th class="px-6 py-4 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Equipamento / Modelo</th>
+                    <th class="px-6 py-4 text-center text-xs font-bold text-slate-500 uppercase tracking-wider">Status</th>
+                    <th class="px-6 py-4 text-center text-xs font-bold text-slate-500 uppercase tracking-wider">Quantidade</th>
+                    <th class="px-6 py-4 text-right text-xs font-bold text-slate-500 uppercase tracking-wider">Ações</th>
                 </tr>
             </thead>
-            <tbody class="bg-white divide-y divide-gray-200">
+            <tbody class="bg-white divide-y divide-gray-100">
                 @forelse($equipamentosAgrupados as $item)
-                <tr class="hover:bg-gray-50 transition">
+                <tr class="hover:bg-slate-50/50 transition">
                     <td class="px-6 py-4">
                         <div class="flex items-center gap-3">
                             <div class="w-10 h-10 bg-slate-100 rounded-lg flex items-center justify-center text-slate-500">
-                                <i class="ph ph-desktop text-xl"></i>
+                                <i class="ph ph-package text-xl"></i>
                             </div>
                             <div>
                                 <div class="text-sm font-black text-slate-900">{{ $item->nome }}</div>
-                                <div class="text-xs text-gray-400">Modelo unificado</div>
+                                <div class="text-[10px] text-slate-400 uppercase font-bold tracking-tight">Modelo Unificado</div>
                             </div>
                         </div>
                     </td>
                     <td class="px-6 py-4 text-center">
-                        <span class="px-3 py-1 text-[10px] font-black rounded-full uppercase tracking-tighter
+                        <span class="px-3 py-1 text-[10px] font-black rounded-full uppercase
                             {{ $item->status == 'Disponivel' ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700' }}">
                             {{ $item->status }}
                         </span>
                     </td>
-                    <td class="px-6 py-4 text-center">
-                        <span class="text-xl font-black text-slate-800">{{ $item->total }}</span>
-                        <span class="text-gray-400 text-xs ml-1">unid.</span>
+                    <td class="px-6 py-4 text-center font-black text-slate-800 text-lg">
+                        {{ $item->total }} <span class="text-[10px] text-slate-400 font-bold">UNID.</span>
                     </td>
-                    <td class="px-6 py-4 text-right text-sm font-medium">
-                        <button class="text-slate-400 hover:text-red-600 transition" title="Ver itens individuais">
-                            <a href="{{ route('estoques.detalhes-item', [$estoque->id, $item->nome]) }}"
-                                class="text-slate-400 hover:text-red-600 transition" title="Ver itens individuais">
-                                <i class="ph ph-eye text-xl"></i>
-                            </a> 
-                        </button>
+                    <td class="px-6 py-4 text-right">
+                        <a href="{{ route('estoques.detalhes-item', [$estoque->id, $item->nome]) }}"
+                            class="inline-flex items-center justify-center w-10 h-10 rounded-xl bg-slate-100 text-slate-600 hover:bg-blue-600 hover:text-white transition-all shadow-sm">
+                            <i class="ph ph-eye text-xl"></i>
+                        </a>
                     </td>
                 </tr>
                 @empty
                 <tr>
                     <td colspan="4" class="px-6 py-16 text-center">
-                        <div class="flex flex-col items-center">
-                            <i class="ph ph-magnifying-glass text-5xl text-gray-200 mb-4"></i>
-                            <span class="text-gray-500 font-medium">Nenhum equipamento encontrado com esses filtros.</span>
-                        </div>
+                        <i class="ph ph-magnifying-glass text-5xl text-slate-200 mb-3"></i>
+                        <p class="text-slate-500 font-bold">Nenhum item encontrado.</p>
                     </td>
                 </tr>
                 @endforelse
             </tbody>
         </table>
+    </div>
+</div>
+
+{{-- MODAL: NOVO EQUIPAMENTO --}}
+<div id="modal-equipamento" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm hidden z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl shadow-2xl max-w-lg w-full overflow-hidden">
+        <div class="bg-slate-900 p-6 text-white flex justify-between items-center">
+            <div>
+                <h3 class="font-black text-lg uppercase tracking-widest">Novo Equipamento</h3>
+                <p class="text-slate-400 text-xs font-bold">Entrada de item único com patrimônio.</p>
+            </div>
+            <i class="ph ph-desktop text-3xl text-blue-400"></i>
+        </div>
+        <form action="{{ route('equipamentos.store') }}" method="POST" class="p-8 space-y-5">
+            @csrf
+            <input type="hidden" name="estoque_id" value="{{ $estoque->id }}">
+            <input type="hidden" name="tipo" value="equipamento">
+
+            <div>
+                <label class="block text-[10px] font-black text-slate-400 uppercase mb-2 tracking-widest">Modelo no Catálogo</label>
+                <select name="nome" required class="w-full rounded-xl border-slate-200 bg-slate-50 p-3 font-bold text-sm outline-none focus:ring-2 focus:ring-blue-500">
+                    <option value="">Selecione o modelo...</option>
+                    @foreach($modelosCatalogo->whereNotIn('categoria', ['Toner', 'Cartucho', 'Insumo', 'Suprimento']) as $modelo) <option value="{{ $modelo->nome }}">{{ $modelo->nome }} ({{ $modelo->categoria }})</option>
+                    @endforeach
+                </select>
+            </div>
+
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-[10px] font-black text-slate-400 uppercase mb-2">Nº Tombo</label>
+                    <input type="text" name="tombo" placeholder="0000" class="w-full rounded-xl border-slate-200 bg-slate-50 p-3 font-bold text-sm outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+                <div>
+                    <label class="block text-[10px] font-black text-slate-400 uppercase mb-2">Nº Serial</label>
+                    <input type="text" name="serial" placeholder="S/N" class="w-full rounded-xl border-slate-200 bg-slate-50 p-3 font-bold text-sm outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+            </div>
+
+            <div class="flex justify-end gap-3 pt-4">
+                <button type="button" onclick="document.getElementById('modal-equipamento').classList.add('hidden')"
+                    class="px-6 py-3 rounded-xl font-bold text-slate-500 hover:bg-slate-100 transition-all">Voltar</button>
+                <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 rounded-xl font-bold shadow-lg transition-all">
+                    Registrar Entrada
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+{{-- MODAL: NOVO INSUMO --}}
+<div id="modal-insumo" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm hidden z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl shadow-2xl max-w-lg w-full overflow-hidden">
+        <div class="bg-slate-900 p-6 text-white flex justify-between items-center">
+            <div>
+                <h3 class="font-black text-lg uppercase tracking-widest text-emerald-400">Novo Insumo</h3>
+                <p class="text-slate-400 text-xs font-bold">Entrada de itens em lote/quantidade.</p>
+            </div>
+            <i class="ph ph-drop text-3xl text-emerald-400"></i>
+        </div>
+        <form action="{{ route('equipamentos.store') }}" method="POST" class="p-8 space-y-5">
+            @csrf
+            <input type="hidden" name="estoque_id" value="{{ $estoque->id }}">
+            <input type="hidden" name="tipo" value="insumo">
+
+            <div>
+                <label class="block text-[10px] font-black text-slate-400 uppercase mb-2 tracking-widest">Insumo no Catálogo</label>
+                <select name="nome" required class="w-full rounded-xl border-slate-200 bg-slate-50 p-3 font-bold text-sm outline-none focus:ring-2 focus:ring-emerald-500">
+                    <option value="">Selecione o insumo...</option>
+                    @foreach($modelosCatalogo->whereIn('categoria', ['Toner', 'Cartucho', 'Insumo', 'Suprimento']) as $modelo)
+                    <option value="{{ $modelo->nome }}">{{ $modelo->nome }} ({{ $modelo->categoria }})</option>
+                    @endforeach
+                </select>
+            </div>
+
+            <div>
+                <label class="block text-[10px] font-black text-slate-400 uppercase mb-2">Quantidade a Adicionar</label>
+                <input type="number" name="quantidade" value="1" min="1" required class="w-full rounded-xl border-slate-200 bg-slate-50 p-3 font-bold text-sm outline-none focus:ring-2 focus:ring-emerald-500">
+            </div>
+
+            <div class="flex justify-end gap-3 pt-4">
+                <button type="button" onclick="document.getElementById('modal-insumo').classList.add('hidden')"
+                    class="px-6 py-3 rounded-xl font-bold text-slate-500 hover:bg-slate-100 transition-all">Voltar</button>
+                <button type="submit" class="bg-emerald-600 hover:bg-emerald-700 text-white px-8 py-3 rounded-xl font-bold shadow-lg transition-all">
+                    Adicionar ao Estoque
+                </button>
+            </div>
+        </form>
     </div>
 </div>
 @endsection

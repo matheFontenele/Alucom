@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Estoque;
+use App\Models\Catalogo;
 use Illuminate\Http\Request;
 
 class EstoqueController extends Controller
@@ -48,25 +49,26 @@ class EstoqueController extends Controller
     {
         $estoque = Estoque::findOrFail($id);
 
-        // Começamos a consulta de equipamentos deste estoque
+        // 1. Buscamos todos os modelos do catálogo para os Modais
+        $modelosCatalogo = Catalogo::orderBy('nome')->get();
+
         $query = $estoque->equipamentos();
 
-        // FILTRO 1: Busca por nome/modelo
         if ($request->filled('search')) {
             $query->where('nome', 'like', '%' . $request->search . '%');
         }
 
-        // FILTRO 2: Status (Lista Suspensa)
         if ($request->filled('status')) {
             $query->where('status', $request->status);
         }
 
-        // AGRUPAMENTO: Soma quantidades ignorando tombo/serial
+        // 2. Agrupamento para a contagem na tela principal do estoque
         $equipamentosAgrupados = $query->select('nome', 'status', \DB::raw('count(*) as total'))
             ->groupBy('nome', 'status')
             ->get();
 
-        return view('estoques.show', compact('estoque', 'equipamentosAgrupados'));
+        // Passamos $modelosCatalogo para a View
+        return view('estoques.show', compact('estoque', 'equipamentosAgrupados', 'modelosCatalogo'));
     }
 
     /**
