@@ -38,7 +38,7 @@ Route::resource('equipamentos', EquipamentoController::class);
 Route::resource('movimentacoes', MovimentacaoController::class);
 
 //Catalogo
-Route::get('/catalogo', [CatalogoController::class, 'index'])->name('catalogos.index');
+Route::resource('catalogo', CatalogoController::class)->names('catalogos');
 
 //Rota de identificação de Categorias e SubCategorias
 Route::get('/api/categorias/{categoria}/subcategorias', function ($categoriaId) {

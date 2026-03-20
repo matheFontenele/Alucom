@@ -13,16 +13,14 @@ return new class extends Migration
     {
         Schema::create('catalogo', function (Blueprint $table) {
             $table->id();
-            $table->string('nome'); // Ex: Ecosys M3655idn
-            $table->string('fabricante'); // Ex: Kyocera
-            $table->string('categoria'); // Impressora, Nobreak, etc.
+            $table->string('nome');
+            $table->string('fabricante');
 
-            // Campos específicos
-            $table->string('tipo_papel')->nullable(); // A3, A4
-            $table->string('voltagem')->nullable(); // Bivolt, 110v, 220v
-            $table->string('cor')->nullable(); // Preto, Ciano, etc.
-            $table->string('descricao')->nullable(); // Para Periféricos/Outros
-
+            $table->foreignId('categoria_id')->constrained('categorias')->onDelete('cascade');
+            $table->string('tipo_papel')->nullable();
+            $table->string('voltagem')->nullable();
+            $table->string('cor')->nullable();
+            $table->string('descricao')->nullable();
             $table->timestamps();
         });
     }

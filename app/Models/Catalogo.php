@@ -3,11 +3,26 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use App\Models\Categoria;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Catalogo extends Model
 {
     protected $table = 'catalogo';
-    protected $fillable = ['nome', 'fabricante', 'categoria', 'tipo_papel', 'voltagem', 'cor', 'descricao'];
+    protected $fillable = [
+        'nome',
+        'fabricante',
+        'categoria_id',
+        'tipo_papel',
+        'voltagem',
+        'cor',
+        'descricao'
+    ];
+    //Relação com categorias
+    public function categoria(): BelongsTo
+    {
+        return $this->belongsTo(Categoria::class, 'categoria_id');
+    }
 
     public function getCorHexAttribute()
     {

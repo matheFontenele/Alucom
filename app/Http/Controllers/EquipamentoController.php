@@ -38,45 +38,46 @@ class EquipamentoController extends Controller
     public function store(Request $request)
     {
         $data = $request->validate([
-            'tipo'         => 'required|in:equipamento,insumo',
-            'nome'         => 'required|string', // Nome vem do select do catálogo
-            'estoque_id'   => 'required|exists:estoques,id',
-            'status'       => 'required',
-            // Se for equipamento, o tombo pode ser enviado. Se for insumo, usamos a quantidade.
-            'tombo'        => 'nullable|string',
-            'serial'       => 'nullable|string',
-            'quantidade'   => 'nullable|integer|min:1',
-            'cor'          => 'nullable|string',
+            'tipo'        => 'required|in:equipamento,insumo',
+            'catalogo_id' => 'required|exists:catalogo,id', // Agora validamos o ID do catálogo
+            'estoque_id'  => 'required|exists:estoques,id',
+            'status'      => 'required',
+            'tombo'       => 'nullable|string',
+            'serial'      => 'nullable|string',
+            'quantidade'  => 'nullable|integer|min:1',
         ]);
 
-        // Lógica para Insumos (Cria vários registros baseados na quantidade)
+        // Buscamos as specs do catálogo para não precisar digitar de novo
+        $itemCatalogo = \App\Models\Catalogo::find($data['catalogo_id']);
+
         if ($request->tipo === 'insumo') {
             $qtd = $request->input('quantidade', 1);
 
             for ($i = 0; $i < $qtd; $i++) {
                 \App\Models\Equipamento::create([
-                    'tipo'       => 'insumo',
-                    'nome'       => $data['nome'],
-                    'estoque_id' => $data['estoque_id'],
-                    'status'     => $data['status'] ?? 'Disponivel',
-                    'cor'        => $request->cor, // Se o catálogo tiver cor, você pode puxar automático
+                    'tipo'        => 'insumo',
+                    'catalogo_id' => $itemCatalogo->id,
+                    'nome'        => $itemCatalogo->nome, // Mantemos o nome para redundância/facilidade
+                    'estoque_id'  => $data['estoque_id'],
+                    'status'      => $data['status'] ?? 'Disponível',
+                    'cor'         => $itemCatalogo->cor, // Puxa automático do catálogo
                     'data_movimentacao' => now(),
                 ]);
             }
-            $mensagem = "{$qtd} unidades de {$data['nome']} adicionadas!";
-        }
-        // Lógica para Equipamento Único
-        else {
+            $mensagem = "{$qtd} unidades de {$itemCatalogo->nome} adicionadas!";
+        } else {
             \App\Models\Equipamento::create([
-                'tipo'       => 'equipamento',
-                'nome'       => $data['nome'],
-                'tombo'      => $data['tombo'],
-                'serial'     => $data['serial'],
-                'estoque_id' => $data['estoque_id'],
-                'status'     => $data['status'] ?? 'Disponivel',
+                'tipo'        => 'equipamento',
+                'catalogo_id' => $itemCatalogo->id,
+                'nome'        => $itemCatalogo->nome,
+                'tombo'       => $data['tombo'],
+                'serial'      => $data['serial'],
+                'estoque_id'  => $data['estoque_id'],
+                'status'      => $data['status'] ?? 'Disponível',
+                'cor'         => $itemCatalogo->cor,
                 'data_movimentacao' => now(),
             ]);
-            $mensagem = "Equipamento {$data['nome']} cadastrado!";
+            $mensagem = "Equipamento {$itemCatalogo->nome} cadastrado!";
         }
 
         return redirect()->back()->with('success', $mensagem);

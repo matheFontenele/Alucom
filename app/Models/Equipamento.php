@@ -3,29 +3,38 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Equipamento extends Model
 {
-    // Adicionado: tipo, cor, observacoes e estoque_id
     protected $fillable = [
+        'catalogo_id',    // RELAÇÃO COM O CATÁLOGO
         'categoria_id',
         'subcategoria_id',
         'cliente_id',
         'estoque_id',
-        'tipo',          // 'equipamento' ou 'insumo'
+        'tipo',
         'tombo',
         'nome',
         'serial',
-        'status',        // Alugado, Disponivel, etc.
-        'situacao',      // No Cliente, Em Rota, etc.
-        'cor',           // Preto, Ciano, Magenta, Amarelo
-        'observacoes',   // Notas gerais
+        'status',
+        'situacao',
+        'cor',
+        'observacoes',
         'data_movimentacao'
     ];
 
     protected $casts = [
         'data_movimentacao' => 'datetime',
     ];
+
+    /**
+     * Relação com o item original do Catálogo
+     */
+    public function catalogo(): BelongsTo
+    {
+        return $this->belongsTo(Catalogo::class, 'catalogo_id');
+    }
 
     /**
      * Usado na View para exibir o círculo colorido
@@ -40,33 +49,13 @@ class Equipamento extends Model
             'Branco'  => '#FFFFFF',
         ];
 
-        return $cores[$this->cor] ?? '#cbd5e1'; // Cinza se não houver cor
+        return $cores[$this->cor] ?? '#cbd5e1'; 
     }
 
-    // --- Relacionamentos ---
-
-    public function categoria()
-    {
-        return $this->belongsTo(Categoria::class);
-    }
-
-    public function subcategoria()
-    {
-        return $this->belongsTo(Subcategoria::class);
-    }
-
-    public function cliente()
-    {
-        return $this->belongsTo(Clientes::class, 'cliente_id');
-    }
-
-    public function estoque()
-    {
-        return $this->belongsTo(Estoque::class);
-    }
-
-    public function movimentacoes()
-    {
-        return $this->hasMany(Movimentacao::class);
-    }
+    // --- Outros Relacionamentos ---
+    public function categoria() { return $this->belongsTo(Categoria::class); }
+    public function subcategoria() { return $this->belongsTo(Subcategoria::class); }
+    public function cliente() { return $this->belongsTo(Clientes::class, 'cliente_id'); }
+    public function estoque() { return $this->belongsTo(Estoque::class); }
+    public function movimentacoes() { return $this->hasMany(Movimentacao::class); }
 }

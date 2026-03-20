@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Catalogo;
+use App\Models\Categoria;
 use Illuminate\Http\Request;
 
 class CatalogoController extends Controller
@@ -10,12 +11,33 @@ class CatalogoController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        // Busca todos e agrupa pela coluna 'categoria'
-        $itens = Catalogo::all()->groupBy('categoria');
+        $query = Catalogo::query();
 
-        return view('catalogo.index', compact('itens'));
+        // Filtro de Texto (Nome ou Fabricante)
+        if ($request->filled('search')) {
+            $query->where(function ($q) use ($request) {
+                $q->where('nome', 'ilike', '%' . $request->search . '%') // ilike para PostgreSQL (case insensitive)
+                    ->orWhere('fabricante', 'ilike', '%' . $request->search . '%');
+            });
+        }
+
+        // Filtro por ID da Categoria (O que o seu Select envia)
+        if ($request->filled('categoria_id')) {
+            $query->where('categoria_id', $request->categoria_id);
+        }
+
+        // Eager Load da categoria para evitar o "SEM CATEGORIA"
+        $itens = $query->with('categoria')->get()->groupBy(function ($item) {
+            return $item->categoria ? mb_strtoupper($item->categoria->nome) : 'SEM CATEGORIA';
+        });
+
+        // Pega as categorias para o Select do filtro
+        $categorias = Categoria::orderBy('nome')->get();
+
+        // IMPORTANTE: Verifique se o caminho da view está correto (singular/plural)
+        return view('catalogo.index', compact('itens', 'categorias'));
     }
 
     /**
@@ -31,7 +53,20 @@ class CatalogoController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $data = $request->validate([
+            'nome'         => 'required|string|max:255',
+            'fabricante'   => 'required|string|max:255',
+            'categoria_id' => 'required|exists:categorias,id',
+            'voltagem'     => 'nullable|string',
+            'cor'          => 'nullable|string',
+            'tipo_papel'   => 'nullable|string',
+            'descricao'    => 'nullable|string',
+        ]);
+
+        \App\Models\Catalogo::create($data);
+
+        return redirect()->route('catalogos.index')
+            ->with('success', 'Novo modelo adicionado ao catálogo com sucesso!');
     }
 
     /**

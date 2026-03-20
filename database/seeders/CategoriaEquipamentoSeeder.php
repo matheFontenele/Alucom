@@ -20,12 +20,11 @@ class CategoriaEquipamentoSeeder extends Seeder
         ];
 
         foreach ($estrutura as $nomeCategoria => $subcategorias) {
-            // Cria a Categoria principal
-            $categoria = Categoria::create(['nome' => $nomeCategoria]);
+            // Busca se já existe ou cria se for novo
+            $categoria = Categoria::firstOrCreate(['nome' => $nomeCategoria]);
 
-            // Cria as Subcategorias vinculadas a esta categoria
             foreach ($subcategorias as $nomeSub) {
-                Subcategoria::create([
+                Subcategoria::firstOrCreate([
                     'categoria_id' => $categoria->id,
                     'nome' => $nomeSub
                 ]);

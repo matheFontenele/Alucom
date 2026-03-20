@@ -4,105 +4,139 @@ namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
 use App\Models\Catalogo;
+use App\Models\Categoria;
 
 class CatalogoSeeder extends Seeder
 {
     public function run(): void
     {
         $itens = [
-            // IMPRESSORAS
+            // --- IMPRESSORAS & MULTIFUNCIONAIS ---
             [
                 'nome' => 'Ecosys M3655idn',
                 'fabricante' => 'Kyocera',
-                'categoria' => 'Impressora',
+                'categoria_nome' => 'Impressora',
                 'tipo_papel' => 'A4',
                 'voltagem' => '110v',
                 'cor' => 'Preto',
+                'descricao' => 'Multifuncional laser monocromática de alta performance (55 ppm).',
+            ],
+            [
+                'nome' => 'Ecosys M6635cidn',
+                'fabricante' => 'Kyocera',
+                'categoria_nome' => 'Impressora',
+                'tipo_papel' => 'A4',
+                'voltagem' => '110v',
+                'cor' => 'Colorido',
+                'descricao' => 'Multifuncional laser colorida para grupos de trabalho.',
             ],
             [
                 'nome' => 'L42PRO Full',
                 'fabricante' => 'Elgin',
-                'categoria' => 'Impressora',
+                'categoria_nome' => 'Impressora',
                 'tipo_papel' => 'Etiqueta',
                 'voltagem' => 'Bivolt',
                 'cor' => 'Preto',
+                'descricao' => 'Impressora térmica para etiquetas e códigos de barras.',
             ],
-            // NOBREAKS
+            [
+                'nome' => 'EcoTank L3250',
+                'fabricante' => 'Epson',
+                'categoria_nome' => 'Impressora',
+                'tipo_papel' => 'A4',
+                'voltagem' => 'Bivolt',
+                'cor' => 'Colorido',
+                'descricao' => 'Multifuncional tanque de tinta colorida com Wi-Fi.',
+            ],
+
+            // --- NOBREAKS & ESTABILIZADORES ---
             [
                 'nome' => 'Attiv 600VA',
                 'fabricante' => 'Intelbras',
-                'categoria' => 'Nobreak',
+                'categoria_nome' => 'Nobreak',
                 'voltagem' => 'Bivolt',
-                'descricao' => 'Nobreak para PDV e estações de trabalho',
+                'descricao' => 'Nobreak para PDV, roteadores e estações de trabalho simples.',
             ],
             [
-                'nome' => 'XNB 1440VA',
+                'nome' => 'DNB 1.5 kVA RT',
                 'fabricante' => 'Intelbras',
-                'categoria' => 'Nobreak',
-                'voltagem' => '110v',
-                'descricao' => 'Carga para servidores pequenos',
+                'categoria_nome' => 'Nobreak',
+                'voltagem' => '220v',
+                'descricao' => 'Nobreak senoidal online de torre ou rack para servidores.',
             ],
-            // PERIFÉRICOS / OUTROS
             [
-                'nome' => 'Leitor QuickScan QW2100',
-                'fabricante' => 'Datalogic',
-                'categoria' => 'Periférico',
-                'descricao' => 'Leitor de código de barras USB com suporte',
+                'nome' => 'Manager III 1500VA',
+                'fabricante' => 'SMS',
+                'categoria_nome' => 'Nobreak',
+                'voltagem' => 'Bivolt',
+                'descricao' => 'Nobreak com comunicação inteligente e 6 tomadas.',
             ],
 
-            // TONERS (LASER)
+            // --- SUPRIMENTOS (TONERS, TINTAS, CILINDROS) ---
             [
                 'nome' => 'Toner TK-3192',
                 'fabricante' => 'Kyocera',
-                'categoria' => 'Suprimento',
-                'tipo_papel' => null,
-                'voltagem' => null,
+                'categoria_nome' => 'Suprimento',
                 'cor' => 'Preto',
                 'descricao' => 'Rendimento de 25.000 páginas. Compatível com M3655idn.',
             ],
             [
-                'nome' => 'Toner HP 105A (W1105A)',
-                'fabricante' => 'HP',
-                'categoria' => 'Suprimento',
-                'tipo_papel' => null,
-                'voltagem' => null,
+                'nome' => 'Toner TN-3472',
+                'fabricante' => 'Brother',
+                'categoria_nome' => 'Suprimento',
                 'cor' => 'Preto',
-                'descricao' => 'Compatível com HP Laser 107a, 107w, MFP 135a.',
+                'descricao' => 'Rendimento de 12.000 páginas. Compatível com L5652DN.',
+            ],
+            [
+                'nome' => 'Garrafa de Tinta T504120',
+                'fabricante' => 'Epson',
+                'categoria_nome' => 'Suprimento',
+                'cor' => 'Preto',
+                'descricao' => 'Refil de tinta preta 127ml para série EcoTank L4150/L4160.',
+            ],
+            [
+                'nome' => 'Unidade de Cilindro DR-3440',
+                'fabricante' => 'Brother',
+                'categoria_nome' => 'Suprimento',
+                'cor' => 'Preto',
+                'descricao' => 'Unidade de imagem fotocondutora (50.000 páginas).',
             ],
 
-            // BOLSAS DE TINTA (INKJET / RIPS)
+            // --- PERIFÉRICOS & OUTROS ---
             [
-                'nome' => 'Bolsa de Tinta T941120',
-                'fabricante' => 'Epson',
-                'categoria' => 'Suprimento',
-                'cor' => 'Preto',
-                'descricao' => 'Tinta DURABrite Ultra. Compatível com WorkForce Pro WF-C5710.',
+                'nome' => 'Leitor QuickScan QW2100',
+                'fabricante' => 'Datalogic',
+                'categoria_nome' => 'Periférico',
+                'descricao' => 'Leitor de código de barras imager 1D com interface USB.',
             ],
             [
-                'nome' => 'Bolsa de Tinta T941220',
-                'fabricante' => 'Epson',
-                'categoria' => 'Suprimento',
-                'cor' => 'Ciano',
-                'descricao' => 'Tinta DURABrite Ultra. Compatível com WorkForce Pro WF-C5710.',
+                'nome' => 'Scanner ScanSnap iX1600',
+                'fabricante' => 'Fujitsu',
+                'categoria_nome' => 'Periférico',
+                'descricao' => 'Scanner de documentos duplex de alta velocidade com tela touch.',
             ],
             [
-                'nome' => 'Bolsa de Tinta T941320',
-                'fabricante' => 'Epson',
-                'categoria' => 'Suprimento',
-                'cor' => 'Magenta',
-                'descricao' => 'Tinta DURABrite Ultra. Compatível com WorkForce Pro WF-C5710.',
-            ],
-            [
-                'nome' => 'Bolsa de Tinta T941420',
-                'fabricante' => 'Epson',
-                'categoria' => 'Suprimento',
-                'cor' => 'Amarelo',
-                'descricao' => 'Tinta DURABrite Ultra. Compatível com WorkForce Pro WF-C5710.',
+                'nome' => 'Switch 24 Portas Gigabit',
+                'fabricante' => 'TP-Link',
+                'categoria_nome' => 'Periférico',
+                'descricao' => 'Switch rackmount para infraestrutura de rede.',
             ],
         ];
 
-        foreach ($itens as $item) {
-            Catalogo::create($item);
+        foreach ($itens as $dados) {
+            // Busca a categoria pelo nome definido no array
+            $categoria = Categoria::where('nome', $dados['categoria_nome'])->first();
+
+            // Se a categoria não existir, cria uma para não quebrar o seeder
+            if (!$categoria) {
+                $categoria = Categoria::create(['nome' => $dados['categoria_nome']]);
+            }
+
+            // Remove o nome temporário e adiciona o ID real
+            unset($dados['categoria_nome']);
+            $dados['categoria_id'] = $categoria->id;
+
+            Catalogo::create($dados);
         }
     }
 }
