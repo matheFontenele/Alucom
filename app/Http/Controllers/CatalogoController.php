@@ -18,25 +18,24 @@ class CatalogoController extends Controller
         // Filtro de Texto (Nome ou Fabricante)
         if ($request->filled('search')) {
             $query->where(function ($q) use ($request) {
-                $q->where('nome', 'ilike', '%' . $request->search . '%') // ilike para PostgreSQL (case insensitive)
+                // Note o uso de 'ilike' para ambos para garantir case-insensitivity no PostgreSQL
+                $q->where('nome', 'ilike', '%' . $request->search . '%')
                     ->orWhere('fabricante', 'ilike', '%' . $request->search . '%');
             });
         }
 
-        // Filtro por ID da Categoria (O que o seu Select envia)
+        // CORREÇÃO: O Select envia 'categoria_id'. Devemos filtrar pela chave estrangeira na tabela 'catalogos'.
         if ($request->filled('categoria_id')) {
             $query->where('categoria_id', $request->categoria_id);
         }
 
-        // Eager Load da categoria para evitar o "SEM CATEGORIA"
+        // Eager Load da categoria
         $itens = $query->with('categoria')->get()->groupBy(function ($item) {
             return $item->categoria ? mb_strtoupper($item->categoria->nome) : 'SEM CATEGORIA';
         });
 
-        // Pega as categorias para o Select do filtro
         $categorias = Categoria::orderBy('nome')->get();
 
-        // IMPORTANTE: Verifique se o caminho da view está correto (singular/plural)
         return view('catalogo.index', compact('itens', 'categorias'));
     }
 
