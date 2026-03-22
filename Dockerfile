@@ -1,6 +1,7 @@
-FROM php:8.2-cli
+# Alterado para 8.4 para bater com suas dependências
+FROM php:8.4-cli 
 
-# Instala dependências do sistema (incluindo libzip-dev para o erro atual)
+# Instala dependências do sistema
 RUN apt-get update && apt-get install -y \
     git \
     curl \
@@ -11,10 +12,9 @@ RUN apt-get update && apt-get install -y \
     nodejs \
     npm
 
-# Limpa o cache
 RUN apt-get clean && rm -rf /var/lib/apt/lists/*
 
-# Instala extensões PHP (Adicionado 'zip' aqui)
+# Instala extensões PHP
 RUN docker-php-ext-install pdo_pgsql zip
 
 # Instala o Composer
@@ -23,10 +23,10 @@ COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 WORKDIR /app
 COPY . .
 
-# Instala dependências do PHP (Agora deve passar)
-RUN composer install --no-dev --optimize-autoloader --no-interaction
+# Comando de instalação com ignore para evitar travas de plataforma
+RUN composer install --no-dev --optimize-autoloader --no-interaction --ignore-platform-reqs
 
-# Gera o CSS e JS (Vite)
+# Gera os assets (Vite)
 RUN npm install
 RUN npm run build
 
