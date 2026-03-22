@@ -4,20 +4,20 @@
 <div class="container mx-auto p-6">
     {{-- Exibição de Erros de Validação --}}
     @if ($errors->any())
-        <div class="mb-6 p-4 bg-red-100 border-l-4 border-red-500 text-red-700 rounded-xl shadow-sm">
-            <p class="font-black uppercase text-xs mb-2">Erro ao salvar:</p>
-            <ul class="list-disc ml-5 text-sm">
-                @foreach ($errors->all() as $error)
-                    <li>{{ $error }}</li>
-                @endforeach
-            </ul>
-        </div>
+    <div class="mb-6 p-4 bg-red-100 border-l-4 border-red-500 text-red-700 rounded-xl shadow-sm">
+        <p class="font-black uppercase text-xs mb-2">Erro ao salvar:</p>
+        <ul class="list-disc ml-5 text-sm">
+            @foreach ($errors->all() as $error)
+            <li>{{ $error }}</li>
+            @endforeach
+        </ul>
+    </div>
     @endif
 
     @if(session('success'))
-        <div class="mb-6 p-4 bg-emerald-100 border-l-4 border-emerald-500 text-emerald-700 rounded-xl shadow-sm font-bold text-sm">
-            {{ session('success') }}
-        </div>
+    <div class="mb-6 p-4 bg-emerald-100 border-l-4 border-emerald-500 text-emerald-700 rounded-xl shadow-sm font-bold text-sm">
+        {{ session('success') }}
+    </div>
     @endif
 
     {{-- Cabeçalho e Voltar --}}
@@ -161,8 +161,12 @@
                 <label class="block text-[10px] font-black text-slate-400 uppercase mb-2 tracking-widest">Modelo no Catálogo</label>
                 <select name="catalogo_id" required class="w-full rounded-xl border-slate-200 bg-slate-50 p-3 font-bold text-sm outline-none focus:ring-2 focus:ring-blue-500">
                     <option value="">Selecione o modelo...</option>
-                    @foreach($modelosCatalogo->filter(fn($m) => $m->categoria && !in_array($m->categoria->nome, ['Toner', 'Cartucho', 'Insumo', 'Suprimento'])) as $modelo)
-                        <option value="{{ $modelo->id }}">{{ $modelo->nome }} ({{ $modelo->categoria->nome }})</option>
+                    @foreach($modelosCatalogo as $modelo)
+                    @if(!$modelo->ehInsumo())
+                    <option value="{{ $modelo->id }}">
+                        {{ $modelo->nome }} ({{ $modelo->categoria->nome ?? 'S/Cat' }})
+                    </option>
+                    @endif
                     @endforeach
                 </select>
             </div>
@@ -208,8 +212,12 @@
                 <label class="block text-[10px] font-black text-slate-400 uppercase mb-2 tracking-widest">Insumo no Catálogo</label>
                 <select name="catalogo_id" required class="w-full rounded-xl border-slate-200 bg-slate-50 p-3 font-bold text-sm outline-none focus:ring-2 focus:ring-emerald-500">
                     <option value="">Selecione o insumo...</option>
-                    @foreach($modelosCatalogo->filter(fn($m) => $m->categoria && in_array($m->categoria->nome, ['Toner', 'Cartucho', 'Insumo', 'Suprimento'])) as $modelo)
-                        <option value="{{ $modelo->id }}">{{ $modelo->nome }} ({{ $modelo->categoria->nome }})</option>
+                    @foreach($modelosCatalogo as $modelo)
+                    @if($modelo->ehInsumo())
+                    <option value="{{ $modelo->id }}">
+                        {{ $modelo->nome }} ({{ $modelo->categoria->nome ?? 'S/Cat' }})
+                    </option>
+                    @endif
                     @endforeach
                 </select>
             </div>

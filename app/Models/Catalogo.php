@@ -36,4 +36,12 @@ class Catalogo extends Model
 
         return $cores[$this->cor] ?? '#cbd5e1'; // Cinza se não encontrar
     }
+
+    public function ehInsumo(): bool
+    {
+        // Adicione aqui todos os nomes de categorias que devem aparecer no modal de Insumos
+        $categoriasInsumos = ['Suprimentos', 'Toner', 'Cartucho', 'Tintas', 'Papel'];
+
+        return in_array($this->categoria->nome, $categoriasInsumos);
+    }
 }
