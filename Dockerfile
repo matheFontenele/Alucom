@@ -30,6 +30,10 @@ RUN composer install --no-dev --optimize-autoloader --no-interaction --ignore-pl
 RUN npm install
 RUN npm run build
 
+# Garante que a pasta public/build tenha permissão de leitura
+RUN chown -R www-data:www-data /app/public
+RUN chmod -R 755 /app/public
+
 # Permissões
 RUN chown -R www-data:www-data /app/storage /app/bootstrap/cache
 
