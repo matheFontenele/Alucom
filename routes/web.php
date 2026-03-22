@@ -8,6 +8,7 @@ use App\Http\Controllers\EquipamentoController;
 use App\Http\Controllers\TecnicosController;
 use App\Http\Controllers\MovimentacaoController;
 use App\Http\Controllers\CatalogoController;
+use Illuminate\Support\Facades\Artisan;
 
 Route::get('/', function () {
     return redirect()->route('guia-adi.index');
@@ -48,3 +49,13 @@ Route::get('/api/categorias/{categoria}/subcategorias', function ($categoriaId) 
 //Rota de detalhes de itens detro do estoque
 Route::get('/estoques/{estoque}/detalhes/{nome}', [App\Http\Controllers\EstoqueController::class, 'detalhesItem'])
     ->name('estoques.detalhes-item');
+
+Route::get('/init-db', function () {
+    try {
+        // Roda os seeders definidos no DatabaseSeeder
+        Artisan::call('db:seed', ['--force' => true]);
+        return "Banco de dados povoado com sucesso! " . Artisan::output();
+    } catch (\Exception $e) {
+        return "Erro ao rodar seed: " . $e->getMessage();
+    }
+});
