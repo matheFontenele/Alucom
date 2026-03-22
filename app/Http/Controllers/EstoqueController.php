@@ -4,23 +4,25 @@ namespace App\Http\Controllers;
 
 use App\Models\Estoque;
 use App\Models\Catalogo;
+use App\Models\Equipamento;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class EstoqueController extends Controller
 {
     /**
-     * Display a listing of the resource.
+     * Exibe a lista de locais de estoque.
      */
     public function index()
     {
-        // O withCount('equipamentos') cria automaticamente a propriedade equipamentos_count
+        // Carrega os estoques contando quantos equipamentos existem em cada um
         $estoques = Estoque::withCount('equipamentos')->get();
 
         return view('estoques.index', compact('estoques'));
     }
 
     /**
-     * Show the form for creating a new resource.
+     * Formulário de criação de local de estoque.
      */
     public function create()
     {
@@ -28,7 +30,7 @@ class EstoqueController extends Controller
     }
 
     /**
-     * Store a newly created resource in storage.
+     * Salva um novo local de estoque.
      */
     public function store(Request $request)
     {
@@ -43,72 +45,53 @@ class EstoqueController extends Controller
     }
 
     /**
-     * Display the specified resource.
+     * Exibe os itens dentro de um estoque específico.
      */
     public function show($id, Request $request)
     {
         $estoque = Estoque::findOrFail($id);
 
-        // 1. Buscamos todos os modelos do catálogo para os Modais
-        $modelosCatalogo = Catalogo::orderBy('nome')->get();
+        // 1. Buscamos todos os modelos do catálogo COM a categoria carregada.
+        // Isso é CRUCIAL para o filtro de Equipamentos vs Insumos no Blade.
+        $modelosCatalogo = Catalogo::with('categoria')->orderBy('nome')->get();
 
+        // 2. Iniciamos a query de equipamentos deste estoque
         $query = $estoque->equipamentos();
 
+        // Filtro de busca por nome (do equipamento)
         if ($request->filled('search')) {
             $query->where('nome', 'like', '%' . $request->search . '%');
         }
 
+        // Filtro por status
         if ($request->filled('status')) {
             $query->where('status', $request->status);
         }
 
-        // 2. Agrupamento para a contagem na tela principal do estoque
-        $equipamentosAgrupados = $query->select('nome', 'status', \DB::raw('count(*) as total'))
+        // 3. Agrupamento para a tabela principal (agrupa itens iguais com status iguais)
+        $equipamentosAgrupados = $query->select('nome', 'status', DB::raw('count(*) as total'))
             ->groupBy('nome', 'status')
             ->get();
 
-        // Passamos $modelosCatalogo para a View
         return view('estoques.show', compact('estoque', 'equipamentosAgrupados', 'modelosCatalogo'));
     }
 
     /**
-     * Show the form for editing the specified resource.
+     * Exibe os detalhes (seriais e tombos) de um grupo de itens específicos.
      */
-    public function edit(Estoque $estoque)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, Estoque $estoque)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(Estoque $estoque)
-    {
-        //
-    }
-
     public function detalhesItem(Request $request, $estoqueId, $nome)
     {
-        $estoque = \App\Models\Estoque::findOrFail($estoqueId);
+        $estoque = Estoque::findOrFail($estoqueId);
 
-        // Inicia a query filtrando pelo estoque e nome do grupo
-        $query = \App\Models\Equipamento::where('estoque_id', $estoqueId)
+        // Busca os itens individuais (com serial/tombo) baseados no nome do grupo
+        $query = Equipamento::where('estoque_id', $estoqueId)
             ->where('nome', $nome);
 
-        // Aplica o filtro de busca (se houver)
         if ($request->filled('search')) {
             $search = $request->search;
             $query->where(function ($q) use ($search) {
                 $q->where('serial', 'like', "%{$search}%")
-                    ->orWhere('tombo', 'like', "%{$search}%");
+                  ->orWhere('tombo', 'like', "%{$search}%");
             });
         }
 
@@ -116,4 +99,9 @@ class EstoqueController extends Controller
 
         return view('estoques.detalhes-item', compact('estoque', 'itens', 'nome'));
     }
+
+    // Métodos edit, update e destroy podem ser implementados conforme sua necessidade
+    public function edit(Estoque $estoque) { /* ... */ }
+    public function update(Request $request, Estoque $estoque) { /* ... */ }
+    public function destroy(Estoque $estoque) { /* ... */ }
 }
