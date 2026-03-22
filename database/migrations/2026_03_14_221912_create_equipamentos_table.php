@@ -17,6 +17,7 @@ return new class extends Migration
             $table->foreignId('subcategoria_id')->nullable()->constrained();
             $table->foreignId('cliente_id')->nullable()->constrained('clientes');
             $table->foreignId('estoque_id')->nullable()->constrained('estoques');
+            $table->foreignId('catalogo_id')->nullable()->constrained('catalogo')->onDelete('set null');
 
             // Identificadores
             $table->string('tipo')->default('equipamento'); // equipamento ou insumo
