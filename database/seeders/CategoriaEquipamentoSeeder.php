@@ -10,17 +10,16 @@ class CategoriaEquipamentoSeeder extends Seeder
 {
     public function run(): void
     {
-        // Definindo a estrutura baseada nas suas regras
         $estrutura = [
-            'Computadores' => ['Micro', 'Notebook', 'Thinkcentre'],
-            'Impressora' => ['Impressoras', 'Multifuncionais'],
-            'Proteção e Energia' => ['Nobreaks', 'Estabilizadores', 'Transformadores'],
-            'Perifericos' => ['Bandejas', 'Suportes', 'Scanners'],
-            'Outros' => [], // Sem subcategorias
+            'Computadores'       => ['Micro', 'Notebook', 'Thinkcentre'],
+            'Impressoras'        => ['Multifuncionais', 'Térmicas'], // Sincronizado
+            'Nobreaks'           => ['Estabilizadores', 'Transformadores'], // Sincronizado
+            'Periféricos'        => ['Scanners', 'Leitores', 'Switches'], // Com acento
+            'Suprimentos'        => ['Toners', 'Tintas', 'Cilindros'], // Sincronizado
+            'Outros'             => [],
         ];
 
         foreach ($estrutura as $nomeCategoria => $subcategorias) {
-            // Busca se já existe ou cria se for novo
             $categoria = Categoria::firstOrCreate(['nome' => $nomeCategoria]);
 
             foreach ($subcategorias as $nomeSub) {
