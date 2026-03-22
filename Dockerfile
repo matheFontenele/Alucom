@@ -37,4 +37,4 @@ RUN chmod -R 755 /app/public
 # Permissões
 RUN chown -R www-data:www-data /app/storage /app/bootstrap/cache
 
-CMD php artisan migrate:fresh --seed --force && php artisan serve --host=0.0.0.0 --port=${PORT:-10000}
+CMD php artisan migrate --force && php artisan serve --host=0.0.0.0 --port=${PORT:-10000}

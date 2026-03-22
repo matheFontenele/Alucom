@@ -13,10 +13,10 @@ class DatabaseSeeder extends Seeder
     public function run(): void
     {
         // 1. Usuário Admin
-        User::factory()->create([
-            'name' => 'Admin Alucom',
-            'email' => 'admin@alucom.com',
-        ]);
+        //User::factory()->create([
+          //  'name' => 'Admin Alucom',
+           // 'email' => 'admin@alucom.com',
+        //]);
 
         // 2. Ordem Hierárquica (Pai -> Filho)
         $this->call([
