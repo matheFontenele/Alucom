@@ -39,7 +39,7 @@ class EquipamentoController extends Controller
      */
     public function store(Request $request)
     {
-        // 1. Validação Robusta
+        // 1. Ajuste na Validação: Removido 'required' de campos que podem ser nulos no banco
         $data = $request->validate([
             'tipo'        => 'required|in:equipamento,insumo',
             'catalogo_id' => 'required|exists:catalogo,id',
@@ -50,14 +50,10 @@ class EquipamentoController extends Controller
             'status'      => 'nullable|string',
         ]);
 
-        // 2. Busca informações no Catálogo para automatizar o cadastro
         $itemCatalogo = Catalogo::findOrFail($data['catalogo_id']);
-        
-        // Define o status padrão caso venha vazio
         $statusFinal = $request->status ?? 'Disponivel';
 
         try {
-            // Lógica para INSUMOS (Entrada em lote)
             if ($request->tipo === 'insumo') {
                 $qtd = $request->input('quantidade', 1);
 
@@ -65,21 +61,20 @@ class EquipamentoController extends Controller
                     Equipamento::create([
                         'tipo'              => 'insumo',
                         'catalogo_id'       => $itemCatalogo->id,
-                        'nome'              => $itemCatalogo->nome, // Redundância para facilitar buscas
+                        'categoria_id'      => $itemCatalogo->categoria_id, // ADICIONADO: Garante que o ID da categoria seja salvo
+                        'nome'              => $itemCatalogo->nome,
                         'estoque_id'        => $data['estoque_id'],
                         'status'            => $statusFinal,
-                        'cor'               => $itemCatalogo->cor,   // Puxa automático do catálogo
+                        'cor'               => $itemCatalogo->cor,
                         'data_movimentacao' => now(),
                     ]);
                 }
-                $mensagem = "{$qtd} unidades de \"{$itemCatalogo->nome}\" adicionadas ao estoque!";
-            } 
-            
-            // Lógica para EQUIPAMENTOS (Item único com Patrimônio)
-            else {
+                $mensagem = "{$qtd} unidades de \"{$itemCatalogo->nome}\" adicionadas!";
+            } else {
                 Equipamento::create([
                     'tipo'              => 'equipamento',
                     'catalogo_id'       => $itemCatalogo->id,
+                    'categoria_id'      => $itemCatalogo->categoria_id, // ADICIONADO: Garante que o ID da categoria seja salvo
                     'nome'              => $itemCatalogo->nome,
                     'tombo'             => $data['tombo'],
                     'serial'            => $data['serial'],
@@ -88,14 +83,14 @@ class EquipamentoController extends Controller
                     'cor'               => $itemCatalogo->cor,
                     'data_movimentacao' => now(),
                 ]);
-                $mensagem = "Equipamento \"{$itemCatalogo->nome}\" cadastrado com sucesso!";
+                $mensagem = "Equipamento \"{$itemCatalogo->nome}\" cadastrado!";
             }
 
             return redirect()->back()->with('success', $mensagem);
-
         } catch (\Exception $e) {
+            // Oculta detalhes técnicos para o usuário mas mantém no log para você
             return redirect()->back()
-                ->withErrors(['erro' => 'Falha ao salvar no banco: ' . $e->getMessage()])
+                ->withErrors(['erro' => 'Erro ao salvar: Verifique se o Tombo/Serial já existe ou se faltam campos obrigatórios.'])
                 ->withInput();
         }
     }
@@ -120,9 +115,9 @@ class EquipamentoController extends Controller
         $data = $request->validate([
             'tipo'         => 'required|in:equipamento,insumo',
             'nome'         => 'required|string|max:255',
-            'tombo'        => $request->tipo === 'equipamento' 
-                                ? 'required|string|unique:equipamentos,tombo,' . $equipamento->id 
-                                : 'nullable',
+            'tombo'        => $request->tipo === 'equipamento'
+                ? 'required|string|unique:equipamentos,tombo,' . $equipamento->id
+                : 'nullable',
             'serial'       => 'nullable|string|unique:equipamentos,serial,' . $equipamento->id,
             'status'       => 'required|string',
             'cor'          => 'nullable|string',
@@ -133,7 +128,7 @@ class EquipamentoController extends Controller
         $equipamento->update($data);
 
         return redirect()->route('estoques.show', $equipamento->estoque_id)
-                         ->with('success', 'Cadastro atualizado com sucesso!');
+            ->with('success', 'Cadastro atualizado com sucesso!');
     }
 
     /**

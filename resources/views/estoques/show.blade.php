@@ -1,5 +1,16 @@
 @extends('layouts.app')
 
+@if ($errors->any())
+    <div style="background: #fee2e2; color: #991b1b; padding: 15px; margin-bottom: 20px; border-radius: 8px; border: 1px solid #f87171;">
+        <strong>Ops! Algo deu errado:</strong>
+        <ul style="margin-top: 5px;">
+            @foreach ($errors->all() as $error)
+                <li>{{ $error }}</li>
+            @endforeach
+        </ul>
+    </div>
+@endif
+
 @section('content')
 <div class="container mx-auto p-6">
     {{-- Exibição de Erros de Validação --}}
