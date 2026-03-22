@@ -55,9 +55,20 @@ Route::get('/popular-banco', function () {
     try {
         // O parâmetro --force é obrigatório em produção (Render)
         Artisan::call('db:seed', ['--force' => true]);
-        
+
         return "Seeders executados com sucesso! <br><pre>" . Artisan::output() . "</pre>";
     } catch (\Exception $e) {
         return "Erro ao rodar seeders: " . $e->getMessage();
+    }
+});
+
+// No routes/web.php
+Route::get('/debug-seed', function () {
+    try {
+        Artisan::call('migrate:fresh', ['--force' => true]); // Limpa tudo (CUIDADO: deleta dados atuais)
+        Artisan::call('db:seed', ['--force' => true]);
+        return "Sucesso! Output: " . Artisan::output();
+    } catch (\Exception $e) {
+        return "Erro detectado: " . $e->getMessage() . " no arquivo " . $e->getFile() . " linha " . $e->getLine();
     }
 });
