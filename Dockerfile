@@ -1,32 +1,23 @@
 FROM php:8.2-cli
 
-# Instala dependências do sistema (PostgreSQL, Node para o Vite, etc)
+# Instala dependências do sistema e extensões PHP necessárias
 RUN apt-get update && apt-get install -y \
-    git \
-    curl \
-    zip \
-    unzip \
-    libpq-dev \
-    nodejs \
-    npm
+    git curl zip unzip libpq-dev nodejs npm \
+    libpng-dev libonig-dev libxml2-dev # Extensões extras para o Laravel
 
-# Limpa o cache para deixar o servidor mais leve
 RUN apt-get clean && rm -rf /var/lib/apt/lists/*
 
-# Instala a conexão do PHP com o PostgreSQL
-RUN docker-php-ext-install pdo_pgsql
+# Instala extensões PHP
+RUN docker-php-ext-install pdo_pgsql mbstring exif pcntl bcmath gd
 
 # Instala o Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
-# Define a pasta principal do projeto
 WORKDIR /app
-
-# Copia todos os seus arquivos para dentro do servidor
 COPY . .
 
-# Instala as dependências do PHP
-RUN composer install --no-dev --optimize-autoloader
+# Tente rodar o composer sem o --no-dev primeiro para testar, ou garanta o lock
+RUN composer install --optimize-autoloader --no-interaction --no-progress
 
 # Gera o CSS e JS da sua interface (Vite)
 RUN npm install
