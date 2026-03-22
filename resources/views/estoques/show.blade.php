@@ -143,7 +143,7 @@
 
             <div>
                 <label class="block text-[10px] font-black text-slate-400 uppercase mb-2 tracking-widest">Modelo no Catálogo</label>
-                <select name="nome" required class="w-full rounded-xl border-slate-200 bg-slate-50 p-3 font-bold text-sm outline-none focus:ring-2 focus:ring-blue-500">
+                <select name="catalogo_id" required class="w-full rounded-xl border-slate-200 bg-slate-50 p-3 font-bold text-sm outline-none focus:ring-2 focus:ring-blue-500">
                     <option value="">Selecione o modelo...</option>
                     @foreach($modelosCatalogo->whereNotIn('categoria', ['Toner', 'Cartucho', 'Insumo', 'Suprimento']) as $modelo) <option value="{{ $modelo->nome }}">{{ $modelo->nome }} ({{ $modelo->categoria }})</option>
                     @endforeach
@@ -189,11 +189,10 @@
 
             <div>
                 <label class="block text-[10px] font-black text-slate-400 uppercase mb-2 tracking-widest">Insumo no Catálogo</label>
-                <select name="nome" required class="w-full rounded-xl border-slate-200 bg-slate-50 p-3 font-bold text-sm outline-none focus:ring-2 focus:ring-emerald-500">
+                <select name="catalogo_id" required class="w-full rounded-xl border-slate-200 bg-slate-50 p-3 font-bold text-sm outline-none focus:ring-2 focus:ring-emerald-500">
                     <option value="">Selecione o insumo...</option>
                     @foreach($modelosCatalogo->whereIn('categoria', ['Toner', 'Cartucho', 'Insumo', 'Suprimento']) as $modelo)
-                    <option value="{{ $modelo->nome }}">{{ $modelo->nome }} ({{ $modelo->categoria }})</option>
-                    @endforeach
+                    <option value="{{ $modelo->id }}">{{ $modelo->nome }} ({{ $modelo->categoria->nome ?? 'Sem Categoria' }})</option> @endforeach
                 </select>
             </div>
 
