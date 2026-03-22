@@ -50,12 +50,14 @@ Route::get('/api/categorias/{categoria}/subcategorias', function ($categoriaId) 
 Route::get('/estoques/{estoque}/detalhes/{nome}', [App\Http\Controllers\EstoqueController::class, 'detalhesItem'])
     ->name('estoques.detalhes-item');
 
-Route::get('/init-db', function () {
+// Rota temporária para popular o banco
+Route::get('/popular-banco', function () {
     try {
-        // Roda os seeders definidos no DatabaseSeeder
+        // O parâmetro --force é obrigatório em produção (Render)
         Artisan::call('db:seed', ['--force' => true]);
-        return "Banco de dados povoado com sucesso! " . Artisan::output();
+        
+        return "Seeders executados com sucesso! <br><pre>" . Artisan::output() . "</pre>";
     } catch (\Exception $e) {
-        return "Erro ao rodar seed: " . $e->getMessage();
+        return "Erro ao rodar seeders: " . $e->getMessage();
     }
 });
