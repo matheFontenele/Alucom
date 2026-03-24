@@ -7,6 +7,9 @@ use App\Http\Controllers\CatalogoController;
 
 class Requisicao extends Model
 {
+
+    protected $table = 'requisicoes';
+
     protected $fillable = [
         'oficio',
         'solicitante',
