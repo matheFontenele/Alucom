@@ -38,6 +38,9 @@ Route::resource('equipamentos', EquipamentoController::class);
 //Movimentações
 Route::resource('movimentacoes', MovimentacaoController::class);
 
+//Deletar movimentações
+Route::delete('/movimentacoes/{id}', [MovimentacaoController::class, 'destroy'])->name('movimentacoes.destroy');
+
 //Catalogo
 Route::resource('catalogo', CatalogoController::class)->names('catalogos');
 
