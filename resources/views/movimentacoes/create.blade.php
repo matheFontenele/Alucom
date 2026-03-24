@@ -58,6 +58,50 @@
                     </select>
                 </div>
 
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-1">Tipo de Ação</label>
+                        <select name="tipo" id="tipo_select" class="w-full border-gray-300 rounded-lg shadow-sm focus:ring-blue-500" required>
+                            <option value="Aluguel">Aluguel</option>
+                            <option value="Devolução">Devolução</option>
+                            <option value="Manutenção">Manutenção</option>
+                            <option value="Reservado">Reservado</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-1">Situação (Sub-status)</label>
+                        <select name="situacao" id="situacao_select" class="w-full border-gray-300 rounded-lg shadow-sm focus:ring-blue-500" required>
+                            {{-- Opções carregadas via JS --}}
+                        </select>
+                    </div>
+                </div>
+
+                <script>
+                    const situacoes = {
+                        'Aluguel': ['Aguardando Rota', 'Em Rota', 'No Cliente'],
+                        'Devolução': ['Aguardando Coleta', 'Em Rota', 'Recebido'],
+                        'Manutenção': ['Aguardando Retirada', 'Em Laboratório', 'Pronto'],
+                        'Reservado': ['Em Estoque', 'No Cliente']
+                    };
+
+                    document.getElementById('tipo_select').addEventListener('change', function() {
+                        const tipo = this.value;
+                        const selectSituacao = document.getElementById('situacao_select');
+                        selectSituacao.innerHTML = '';
+
+                        situacoes[tipo].forEach(s => {
+                            const opt = document.createElement('option');
+                            opt.value = s;
+                            opt.innerHTML = s;
+                            selectSituacao.appendChild(opt);
+                        });
+                    });
+
+                    // Trigger inicial
+                    document.getElementById('tipo_select').dispatchEvent(new Event('change'));
+                </script>
+
                 {{-- Data --}}
                 <div>
                     <label class="block text-sm font-semibold text-gray-700 mb-1">Data da Movimentação</label>

@@ -8,70 +8,62 @@ use App\Http\Controllers\EquipamentoController;
 use App\Http\Controllers\TecnicosController;
 use App\Http\Controllers\MovimentacaoController;
 use App\Http\Controllers\CatalogoController;
+use App\Models\Subcategoria;
 use Illuminate\Support\Facades\Artisan;
 
+// Redirecionamento Inicial
 Route::get('/', function () {
     return redirect()->route('guia-adi.index');
 });
 
-// Guia ADI
+/**
+ * RECURSOS PRINCIPAIS (CRUDs)
+ * O Route::resource já engloba: index, create, store, show, edit, update e destroy.
+ */
 Route::resource('guia-adi', GuiaAdiController::class);
-Route::prefix('guia')->group(function () {
-    Route::get('/', [GuiaAdiController::class, 'index'])->name('guia-adi.index');
-    Route::get('/novo', [GuiaAdiController::class, 'create'])->name('guia-adi.create');
-    Route::post('/', [GuiaAdiController::class, 'store'])->name('guia-adi.store');
-    Route::get('/{id}', [GuiaAdiController::class, 'show'])->name('guia-adi.show');
-});
-
-// Clientes
 Route::resource('clientes', ClientesController::class);
-
-// Estoques
 Route::resource('estoques', EstoqueController::class);
-
-//Tecnicos
 Route::resource('tecnicos', TecnicosController::class);
-
-//Equipamentos
 Route::resource('equipamentos', EquipamentoController::class);
-
-//Movimentações
 Route::resource('movimentacoes', MovimentacaoController::class);
 
-//Deletar movimentações
-Route::delete('/movimentacoes/{id}', [MovimentacaoController::class, 'destroy'])->name('movimentacoes.destroy');
-
-//Catalogo
+// Catálogo com nome customizado conforme seu padrão
 Route::resource('catalogo', CatalogoController::class)->names('catalogos');
 
-//Rota de identificação de Categorias e SubCategorias
+/**
+ * ROTAS ESPECÍFICAS E APIs
+ */
+
+// Rota de identificação de Categorias e SubCategorias para o Frontend
 Route::get('/api/categorias/{categoria}/subcategorias', function ($categoriaId) {
-    return App\Models\Subcategoria::where('categoria_id', $categoriaId)->get();
+    return Subcategoria::where('categoria_id', $categoriaId)->get();
 });
 
-//Rota de detalhes de itens detro do estoque
-Route::get('/estoques/{estoque}/detalhes/{nome}', [App\Http\Controllers\EstoqueController::class, 'detalhesItem'])
+// Rota de detalhes de itens dentro do estoque
+Route::get('/estoques/{estoque}/detalhes/{nome}', [EstoqueController::class, 'detalhesItem'])
     ->name('estoques.detalhes-item');
 
-// Rota temporária para popular o banco
+/**
+ * UTILITÁRIOS DE MANUTENÇÃO (Ambiente Render/Produção)
+ */
+
+// Rota para popular o banco sem limpar dados existentes
 Route::get('/popular-banco', function () {
     try {
-        // O parâmetro --force é obrigatório em produção (Render)
         Artisan::call('db:seed', ['--force' => true]);
-
         return "Seeders executados com sucesso! <br><pre>" . Artisan::output() . "</pre>";
     } catch (\Exception $e) {
         return "Erro ao rodar seeders: " . $e->getMessage();
     }
 });
 
-// No routes/web.php
+// Rota de Debug (CUIDADO: migrate:fresh apaga todos os dados do banco)
 Route::get('/debug-seed', function () {
     try {
-        Artisan::call('migrate:fresh', ['--force' => true]); // Limpa tudo (CUIDADO: deleta dados atuais)
+        Artisan::call('migrate:fresh', ['--force' => true]);
         Artisan::call('db:seed', ['--force' => true]);
-        return "Sucesso! Output: " . Artisan::output();
+        return "Reset e Seed realizados com sucesso! Output: " . Artisan::output();
     } catch (\Exception $e) {
-        return "Erro detectado: " . $e->getMessage() . " no arquivo " . $e->getFile() . " linha " . $e->getLine();
+        return "Erro detectado: " . $e->getMessage() . " em " . $e->getFile() . ":" . $e->getLine();
     }
 });

@@ -15,6 +15,7 @@ class Movimentacao extends Model
     protected $fillable = [
         'equipamento_id',
         'tipo',
+        'situacao',
         'origem',
         'destino',
         'data_movimentacao',

@@ -43,49 +43,103 @@ class MovimentacaoController extends Controller
         $request->validate([
             'equipamento_id' => 'required|exists:equipamentos,id',
             'tipo' => 'required',
+            'situacao' => 'required',
             'origem' => 'required',
             'destino' => 'required',
-            'data_movimentacao' => 'required|date',
+            'data_movimentacao' => 'required',
         ]);
 
         return DB::transaction(function () use ($request) {
             $equipamento = Equipamento::findOrFail($request->equipamento_id);
-            $statusAtual = $equipamento->status;
-            $novoTipo = $request->tipo;
-            $nomeDestino = $request->destino;
+            $tipo = $request->tipo;
+            $situacao = $request->situacao;
 
-            // --- LÓGICA DE ATUALIZAÇÃO DO EQUIPAMENTO ---
+            // --- REGRAS DE STATUS E LOCALIZAÇÃO ---
 
-            if ($novoTipo === 'Devolução' || $novoTipo === 'Substituição') {
+            if ($tipo === 'Devolução') {
                 $equipamento->status = 'Devolução';
-                $equipamento->cliente_id = null;
-                // Busca o ID do estoque pelo nome enviado pelo form
-                $estoque = Estoque::where('nome', $nomeDestino)->first();
-                $equipamento->estoque_id = $estoque ? $estoque->id : $equipamento->estoque_id;
-            } elseif ($novoTipo === 'Aluguel') {
+                // Se "Aguardando Coleta", ainda está fisicamente no cliente
+                if ($situacao === 'Aguardando Coleta') {
+                    // Mantém o cliente_id atual
+                } else {
+                    // "Em Rota" ou "Recebido": Remove do cliente e manda pro estoque de destino
+                    $equipamento->cliente_id = null;
+                    $estoque = Estoque::where('nome', $request->destino)->first();
+                    $equipamento->estoque_id = $estoque->id ?? $equipamento->estoque_id;
+                }
+            } elseif ($tipo === 'Aluguel') {
                 $equipamento->status = 'Alugado';
-                $equipamento->estoque_id = null;
-                // Busca o ID do cliente pelo nome enviado pelo form
-                $cliente = Clientes::where('nome', $nomeDestino)->first();
-                $equipamento->cliente_id = $cliente ? $cliente->id : $equipamento->cliente_id;
-            } elseif ($novoTipo === 'Manutenção') {
-                $equipamento->status = 'Manutenção';
-            } elseif ($novoTipo === 'Liberação') {
-                $equipamento->status = 'Disponivel';
-            } elseif ($novoTipo === 'Reservado') {
-                $equipamento->status = 'Reservado';
+                // Se "Aguardando Rota", ainda está fisicamente no estoque
+                if ($situacao === 'Aguardando Rota') {
+                    // Mantém o estoque_id atual
+                } else {
+                    // "Em Rota" ou "No Cliente": Sai do estoque e vai pro cliente
+                    $equipamento->estoque_id = null;
+                    $cliente = Clientes::where('nome', $request->destino)->first();
+                    $equipamento->cliente_id = $cliente->id ?? $equipamento->cliente_id;
+                }
             }
 
-            // Salva a movimentação (o model já aceita as strings no $fillable)
-            Movimentacao::create($request->all());
-
-            // Salva a alteração no equipamento
+            $equipamento->situacao = $situacao;
             $equipamento->save();
+
+            Movimentacao::create($request->all());
 
             return redirect()->route('movimentacoes.index')->with('success', 'Movimentação registrada!');
         });
     }
 
+    /**
+     * Metodo para abrir pagina de edição
+     */
+    public function edit($id)
+    {
+        $movimentacao = Movimentacao::findOrFail($id);
+
+        // Precisamos carregar os dados para os selects do formulário
+        $equipamentos = Equipamento::all();
+        $clientes = Clientes::all();
+        $estoques = Estoque::all();
+
+        return view('movimentacoes.edit', compact('movimentacao', 'equipamentos', 'clientes', 'estoques'));
+    }
+
+    // 2. Método para salvar as alterações
+    public function update(Request $request, $id)
+    {
+        $request->validate([
+            'situacao' => 'required|string',
+            'observacao' => 'nullable|string',
+        ]);
+
+        $movimentacao = Movimentacao::findOrFail($id);
+        $equipamento = $movimentacao->equipamento;
+
+        return DB::transaction(function () use ($request, $movimentacao, $equipamento) {
+            // Atualiza o histórico da movimentação
+            $movimentacao->update($request->only(['situacao', 'observacao']));
+
+            // Aplica a regra de negócio no Equipamento (No Cliente vs Em Rota)
+            // Se for Devolução e mudar para 'Em Rota', o equipamento sai do cliente
+            if ($movimentacao->tipo === 'Devolução' && $request->situacao === 'Em Rota') {
+                $equipamento->cliente_id = null;
+                $estoque = Estoque::where('nome', $movimentacao->destino)->first();
+                $equipamento->estoque_id = $estoque->id ?? $equipamento->estoque_id;
+            }
+
+            // Se for Aluguel e mudar para 'Em Rota', o equipamento sai do estoque
+            if ($movimentacao->tipo === 'Aluguel' && $request->situacao === 'Em Rota') {
+                $equipamento->estoque_id = null;
+                $cliente = Clientes::where('nome', $movimentacao->destino)->first();
+                $equipamento->cliente_id = $cliente->id ?? $equipamento->cliente_id;
+            }
+
+            $equipamento->situacao = $request->situacao;
+            $equipamento->save();
+
+            return redirect()->route('movimentacoes.index')->with('success', 'Movimentação atualizada com sucesso!');
+        });
+    }
     /**
      * Remove um registro do histórico de movimentações.
      */
