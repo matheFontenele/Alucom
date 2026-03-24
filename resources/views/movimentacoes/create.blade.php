@@ -46,17 +46,6 @@
 
             <div class="grid grid-cols-2 gap-4">
                 {{-- Tipo --}}
-                <div>
-                    <label class="block text-sm font-semibold text-gray-700 mb-1">Tipo de Ação</label>
-                    <select name="tipo" class="w-full border-gray-300 rounded-lg shadow-sm focus:border-blue-500 focus:ring-blue-500" required>
-                        <option value="Aluguel">Aluguel</option>
-                        <option value="Devolução">Devolução</option>
-                        <option value="Manutenção">Manutenção</option>
-                        <option value="Liberação">Liberação</option>
-                        <option value="Reservado">Reservado</option>
-                        <option value="Substituição">Substituição</option>
-                    </select>
-                </div>
 
                 <div class="grid grid-cols-2 gap-4">
                     <div>
