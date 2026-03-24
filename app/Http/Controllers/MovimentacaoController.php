@@ -11,9 +11,6 @@ use Illuminate\Support\Facades\DB;
 
 class MovimentacaoController extends Controller
 {
-    /**
-     * Lista o histórico de movimentações com paginação.
-     */
     public function index()
     {
         $movimentacoes = Movimentacao::with(['equipamento'])
@@ -23,21 +20,15 @@ class MovimentacaoController extends Controller
         return view('movimentacoes.index', compact('movimentacoes'));
     }
 
-    /**
-     * Exibe o formulário para nova movimentação.
-     */
     public function create()
     {
         $equipamentos = Equipamento::orderBy('nome')->get();
-        $clientes = Clientes::orderBy('nome')->get();
+        $clientes = Clientes::whereNull('parent_id')->orderBy('nome')->get();
         $estoques = Estoque::orderBy('nome')->get();
 
         return view('movimentacoes.create', compact('equipamentos', 'clientes', 'estoques'));
     }
 
-    /**
-     * Registra a movimentação e atualiza o estado do equipamento.
-     */
     public function store(Request $request)
     {
         $request->validate([
@@ -54,24 +45,23 @@ class MovimentacaoController extends Controller
             $tipo = $request->tipo;
             $situacao = $request->situacao;
 
-            // Regra para Disponível: Volta para o estoque e limpa cliente
+            // Regra para Disponível
             if ($tipo === 'Disponível') {
-                $equipamento->status = 'Disponível';
+                $equipamento->status = 'Disponivel';
                 $equipamento->cliente_id = null;
                 $estoque = Estoque::where('nome', $request->destino)->first();
                 $equipamento->estoque_id = $estoque->id ?? $equipamento->estoque_id;
             }
-
             // Regra para Devolução
             elseif ($tipo === 'Devolução') {
                 $equipamento->status = 'Devolução';
-                if ($situacao !== 'Aguardando Coleta') {
+                if ($situacao === 'Recebido') {
+                    $equipamento->status = 'Disponivel';
                     $equipamento->cliente_id = null;
                     $estoque = Estoque::where('nome', $request->destino)->first();
                     $equipamento->estoque_id = $estoque->id ?? $equipamento->estoque_id;
                 }
             }
-
             // Regra para Aluguel
             elseif ($tipo === 'Aluguel') {
                 $equipamento->status = 'Alugado';
@@ -85,37 +75,20 @@ class MovimentacaoController extends Controller
             $equipamento->situacao = $situacao;
             $equipamento->save();
 
-            // Salva o histórico (Usando only para evitar colunas inexistentes no banco)
             Movimentacao::create($request->only([
-                'equipamento_id',
-                'tipo',
-                'situacao',
-                'origem',
-                'destino',
-                'data_movimentacao',
-                'observacao'
+                'equipamento_id', 'tipo', 'situacao', 'origem', 'destino', 'data_movimentacao', 'observacao'
             ]));
 
             return redirect()->route('movimentacoes.index')->with('success', 'Movimentação registrada!');
         });
     }
 
-    /**
-     * Metodo para abrir pagina de edição
-     */
     public function edit($id)
     {
         $movimentacao = Movimentacao::findOrFail($id);
-
-        // Precisamos carregar os dados para os selects do formulário
-        $equipamentos = Equipamento::all();
-        $clientes = Clientes::all();
-        $estoques = Estoque::all();
-
-        return view('movimentacoes.edit', compact('movimentacao', 'equipamentos', 'clientes', 'estoques'));
+        return view('movimentacoes.edit', compact('movimentacao'));
     }
 
-    // 2. Método para salvar as alterações
     public function update(Request $request, $id)
     {
         $request->validate([
@@ -127,42 +100,26 @@ class MovimentacaoController extends Controller
         $equipamento = $movimentacao->equipamento;
 
         return DB::transaction(function () use ($request, $movimentacao, $equipamento) {
-            // Atualiza o histórico da movimentação
             $movimentacao->update($request->only(['situacao', 'observacao']));
 
-            // Aplica a regra de negócio no Equipamento (No Cliente vs Em Rota)
-            // Se for Devolução e mudar para 'Em Rota', o equipamento sai do cliente
-            if ($movimentacao->tipo === 'Devolução' && $request->situacao === 'Em Rota') {
+            // Se marcar como Disponível ou Recebido na edição, libera o equipamento
+            if ($request->situacao === 'Em Estoque' || $request->situacao === 'Recebido') {
+                $equipamento->status = 'Disponivel';
                 $equipamento->cliente_id = null;
                 $estoque = Estoque::where('nome', $movimentacao->destino)->first();
                 $equipamento->estoque_id = $estoque->id ?? $equipamento->estoque_id;
             }
 
-            // Se for Aluguel e mudar para 'Em Rota', o equipamento sai do estoque
-            if ($movimentacao->tipo === 'Aluguel' && $request->situacao === 'Em Rota') {
-                $equipamento->estoque_id = null;
-                $cliente = Clientes::where('nome', $movimentacao->destino)->first();
-                $equipamento->cliente_id = $cliente->id ?? $equipamento->cliente_id;
-            }
-
             $equipamento->situacao = $request->situacao;
             $equipamento->save();
 
-            return redirect()->route('movimentacoes.index')->with('success', 'Movimentação atualizada com sucesso!');
+            return redirect()->route('movimentacoes.index')->with('success', 'Situação atualizada!');
         });
     }
-    /**
-     * Remove um registro do histórico de movimentações.
-     */
+
     public function destroy($id)
     {
-        try {
-            $movimentacao = Movimentacao::findOrFail($id);
-            $movimentacao->delete();
-
-            return redirect()->back()->with('success', 'Histórico de movimentação removido!');
-        } catch (\Exception $e) {
-            return redirect()->back()->with('error', 'Não foi possível excluir o registro.');
-        }
+        Movimentacao::findOrFail($id)->delete();
+        return redirect()->back()->with('success', 'Registro removido!');
     }
 }
