@@ -8,6 +8,7 @@ use App\Http\Controllers\EquipamentoController;
 use App\Http\Controllers\TecnicosController;
 use App\Http\Controllers\MovimentacaoController;
 use App\Http\Controllers\CatalogoController;
+use App\Http\Controllers\RequisicaoController; // <-- ADICIONADO
 use App\Models\Subcategoria;
 use Illuminate\Support\Facades\Artisan;
 
@@ -18,7 +19,6 @@ Route::get('/', function () {
 
 /**
  * RECURSOS PRINCIPAIS (CRUDs)
- * O Route::resource já engloba: index, create, store, show, edit, update e destroy.
  */
 Route::resource('guia-adi', GuiaAdiController::class);
 Route::resource('clientes', ClientesController::class);
@@ -26,9 +26,20 @@ Route::resource('estoques', EstoqueController::class);
 Route::resource('tecnicos', TecnicosController::class);
 Route::resource('equipamentos', EquipamentoController::class);
 Route::resource('movimentacoes', MovimentacaoController::class);
-
-// Catálogo com nome customizado conforme seu padrão
 Route::resource('catalogo', CatalogoController::class)->names('catalogos');
+
+/**
+ * SISTEMA DE REQUISIÇÕES & SEPARAÇÃO
+ */
+// Rota customizada para a "Aba" de Separação (deve vir antes do resource para não dar conflito com o {id})
+Route::get('/requisicoes/{id}/separacao', [RequisicaoController::class, 'separacao'])
+    ->name('requisicoes.separacao');
+
+Route::put('/requisicoes/{id}/separar', [RequisicaoController::class, 'separarUpdate'])
+    ->name('requisicoes.separar.update');
+
+Route::resource('requisicoes', RequisicaoController::class);
+
 
 /**
  * ROTAS ESPECÍFICAS E APIs
@@ -42,6 +53,7 @@ Route::get('/api/categorias/{categoria}/subcategorias', function ($categoriaId) 
 // Rota de detalhes de itens dentro do estoque
 Route::get('/estoques/{estoque}/detalhes/{nome}', [EstoqueController::class, 'detalhesItem'])
     ->name('estoques.detalhes-item');
+
 
 /**
  * UTILITÁRIOS DE MANUTENÇÃO (Ambiente Render/Produção)
