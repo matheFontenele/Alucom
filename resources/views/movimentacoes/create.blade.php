@@ -71,24 +71,29 @@
                         'Aluguel': ['Aguardando Rota', 'Em Rota', 'No Cliente'],
                         'Devolução': ['Aguardando Coleta', 'Em Rota', 'Recebido'],
                         'Manutenção': ['Aguardando Retirada', 'Em Laboratório', 'Pronto'],
-                        'Reservado': ['Em Estoque', 'No Cliente']
+                        'Reservado': ['Em Estoque', 'No Cliente'],
+                        'Disponível': ['Em Estoque']
                     };
 
-                    document.getElementById('tipo_select').addEventListener('change', function() {
-                        const tipo = this.value;
-                        const selectSituacao = document.getElementById('situacao_select');
-                        selectSituacao.innerHTML = '';
+                    const tipoSelect = document.getElementById('tipo_select'); // Garanta que o id do select seja este
+                    const situacaoSelect = document.getElementById('situacao_select');
 
-                        situacoes[tipo].forEach(s => {
-                            const opt = document.createElement('option');
-                            opt.value = s;
-                            opt.innerHTML = s;
-                            selectSituacao.appendChild(opt);
-                        });
+                    tipoSelect.addEventListener('change', function() {
+                        const tipo = this.value;
+                        situacaoSelect.innerHTML = '';
+
+                        if (situacoes[tipo]) {
+                            situacoes[tipo].forEach(s => {
+                                const opt = document.createElement('option');
+                                opt.value = s;
+                                opt.innerHTML = s;
+                                situacaoSelect.appendChild(opt);
+                            });
+                        }
                     });
 
-                    // Trigger inicial
-                    document.getElementById('tipo_select').dispatchEvent(new Event('change'));
+                    // Disparar o evento inicial para carregar as opções do primeiro item
+                    tipoSelect.dispatchEvent(new Event('change'));
                 </script>
 
                 {{-- Data --}}

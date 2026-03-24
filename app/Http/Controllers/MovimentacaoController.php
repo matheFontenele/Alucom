@@ -54,26 +54,28 @@ class MovimentacaoController extends Controller
             $tipo = $request->tipo;
             $situacao = $request->situacao;
 
-            // --- REGRAS DE STATUS E LOCALIZAÇÃO ---
+            // Regra para Disponível: Volta para o estoque e limpa cliente
+            if ($tipo === 'Disponível') {
+                $equipamento->status = 'Disponível';
+                $equipamento->cliente_id = null;
+                $estoque = Estoque::where('nome', $request->destino)->first();
+                $equipamento->estoque_id = $estoque->id ?? $equipamento->estoque_id;
+            }
 
-            if ($tipo === 'Devolução') {
+            // Regra para Devolução
+            elseif ($tipo === 'Devolução') {
                 $equipamento->status = 'Devolução';
-                // Se "Aguardando Coleta", ainda está fisicamente no cliente
-                if ($situacao === 'Aguardando Coleta') {
-                    // Mantém o cliente_id atual
-                } else {
-                    // "Em Rota" ou "Recebido": Remove do cliente e manda pro estoque de destino
+                if ($situacao !== 'Aguardando Coleta') {
                     $equipamento->cliente_id = null;
                     $estoque = Estoque::where('nome', $request->destino)->first();
                     $equipamento->estoque_id = $estoque->id ?? $equipamento->estoque_id;
                 }
-            } elseif ($tipo === 'Aluguel') {
+            }
+
+            // Regra para Aluguel
+            elseif ($tipo === 'Aluguel') {
                 $equipamento->status = 'Alugado';
-                // Se "Aguardando Rota", ainda está fisicamente no estoque
-                if ($situacao === 'Aguardando Rota') {
-                    // Mantém o estoque_id atual
-                } else {
-                    // "Em Rota" ou "No Cliente": Sai do estoque e vai pro cliente
+                if ($situacao !== 'Aguardando Rota') {
                     $equipamento->estoque_id = null;
                     $cliente = Clientes::where('nome', $request->destino)->first();
                     $equipamento->cliente_id = $cliente->id ?? $equipamento->cliente_id;
@@ -83,7 +85,16 @@ class MovimentacaoController extends Controller
             $equipamento->situacao = $situacao;
             $equipamento->save();
 
-            Movimentacao::create($request->all());
+            // Salva o histórico (Usando only para evitar colunas inexistentes no banco)
+            Movimentacao::create($request->only([
+                'equipamento_id',
+                'tipo',
+                'situacao',
+                'origem',
+                'destino',
+                'data_movimentacao',
+                'observacao'
+            ]));
 
             return redirect()->route('movimentacoes.index')->with('success', 'Movimentação registrada!');
         });
