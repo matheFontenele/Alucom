@@ -52,6 +52,7 @@ class MovimentacaoController extends Controller
             }
             $equipamento->status = 'Devolução';
             $equipamento->cliente_id = null; // Sai do cliente
+            $equipamento->estoque_id = $request->destino; // Volta para o estoque selecionado no form
         }
 
         // 2. Aluguel: Estoque -> Cliente
@@ -61,6 +62,7 @@ class MovimentacaoController extends Controller
             }
             $equipamento->status = 'Alugado';
             $equipamento->estoque_id = null; // Sai do estoque
+            $equipamento->cliente_id = $request->destino; // Vai para o cliente selecionado no form
         }
 
         // 3. Manutenção: Só após Devolução
@@ -94,8 +96,8 @@ class MovimentacaoController extends Controller
             }
             $equipamento->status = 'Devolução';
             $equipamento->cliente_id = null;
+            $equipamento->estoque_id = $request->destino; // Volta pro estoque
         }
-
         // Salva a movimentação e atualiza o equipamento
         \App\Models\Movimentacao::create($request->all());
         $equipamento->save();

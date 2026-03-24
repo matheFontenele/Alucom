@@ -96,6 +96,18 @@ class EquipamentoController extends Controller
     }
 
     /**
+     * Exibe os detalhes de um equipamento específico.
+     */
+    public function show($id)
+    {
+        // Busca o equipamento e trás junto as informações do catálogo, estoque e categoria
+        $equipamento = Equipamento::with(['catalogo', 'estoque', 'categoria'])->findOrFail($id);
+
+        // Retorna a view de detalhes passando o equipamento
+        return view('equipamentos.show', compact('equipamento'));
+    }
+
+    /**
      * Formulário de edição.
      */
     public function edit(Equipamento $equipamento)
