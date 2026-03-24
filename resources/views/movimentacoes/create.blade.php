@@ -13,6 +13,23 @@
         <form action="{{ route('movimentacoes.store') }}" method="POST" class="p-6 space-y-4">
             @csrf
 
+            @if ($errors->any())
+            <div class="mb-4 p-4 bg-red-100 border-l-4 border-red-500 text-red-700 rounded shadow-sm">
+                <p class="font-bold mb-1">Ops! Verifique os erros abaixo:</p>
+                <ul class="list-disc list-inside text-sm">
+                    @foreach ($errors->all() as $error)
+                    <li>{{ $error }}</li>
+                    @endforeach
+                </ul>
+            </div>
+            @endif
+
+            @if(session('error'))
+            <div class="mb-4 p-4 bg-amber-100 border-l-4 border-amber-500 text-amber-700 rounded shadow-sm">
+                {{ session('error') }}
+            </div>
+            @endif
+
             {{-- Equipamento --}}
             <div>
                 <label class="block text-sm font-semibold text-gray-700 mb-1">Equipamento</label>
@@ -108,23 +125,23 @@
 
 <!--Script de auto preenchimento-->
 <script>
-document.getElementById('equipamento_select').addEventListener('change', function() {
-    // Obtém a localização atual do atributo data-localizacao
-    const selectedOption = this.options[this.selectedIndex];
-    const localAtual = selectedOption.getAttribute('data-localizacao');
-    
-    // Localiza o campo de Origem (Select)
-    const selectOrigem = document.querySelector('select[name="origem"]');
-    
-    if (localAtual && selectOrigem) {
-        // Itera sobre as opções da Origem para encontrar o texto correspondente
-        for (let i = 0; i < selectOrigem.options.length; i++) {
-            if (selectOrigem.options[i].text === localAtual) {
-                selectOrigem.selectedIndex = i;
-                break;
+    document.getElementById('equipamento_select').addEventListener('change', function() {
+        // Obtém a localização atual do atributo data-localizacao
+        const selectedOption = this.options[this.selectedIndex];
+        const localAtual = selectedOption.getAttribute('data-localizacao');
+
+        // Localiza o campo de Origem (Select)
+        const selectOrigem = document.querySelector('select[name="origem"]');
+
+        if (localAtual && selectOrigem) {
+            // Itera sobre as opções da Origem para encontrar o texto correspondente
+            for (let i = 0; i < selectOrigem.options.length; i++) {
+                if (selectOrigem.options[i].text === localAtual) {
+                    selectOrigem.selectedIndex = i;
+                    break;
+                }
             }
         }
-    }
-});
+    });
 </script>
 @endsection

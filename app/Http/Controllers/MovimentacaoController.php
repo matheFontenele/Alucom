@@ -41,86 +41,49 @@ class MovimentacaoController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'equipamento_id'    => 'required|exists:equipamentos,id',
-            'tipo'              => 'required|string',
-            'origem'            => 'required|string',
-            'destino'           => 'required|string',
+            'equipamento_id' => 'required|exists:equipamentos,id',
+            'tipo' => 'required',
+            'origem' => 'required',
+            'destino' => 'required',
             'data_movimentacao' => 'required|date',
         ]);
 
-        try {
-            return DB::transaction(function () use ($request) {
-                $equipamento = Equipamento::findOrFail($request->equipamento_id);
-                $statusAtual = $equipamento->status;
-                $novoTipo    = $request->tipo;
+        return DB::transaction(function () use ($request) {
+            $equipamento = Equipamento::findOrFail($request->equipamento_id);
+            $statusAtual = $equipamento->status;
+            $novoTipo = $request->tipo;
+            $nomeDestino = $request->destino;
 
-                // --- APLICAÇÃO DAS REGRAS DE NEGÓCIO ---
+            // --- LÓGICA DE ATUALIZAÇÃO DO EQUIPAMENTO ---
 
-                // 1. Devolução: Cliente -> Estoque
-                if ($novoTipo === 'Devolução') {
-                    if (!in_array($statusAtual, ['Alugado', 'Reservado'])) {
-                        return back()->with('error', 'Só é possível devolver equipamentos Alugados ou Reservados.')->withInput();
-                    }
-                    $equipamento->status = 'Devolução';
-                    $equipamento->cliente_id = null;
-                    $equipamento->estoque_id = $request->destino_id ?? $request->destino; 
-                }
+            if ($novoTipo === 'Devolução' || $novoTipo === 'Substituição') {
+                $equipamento->status = 'Devolução';
+                $equipamento->cliente_id = null;
+                // Busca o ID do estoque pelo nome enviado pelo form
+                $estoque = Estoque::where('nome', $nomeDestino)->first();
+                $equipamento->estoque_id = $estoque ? $estoque->id : $equipamento->estoque_id;
+            } elseif ($novoTipo === 'Aluguel') {
+                $equipamento->status = 'Alugado';
+                $equipamento->estoque_id = null;
+                // Busca o ID do cliente pelo nome enviado pelo form
+                $cliente = Clientes::where('nome', $nomeDestino)->first();
+                $equipamento->cliente_id = $cliente ? $cliente->id : $equipamento->cliente_id;
+            } elseif ($novoTipo === 'Manutenção') {
+                $equipamento->status = 'Manutenção';
+            } elseif ($novoTipo === 'Liberação') {
+                $equipamento->status = 'Disponivel';
+            } elseif ($novoTipo === 'Reservado') {
+                $equipamento->status = 'Reservado';
+            }
 
-                // 2. Aluguel: Estoque -> Cliente
-                elseif ($novoTipo === 'Aluguel') {
-                    if (!in_array($statusAtual, ['Disponivel', 'Reservado'])) {
-                        return back()->with('error', 'O item deve estar Disponível ou Reservado para ser alugado.')->withInput();
-                    }
-                    $equipamento->status = 'Alugado';
-                    $equipamento->estoque_id = null;
-                    $equipamento->cliente_id = $request->destino_id ?? $request->destino;
-                }
+            // Salva a movimentação (o model já aceita as strings no $fillable)
+            Movimentacao::create($request->all());
 
-                // 3. Manutenção
-                elseif ($novoTipo === 'Manutenção') {
-                    if ($statusAtual !== 'Devolução') {
-                        return back()->with('error', 'O equipamento deve passar pelo status de Devolução antes da Manutenção.')->withInput();
-                    }
-                    $equipamento->status = 'Manutenção';
-                }
+            // Salva a alteração no equipamento
+            $equipamento->save();
 
-                // 4. Liberação (Volta a ficar disponível no estoque atual)
-                elseif ($novoTipo === 'Liberação') {
-                    if (!in_array($statusAtual, ['Devolução', 'Manutenção'])) {
-                        return back()->with('error', 'Só é possível liberar itens vindo de Devolução ou Manutenção.')->withInput();
-                    }
-                    $equipamento->status = 'Disponivel';
-                }
-
-                // 5. Reservado
-                elseif ($novoTipo === 'Reservado') {
-                    if ($statusAtual !== 'Disponivel') {
-                        return back()->with('error', 'Apenas equipamentos Disponíveis podem ser reservados.')->withInput();
-                    }
-                    $equipamento->status = 'Reservado';
-                }
-
-                // 6. Substituição
-                elseif ($novoTipo === 'Substituição') {
-                    if ($statusAtual !== 'Alugado') {
-                        return back()->with('error', 'Substituição só permitida para itens Alugados.')->withInput();
-                    }
-                    $equipamento->status = 'Devolução';
-                    $equipamento->cliente_id = null;
-                    $equipamento->estoque_id = $request->destino_id ?? $request->destino;
-                }
-
-                // Salva o log da movimentação
-                Movimentacao::create($request->all());
-
-                // Atualiza o estado do equipamento no banco
-                $equipamento->save();
-
-                return redirect()->route('movimentacoes.index')->with('success', 'Movimentação registrada com sucesso!');
-            });
-        } catch (\Exception $e) {
-            return back()->with('error', 'Erro ao processar movimentação: ' . $e->getMessage())->withInput();
-        }
+            return redirect()->route('movimentacoes.index')->with('success', 'Movimentação registrada!');
+        });
     }
 
     /**
