@@ -11,7 +11,7 @@
 
         <form action="{{ route('requisicoes.store') }}" method="POST" class="p-6 space-y-6">
             @csrf
-            
+
             {{-- Linha 1: Ofício e Solicitante --}}
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
@@ -31,9 +31,9 @@
                     <select name="cliente_id" id="cliente_select" class="w-full border-gray-300 rounded-lg shadow-sm" required>
                         <option value="">Selecione o Cliente</option>
                         @foreach($clientes as $cliente)
-                            <option value="{{ $cliente->id }}" data-cidade="{{ $cliente->cidade }}" data-estado="{{ $cliente->estado }}">
-                                {{ $cliente->nome }}
-                            </option>
+                        <option value="{{ $cliente->id }}" data-cidade="{{ $cliente->cidade }}" data-estado="{{ $cliente->estado }}">
+                            {{ $cliente->nome }}
+                        </option>
                         @endforeach
                     </select>
                 </div>
@@ -53,7 +53,7 @@
                     <label class="block text-sm font-bold text-gray-700">Equipamento | Insumo (Catálogo)</label>
                     <select name="catalogo_id" class="w-full border-gray-300 rounded-lg shadow-sm" required>
                         @foreach($catalogo as $item)
-                            <option value="{{ $item->id }}">{{ $item->modelo }} - {{ $item->marca }}</option>
+                        <option value="{{ $item->id }}">{{ $item->nome }} - {{ $item->fabricante }}</option>
                         @endforeach
                     </select>
                 </div>

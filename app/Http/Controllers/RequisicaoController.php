@@ -11,7 +11,6 @@ class RequisicaoController extends Controller
 {
     public function index()
     {
-        // Carrega as requisições com os relacionamentos para evitar múltiplas consultas
         $requisicoes = Requisicao::with(['cliente', 'item'])->orderBy('created_at', 'desc')->paginate(10);
         return view('requisicoes.index', compact('requisicoes'));
     }
@@ -19,7 +18,7 @@ class RequisicaoController extends Controller
     public function create()
     {
         $clientes = Clientes::orderBy('nome')->get();
-        $catalogo = Catalogo::orderBy('modelo')->get();
+        $catalogo = Catalogo::orderBy('nome')->get();
         return view('requisicoes.create', compact('clientes', 'catalogo'));
     }
 
