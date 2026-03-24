@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Requisicao;
 use App\Models\Clientes;
 use App\Models\Catalogo;
+use App\Models\Movimentacao;
 use Illuminate\Http\Request;
 
 class RequisicaoController extends Controller
@@ -28,6 +29,8 @@ class RequisicaoController extends Controller
             'cliente_id' => 'required',
             'catalogo_id' => 'required',
             'quantidade' => 'required|integer|min:1',
+            'envio' => 'required',
+            'etiqueta' => 'required',
         ]);
 
         Requisicao::create([
@@ -44,25 +47,22 @@ class RequisicaoController extends Controller
             'etiqueta' => $request->etiqueta ?? 'Alucom',
             'quantidade' => $request->quantidade,
             'tipo_solicitacao' => $request->tipo_solicitacao,
-            'patrimonio_substituido' => $request->patrimonio_substituido,
+            'patrimonio_substituido' => $request->tipo_solicitacao === 'Substituição' ? $request->patrimonio_substituido : null,
         ]);
 
         return redirect()->route('requisicoes.index')->with('success', 'Requisição criada com sucesso!');
     }
 
-    // Método para abrir a tela de separação
     public function separacao($id)
     {
         $requisicao = Requisicao::with(['cliente', 'item'])->findOrFail($id);
         return view('requisicoes.separacao', compact('requisicao'));
     }
 
-    // Método para salvar os dados da separação
     public function separarUpdate(Request $request, $id)
     {
         $requisicao = Requisicao::findOrFail($id);
 
-        // Atualiza os dados da separação
         $requisicao->update([
             'quantidade_separada' => $request->quantidade_separada,
             'data_separacao' => $request->data_separacao,
@@ -71,13 +71,11 @@ class RequisicaoController extends Controller
             'observacao_separacao' => $request->observacao_separacao,
         ]);
 
-        // Se marcou "Sim" para baixa no sistema, vamos gerar uma movimentação automática
+        // Se marcou "Sim" para baixa (valor '1'), gera movimentação automática
         if ($request->baixa_sistema == '1') {
-            // Exemplo: Criar um registro na sua tabela de movimentações
-            // Isso garante que o item saia do estoque físico
-            \App\Models\Movimentacao::create([
+            Movimentacao::create([
                 'equipamento_id' => $requisicao->catalogo_id,
-                'tipo_acao' => 'Aluguel', // Conforme sua imagem de tipos de ação
+                'tipo_acao' => 'Aluguel', 
                 'situacao' => 'Aguardando Rota',
                 'destino' => $requisicao->cliente_id,
                 'data_movimentacao' => now(),
