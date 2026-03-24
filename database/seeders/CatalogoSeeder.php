@@ -88,7 +88,7 @@ class CatalogoSeeder extends Seeder
                 'descricao' => 'Rendimento de 12.000 páginas. Compatível com L5652DN.',
             ],
             [
-                'nome' => 'Garrafa de Tinta T504120',
+                'nome' => 'Bolsa de Tinta T504120',
                 'fabricante' => 'Epson',
                 'categoria_nome' => 'Suprimentos',
                 'cor' => 'Preto',

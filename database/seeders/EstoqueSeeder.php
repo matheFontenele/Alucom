@@ -11,6 +11,6 @@ class EstoqueSeeder extends Seeder
     {
         Estoque::create(['nome' => 'Alucom Base', 'localizacao' => 'Sede Alucom - Fortaleza CE']);
         Estoque::create(['nome' => 'Alucom SC', 'localizacao' => 'Florianópolis - SC']);
-        Estoque::create(['nome' => 'Laboratório Técnico', 'localizacao' => 'Setor de Reparos - Fortaleza CE']);
+        Estoque::create(['nome' => 'Box Brasilia', 'localizacao' => 'Brasilia - DF']);
     }
 }
