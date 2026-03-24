@@ -10,9 +10,16 @@
         </a>
     </div>
 
+    {{-- Alertas de Sucesso ou Erro --}}
     @if(session('success'))
-        <div class="mb-4 p-4 bg-emerald-100 text-emerald-700 rounded-lg font-bold text-sm border-l-4 border-emerald-500">
+        <div class="mb-4 p-4 bg-emerald-100 text-emerald-700 rounded-lg shadow-sm border-l-4 border-emerald-500">
             {{ session('success') }}
+        </div>
+    @endif
+
+    @if(session('error'))
+        <div class="mb-4 p-4 bg-red-100 text-red-700 rounded-lg shadow-sm border-l-4 border-red-500">
+            {{ session('error') }}
         </div>
     @endif
 
@@ -25,21 +32,22 @@
                     <th class="py-4 px-6 text-left">Tipo</th>
                     <th class="py-4 px-6 text-left">Origem / Destino</th>
                     <th class="py-4 px-6 text-left">Data</th>
-                    <th class="py-4 px-6 text-right">Ações</th> {{-- Nova Coluna --}}
+                    <th class="py-4 px-6 text-center">Ações</th>
                 </tr>
             </thead>
             <tbody class="text-gray-700 divide-y divide-gray-100">
                 @forelse($movimentacoes as $mov)
                     <tr class="hover:bg-gray-50/50 transition">
                         <td class="py-4 px-6 text-sm text-gray-400 font-mono">#{{ $mov->id }}</td>
-                        <td class="py-4 px-6 font-bold text-slate-800">{{ $mov->equipamento->nome ?? 'Item Removido' }}</td>
+                        <td class="py-4 px-6 font-bold text-slate-800">{{ $mov->equipamento->nome ?? 'N/A' }}</td>
                         <td class="py-4 px-6">
                             <span class="px-2 py-0.5 rounded text-[10px] font-bold uppercase 
                                 {{ $mov->tipo == 'Aluguel' ? 'bg-blue-100 text-blue-700' : '' }}
                                 {{ $mov->tipo == 'Devolução' ? 'bg-amber-100 text-amber-700' : '' }}
                                 {{ $mov->tipo == 'Manutenção' ? 'bg-red-100 text-red-700' : '' }}
                                 {{ $mov->tipo == 'Liberação' ? 'bg-emerald-100 text-emerald-700' : '' }}
-                                {{ $mov->tipo == 'Reservado' ? 'bg-purple-100 text-purple-700' : '' }}">
+                                {{ $mov->tipo == 'Reservado' ? 'bg-purple-100 text-purple-700' : '' }}
+                                {{ $mov->tipo == 'Substituição' ? 'bg-orange-100 text-orange-700' : '' }}">
                                 {{ $mov->tipo }}
                             </span>
                         </td>
@@ -53,23 +61,35 @@
                         <td class="py-4 px-6 text-sm text-gray-500">
                             {{ $mov->data_movimentacao->format('d/m/Y H:i') }}
                         </td>
-                        <td class="py-4 px-6 text-right">
-                            {{-- Botão Deletar --}}
-                            <form action="{{ route('movimentacoes.destroy', $mov->id) }}" method="POST" onsubmit="return confirm('Excluir este registro de histórico permanentemente?')">
+                        <td class="py-4 px-6 text-center">
+                            <form action="{{ route('movimentacoes.destroy', $mov->id) }}" method="POST" 
+                                  onsubmit="return confirm('Tem certeza que deseja excluir este registro do histórico?')">
                                 @csrf
                                 @method('DELETE')
-                                <button type="submit" class="text-gray-300 hover:text-red-600 transition">
-                                    <i class="ph ph-trash text-xl"></i>
+                                <button type="submit" class="text-gray-400 hover:text-red-600 transition p-2">
+                                    <i class="ph ph-trash text-lg"></i>
                                 </button>
                             </form>
                         </td>
                     </tr>
                 @empty
-                    {{-- ... bloco empty se mantém igual ... --}}
+                    <tr>
+                        <td colspan="6" class="py-12 text-center">
+                            <div class="flex flex-col items-center">
+                                <i class="ph ph-calendar-x text-4xl text-gray-200 mb-2"></i>
+                                <p class="text-gray-400 italic">Nenhuma movimentação registrada.</p>
+                            </div>
+                        </td>
+                    </tr>
                 @endforelse
             </tbody>
         </table>
-        {{-- ... links de paginação se mantém iguais ... --}}
+        
+        @if($movimentacoes->hasPages())
+            <div class="p-4 border-t border-gray-50">
+                {{ $movimentacoes->links() }}
+            </div>
+        @endif
     </div>
 </div>
 @endsection
