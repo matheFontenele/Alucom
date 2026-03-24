@@ -3,63 +3,90 @@
 namespace App\Http\Controllers;
 
 use App\Models\Requisicao;
+use App\Models\Clientes;
+use App\Models\Catalogo;
 use Illuminate\Http\Request;
 
 class RequisicaoController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
     public function index()
     {
-        //
+        // Carrega as requisições com os relacionamentos para evitar múltiplas consultas
+        $requisicoes = Requisicao::with(['cliente', 'item'])->orderBy('created_at', 'desc')->paginate(10);
+        return view('requisicoes.index', compact('requisicoes'));
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
     public function create()
     {
-        //
+        $clientes = Clientes::orderBy('nome')->get();
+        $catalogo = Catalogo::orderBy('modelo')->get();
+        return view('requisicoes.create', compact('clientes', 'catalogo'));
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(Request $request)
     {
-        //
+        $request->validate([
+            'cliente_id' => 'required',
+            'catalogo_id' => 'required',
+            'quantidade' => 'required|integer|min:1',
+        ]);
+
+        Requisicao::create([
+            'oficio' => $request->oficio ?? 'Sem Oficio',
+            'solicitante' => auth()->user() ? auth()->user()->name : 'Admin',
+            'data_solicitacao' => now(),
+            'previsao_envio' => $request->previsao_envio,
+            'envio' => $request->envio ?? 'Coleta',
+            'nfe' => $request->nfe ?? 'Sem NF',
+            'cliente_id' => $request->cliente_id,
+            'catalogo_id' => $request->catalogo_id,
+            'estado' => $request->estado,
+            'cidade' => $request->cidade,
+            'etiqueta' => $request->etiqueta ?? 'Alucom',
+            'quantidade' => $request->quantidade,
+            'tipo_solicitacao' => $request->tipo_solicitacao,
+            'patrimonio_substituido' => $request->patrimonio_substituido,
+        ]);
+
+        return redirect()->route('requisicoes.index')->with('success', 'Requisição criada com sucesso!');
     }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(Requisicao $requisicao)
+    // Método para abrir a tela de separação
+    public function separacao($id)
     {
-        //
+        $requisicao = Requisicao::with(['cliente', 'item'])->findOrFail($id);
+        return view('requisicoes.separacao', compact('requisicao'));
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(Requisicao $requisicao)
+    // Método para salvar os dados da separação
+    public function separarUpdate(Request $request, $id)
     {
-        //
-    }
+        $requisicao = Requisicao::findOrFail($id);
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, Requisicao $requisicao)
-    {
-        //
-    }
+        // Atualiza os dados da separação
+        $requisicao->update([
+            'quantidade_separada' => $request->quantidade_separada,
+            'data_separacao' => $request->data_separacao,
+            'separado_por' => $request->separado_por,
+            'baixa_sistema' => $request->baixa_sistema,
+            'observacao_separacao' => $request->observacao_separacao,
+        ]);
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(Requisicao $requisicao)
-    {
-        //
+        // Se marcou "Sim" para baixa no sistema, vamos gerar uma movimentação automática
+        if ($request->baixa_sistema == '1') {
+            // Exemplo: Criar um registro na sua tabela de movimentações
+            // Isso garante que o item saia do estoque físico
+            \App\Models\Movimentacao::create([
+                'equipamento_id' => $requisicao->catalogo_id,
+                'tipo_acao' => 'Aluguel', // Conforme sua imagem de tipos de ação
+                'situacao' => 'Aguardando Rota',
+                'destino' => $requisicao->cliente_id,
+                'data_movimentacao' => now(),
+                'detalhes' => "Saída automática via Requisição #{$requisicao->id}"
+            ]);
+        }
+
+        return redirect()->route('requisicoes.index')
+            ->with('success', 'Separação concluída e movimentação gerada!');
     }
 }
