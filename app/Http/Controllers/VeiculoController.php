@@ -20,13 +20,13 @@ class VeiculoController extends Controller
 
     public function store(Request $request)
     {
-        $request->validate([
+        $validated = $request->validate([
             'placa'  => 'required|unique:veiculos|max:10',
             'modelo' => 'required|string|max:255',
             'marca'  => 'nullable|string'
         ]);
 
-        Veiculo::create($request->all());
+        Veiculo::create($validated);
 
         return redirect()->route('veiculos.index')->with('success', 'Veículo cadastrado!');
     }
