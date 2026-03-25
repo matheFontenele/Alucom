@@ -40,7 +40,7 @@
                         <option value="{{ $cliente->id }}"
                             data-cidade="{{ $cliente->cidade }}"
                             data-estado="{{ $cliente->estado }}"
-                            data-etiqueta="{{ $cliente->etiqueta }}"> {{-- Adicionado aqui --}}
+                            data-etiqueta="{{ $cliente->contrato }}"> {{-- Mapeado para o campo 'contrato' --}}
                             {{ $cliente->nome }}
                         </option>
                         @endforeach
@@ -76,7 +76,7 @@
                 </div>
                 <div>
                     <label class="block text-xs font-black uppercase text-gray-400 mb-1">Etiqueta</label>
-                    <select name="etiqueta" id="etiqueta_select" class="w-full border-gray-200 rounded-xl">
+                    <select name="etiqueta" id="etiqueta_select" class="w-full border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500">
                         <option value="Alucom">Alucom</option>
                         <option value="Moreia">Moreia</option>
                         <option value="IP">IP</option>
@@ -142,7 +142,7 @@
 </div>
 
 <script>
-    // 1. Atualização Automática de Cidade, Estado e Etiqueta
+    // 1. Atualização Automática de Cidade, Estado e Etiqueta (Contrato)
     document.getElementById('cliente_select').addEventListener('change', function() {
         const option = this.options[this.selectedIndex];
 
@@ -150,13 +150,13 @@
         document.getElementById('cidade_input').value = option.getAttribute('data-cidade') || '';
         document.getElementById('estado_input').value = option.getAttribute('data-estado') || '';
 
-        // Preenche a Etiqueta
-        const etiquetaSugerida = option.getAttribute('data-etiqueta');
+        // Preenche a Etiqueta com base no campo Contrato do cliente
+        const contratoSugerido = option.getAttribute('data-etiqueta');
         const selectEtiqueta = document.getElementById('etiqueta_select');
 
-        if (etiquetaSugerida) {
-            // Lógica para encontrar a opção correta mesmo se houver diferença de maiúsculas/minúsculas
-            const valorParaComparar = etiquetaSugerida.trim().toLowerCase();
+        if (contratoSugerido) {
+            // Normaliza para comparação (remove espaços e ignora case)
+            const valorParaComparar = contratoSugerido.trim().toLowerCase();
 
             let encontrou = false;
             for (let i = 0; i < selectEtiqueta.options.length; i++) {
@@ -167,7 +167,7 @@
                 }
             }
 
-            // Feedback visual se encontrar
+            // Feedback visual se uma correspondência for encontrada
             if (encontrou) {
                 selectEtiqueta.classList.add('ring-2', 'ring-blue-400', 'border-blue-400');
                 setTimeout(() => {
@@ -177,7 +177,7 @@
         }
     });
 
-    // 2. Lógica Dinâmica para o Campo de Patrimônio (Você esqueceu de manter no código enviado)
+    // 2. Lógica Dinâmica para o Campo de Patrimônio
     document.querySelectorAll('input[name="tipo_solicitacao"]').forEach(radio => {
         radio.addEventListener('change', function() {
             const divPatrimonio = document.getElementById('campo_patrimonio');

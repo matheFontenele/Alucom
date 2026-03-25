@@ -7,13 +7,27 @@
     <title>GUIA ADI - @yield('title', 'Dashboard')</title>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/@alpinejs/collapse@3.x.x/dist/cdn.min.js"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 
     <style>
-        [x-cloak] { display: none !important; }
-        select option:disabled { color: #cbd5e1; background-color: #f8fafc; }
-        aside::-webkit-scrollbar { width: 4px; }
-        aside::-webkit-scrollbar-thumb { background: #334155; border-radius: 10px; }
+        [x-cloak] {
+            display: none !important;
+        }
+
+        select option:disabled {
+            color: #cbd5e1;
+            background-color: #f8fafc;
+        }
+
+        aside::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        aside::-webkit-scrollbar-thumb {
+            background: #334155;
+            border-radius: 10px;
+        }
     </style>
 </head>
 
@@ -22,15 +36,15 @@
     <aside x-data="{ 
         openMenu: '{{ request()->routeIs('guia-adi.*', 'clientes.*', 'catalogos.*', 'tecnicos.*', 'estoques.*') ? 'operacao' : (request()->routeIs('requisicoes.*', 'rotas.*', 'movimentacoes.*', 'veiculos.*') ? 'logistica' : (request()->routeIs('usuarios.*') ? 'gerenciamento' : '')) }}' 
     }" class="w-64 bg-slate-900 min-h-screen text-slate-300 flex flex-col shadow-xl sticky top-0 h-screen overflow-y-auto">
-        
+
         <div class="p-6 text-white font-bold text-2xl border-b border-slate-800 flex items-center gap-2">
             <i class="ph ph-package text-red-500"></i> Guia ADI
         </div>
 
         <div class="flex-1 py-4 space-y-2">
-            
+
             <div class="px-4">
-                <button @click="openMenu = (openMenu === 'operacao' ? '' : 'operacao')" 
+                <button @click="openMenu = (openMenu === 'operacao' ? '' : 'operacao')"
                     class="w-full flex items-center justify-between p-3 rounded-lg hover:bg-slate-800 transition group"
                     :class="openMenu === 'operacao' ? 'text-white' : ''">
                     <div class="flex items-center gap-3">
@@ -50,7 +64,7 @@
             </div>
 
             <div class="px-4">
-                <button @click="openMenu = (openMenu === 'logistica' ? '' : 'logistica')" 
+                <button @click="openMenu = (openMenu === 'logistica' ? '' : 'logistica')"
                     class="w-full flex items-center justify-between p-3 rounded-lg hover:bg-slate-800 transition group"
                     :class="openMenu === 'logistica' ? 'text-white' : ''">
                     <div class="flex items-center gap-3">
@@ -69,7 +83,7 @@
             </div>
 
             <div class="px-4">
-                <button @click="openMenu = (openMenu === 'gerenciamento' ? '' : 'gerenciamento')" 
+                <button @click="openMenu = (openMenu === 'gerenciamento' ? '' : 'gerenciamento')"
                     class="w-full flex items-center justify-between p-3 rounded-lg hover:bg-slate-800 transition group"
                     :class="openMenu === 'gerenciamento' ? 'text-white' : ''">
                     <div class="flex items-center gap-3">
@@ -105,7 +119,7 @@
                 <i class="ph ph-caret-right text-slate-400"></i>
                 <span class="text-slate-600 font-semibold tracking-tight uppercase text-sm">@yield('subtitle', 'Visão Geral')</span>
             </div>
-            
+
             <div class="flex items-center gap-5 text-slate-400">
                 <div class="relative cursor-pointer hover:text-red-500 transition">
                     <i class="ph ph-bell text-2xl"></i>
