@@ -67,7 +67,7 @@
                 <i class="ph ph-clipboard-text text-xl"></i> Requisições
             </a>
 
-            <a href="{{ route('rotass.index') }}"
+            <a href="{{ route('rotas.index') }}"
                 class="flex items-center gap-3 p-3 rounded-lg transition {{ request()->routeIs('rotas.*') ? 'bg-red-600 text-white shadow-lg shadow-red-900/20' : 'hover:bg-slate-800 hover:text-white text-slate-300' }}">
                 <i class="ph ph-truck text-xl"></i> Rotas
             </a>
