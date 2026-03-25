@@ -17,6 +17,11 @@ return new class extends Migration
             $table->string('email')->unique();
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
+
+            // Campo de Função (Role)
+            $table->string('funcao')->default('Estoque');
+            // Opções: Estoque, Técnico, Motorista, Administrativo, Logística, Financeiro, Gerência
+
             $table->rememberToken();
             $table->timestamps();
         });
