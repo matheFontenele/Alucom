@@ -22,10 +22,10 @@ class ClientesSeeder extends Seeder
         ]);
 
         $unidadesMTE = [
-            ['nome' => 'MTE - Gerência Fortaleza', 'cidade' => 'Fortaleza', 'estado' => 'CE', 'cnpj' => '00.394.460/0080-90'],
-            ['nome' => 'MTE - Superintendência Porto Alegre', 'cidade' => 'Porto Alegre', 'estado' => 'RS', 'cnpj' => '00.394.460/0055-10'],
-            ['nome' => 'MTE - Gerência Maracanaú', 'cidade' => 'Maracanaú', 'estado' => 'CE', 'cnpj' => '00.394.460/0090-11'],
-            ['nome' => 'MTE - Unidade Móvel Pará', 'cidade' => 'Belém', 'estado' => 'PA', 'cnpj' => '00.394.460/0012-33'],
+            ['nome' => 'MTE - Fortaleza', 'cidade' => 'Fortaleza', 'estado' => 'CE', 'cnpj' => '00.394.460/0080-90'],
+            ['nome' => 'MTE - Porto Alegre', 'cidade' => 'Porto Alegre', 'estado' => 'RS', 'cnpj' => '00.394.460/0055-10'],
+            ['nome' => 'MTE - João Pessoa', 'cidade' => 'João Pessoa', 'estado' => 'PB', 'cnpj' => '00.394.460/0090-11'],
+            ['nome' => 'MTE - Pará', 'cidade' => 'Belém', 'estado' => 'PA', 'cnpj' => '00.394.460/0012-33'],
         ];
 
         foreach ($unidadesMTE as $u) {
@@ -39,28 +39,25 @@ class ClientesSeeder extends Seeder
         }
 
         // 2. Ministério da Educação (Pai) + 4 Unidades
-        $mec = Clientes::create([
-            'nome' => 'Ministério da Educação - MEC',
+        $fms = Clientes::create([
+            'nome' => 'Fundo Municipal de Saude',
             'tipo' => 'ministerio',
             'cnpj' => '00.394.445/0001-34',
             'contrato' => 'ZapLoc',
-            'estado' => 'DF',
-            'cidade' => 'Brasília',
+            'estado' => 'PB',
+            'cidade' => 'João Pessoa',
             'endereco' => 'Esplanada dos Ministérios, Bloco L',
             'sla' => ['Atendimento' => 4, 'Insumos' => 12, 'Substituição' => 24, 'Tipo' => 'Original'],
         ]);
 
         $unidadesMEC = [
-            ['nome' => 'MEC - IFCE Fortaleza', 'cidade' => 'Fortaleza', 'estado' => 'CE', 'cnpj' => '00.394.445/0020-11'],
-            ['nome' => 'MEC - UFSC Florianópolis', 'cidade' => 'Florianópolis', 'estado' => 'SC', 'cnpj' => '00.394.445/0030-22'],
-            ['nome' => 'MEC - Unifesp SP', 'cidade' => 'São Paulo', 'estado' => 'SP', 'cnpj' => '00.394.445/0040-33'],
-            ['nome' => 'MEC - Reitoria UFC', 'cidade' => 'Fortaleza', 'estado' => 'CE', 'cnpj' => '00.394.445/0050-44'],
+            ['nome' => 'Centro de Doenças Raras', 'cidade' => 'João Pessoa', 'estado' => 'PB', 'cnpj' => '00.394.445/0020-11'],
         ];
 
         foreach ($unidadesMEC as $u) {
             Clientes::create(array_merge($u, [
                 'tipo' => 'unidade',
-                'parent_id' => $mec->id,
+                'parent_id' => $fms->id,
                 'contrato' => 'Moreia',
                 'endereco' => 'Campus Universitário Principal',
                 'sla' => ['Atendimento' => 6, 'Insumos' => 24, 'Substituição' => 48, 'Tipo' => 'Original']
