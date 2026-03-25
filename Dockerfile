@@ -1,4 +1,4 @@
-# Use a imagem oficial do PHP com extensões necessárias
+# Use a imagem oficial do PHP
 FROM php:8.4-cli 
 
 # Instala dependências do sistema
@@ -9,8 +9,8 @@ RUN apt-get update && apt-get install -y \
     unzip \
     libpq-dev \
     libzip-dev \
-    nodejs \
-    npm \
+    && curl -sL https://deb.nodesource.com/setup_20.x | bash - \
+    && apt-get install -y nodejs \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # Instala extensões PHP
@@ -22,16 +22,17 @@ COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 WORKDIR /app
 COPY . .
 
-# Instalação do PHP (Ignore platform reqs para evitar erro de ext-curl ou similares se faltarem no CLI)
+# Instalação das dependências do PHP
 RUN composer install --no-dev --optimize-autoloader --no-interaction --ignore-platform-reqs
 
 # Build dos assets (Vite)
 RUN npm install && npm run build
 
-# Ajuste de permissões para o Laravel
-RUN chown -R www-data:www-data /app/storage /app/bootstrap/cache /app/public
+# Ajuste de permissões (Crucial para o Laravel não dar erro de escrita)
+RUN chown -R www-data:www-data /app/storage /app/bootstrap/cache
 RUN chmod -R 775 /app/storage /app/bootstrap/cache
 
-# O Render usa a variável de ambiente PORT. 
-# Importante: o comando serve não é ideal, mas para rodar com CLI no Render use:
-CMD php artisan migrate --force && php artisan serve --host=0.0.0.0 --port=${PORT:-10000}
+# Expõe a porta que o Render vai usar (informativo)
+EXPOSE 10000
+
+CMD sh -c "php artisan migrate --force && php artisan serve --host=0.0.0.0 --port=$PORT"
