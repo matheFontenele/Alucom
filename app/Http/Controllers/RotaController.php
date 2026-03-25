@@ -22,18 +22,15 @@ class RotaController extends Controller
 
     public function create()
     {
-        // Filtra apenas usuários que são motoristas
         $motoristas = User::where('funcao', 'Motorista')->get();
         $veiculos = Veiculo::all();
         $estoques = Estoque::all();
 
-        // Busca requisições que já tiveram o patrimônio separado, 
-        // mas que ainda não foram vinculadas a nenhuma rota.
-        $requisicoesDisponiveis = Requisicao::whereNotNull('patrimonio_novo')
-            ->whereDoesntHave('requisicoes_rota') // Verifica se já está em alguma rota
-            ->get();
+        // Busca apenas requisições que ainda não foram vinculadas a nenhuma rota
+        // Verifica se não há registros na tabela intermediária para aquela requisição
+        $requisicoesPendentes = Requisicao::whereDoesntHave('rotas')->get();
 
-        return view('rotas.create', compact('motoristas', 'veiculos', 'estoques', 'requisicoesDisponiveis'));
+        return view('rotas.create', compact('motoristas', 'veiculos', 'estoques', 'requisicoesPendentes'));
     }
 
     public function store(Request $request)
@@ -46,13 +43,12 @@ class RotaController extends Controller
             'estado_destino' => 'required|string|max:2',
             'data_saida' => 'required|date',
             'previsao_chegada' => 'required|date|after_or_equal:data_saida',
-            'requisicoes' => 'required|array|min:1', // Pelo menos uma requisição no carregamento
+            'requisicoes' => 'required|array|min:1', 
         ]);
 
         try {
             DB::beginTransaction();
 
-            // 1. Criar a Rota
             $rota = Rota::create([
                 'user_id' => $request->user_id,
                 'veiculo_id' => $request->veiculo_id,
@@ -65,27 +61,19 @@ class RotaController extends Controller
                 'observacoes' => $request->observacoes,
             ]);
 
-            // 2. Vincular as requisições (Carregamento)
-            // O attach() insere na tabela intermediária rota_requisicao
+            // Vincula os IDs recebidos do formulário à rota
             $rota->requisicoes()->attach($request->requisicoes);
 
-            // 3. Atualizar o status das requisições para "Em Rota"
+            // Atualiza a situação para "Em Rota"
             Requisicao::whereIn('id', $request->requisicoes)->update([
                 'situacao' => 'Em Rota'
             ]);
 
             DB::commit();
             return redirect()->route('rotas.index')->with('success', 'Rota criada e carga vinculada com sucesso!');
-
         } catch (\Exception $e) {
             DB::rollBack();
             return back()->with('error', 'Erro ao criar rota: ' . $e->getMessage());
         }
-    }
-
-    public function show(Rota $rota)
-    {
-        $rota->load(['motorista', 'veiculo', 'requisicoes.cliente', 'requisicoes.catalogo']);
-        return view('rotas.show', compact('rota'));
     }
 }
