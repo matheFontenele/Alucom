@@ -146,22 +146,49 @@
     document.getElementById('cliente_select').addEventListener('change', function() {
         const option = this.options[this.selectedIndex];
 
-        // Preenche Cidade e Estado (Readonly)
+        // Preenche Cidade e Estado
         document.getElementById('cidade_input').value = option.getAttribute('data-cidade') || '';
         document.getElementById('estado_input').value = option.getAttribute('data-estado') || '';
 
-        // Preenche a Etiqueta (Permite edição posterior)
+        // Preenche a Etiqueta
         const etiquetaSugerida = option.getAttribute('data-etiqueta');
         const selectEtiqueta = document.getElementById('etiqueta_select');
 
         if (etiquetaSugerida) {
-            // Define o valor do select para o que veio do cliente
-            selectEtiqueta.value = etiquetaSugerida;
+            // Lógica para encontrar a opção correta mesmo se houver diferença de maiúsculas/minúsculas
+            const valorParaComparar = etiquetaSugerida.trim().toLowerCase();
 
-            // Pequeno feedback visual para o usuário notar a troca
-            selectEtiqueta.classList.add('ring-2', 'ring-blue-200');
-            setTimeout(() => selectEtiqueta.classList.remove('ring-2', 'ring-blue-200'), 1000);
+            let encontrou = false;
+            for (let i = 0; i < selectEtiqueta.options.length; i++) {
+                if (selectEtiqueta.options[i].value.toLowerCase() === valorParaComparar) {
+                    selectEtiqueta.selectedIndex = i;
+                    encontrou = true;
+                    break;
+                }
+            }
+
+            // Feedback visual se encontrar
+            if (encontrou) {
+                selectEtiqueta.classList.add('ring-2', 'ring-blue-400', 'border-blue-400');
+                setTimeout(() => {
+                    selectEtiqueta.classList.remove('ring-2', 'ring-blue-400', 'border-blue-400');
+                }, 1000);
+            }
         }
+    });
+
+    // 2. Lógica Dinâmica para o Campo de Patrimônio (Você esqueceu de manter no código enviado)
+    document.querySelectorAll('input[name="tipo_solicitacao"]').forEach(radio => {
+        radio.addEventListener('change', function() {
+            const divPatrimonio = document.getElementById('campo_patrimonio');
+            if (this.value === 'Substituição') {
+                divPatrimonio.classList.remove('hidden');
+                setTimeout(() => divPatrimonio.classList.remove('scale-95', 'opacity-0'), 10);
+            } else {
+                divPatrimonio.classList.add('scale-95', 'opacity-0');
+                setTimeout(() => divPatrimonio.classList.add('hidden'), 300);
+            }
+        });
     });
 </script>
 @endsection
