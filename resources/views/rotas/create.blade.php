@@ -21,6 +21,7 @@
 
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
             
+            {{-- Coluna da Esquerda: Transporte e Cronograma --}}
             <div class="lg:col-span-1 space-y-6">
                 <div class="bg-white p-6 rounded-3xl shadow-sm border border-slate-200">
                     <h3 class="text-xs font-black text-slate-400 uppercase mb-6 tracking-widest flex items-center gap-2">
@@ -76,6 +77,7 @@
                 </div>
             </div>
 
+            {{-- Coluna da Direita: Destino e Observações --}}
             <div class="lg:col-span-2 space-y-6">
                 <div class="bg-white p-6 rounded-3xl shadow-sm border border-slate-200">
                     <h3 class="text-xs font-black text-slate-400 uppercase mb-6 tracking-widest flex items-center gap-2">
@@ -93,4 +95,17 @@
                     </div>
                 </div>
 
-                <div class="bg-white p-6 rounded-3xl shadow-
+                <div class="bg-white p-6 rounded-3xl shadow-sm border border-slate-200">
+                    <h3 class="text-xs font-black text-slate-400 uppercase mb-6 tracking-widest flex items-center gap-2">
+                        <i class="ph ph-chat-centered-dots text-lg text-amber-500"></i> Observações
+                    </h3>
+                    <div>
+                        <label class="block text-[10px] font-black text-slate-500 uppercase mb-1 ml-1">Notas da Viagem</label>
+                        <textarea name="observacoes" rows="4" placeholder="Alguma instrução especial para o motorista?" class="w-full rounded-xl border-slate-200 focus:border-red-500 focus:ring-red-500 p-3 text-sm"></textarea>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+@endsection

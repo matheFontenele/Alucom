@@ -7,40 +7,24 @@
     <title>GUIA ADI - @yield('title', 'Dashboard')</title>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     
-    {{-- Scripts de Terceiros --}}
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
-    
-    {{-- Alpine.js (Ordem Correta para evitar erros de Collapse) --}}
     <script defer src="https://cdn.jsdelivr.net/npm/@alpinejs/collapse@3.x.x/dist/cdn.min.js"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 
     <style>
         [x-cloak] { display: none !important; }
-
-        select option:disabled {
-            color: #cbd5e1;
-            background-color: #f8fafc;
-        }
-
         aside::-webkit-scrollbar { width: 4px; }
-        aside::-webkit-scrollbar-thumb {
-            background: #334155;
-            border-radius: 10px;
-        }
-        
-        /* Evita que o conteúdo principal "escape" da tela em resoluções menores */
-        .main-content {
-            min-height: calc(100-vh - 64px);
-        }
+        aside::-webkit-scrollbar-thumb { background: #334155; border-radius: 10px; }
+        .main-content { min-height: calc(100vh - 64px); }
     </style>
 </head>
 
-<body class="bg-gray-50 flex font-sans text-slate-900 overflow-x-hidden">
+<body class="bg-gray-50 flex font-sans text-slate-900 overflow-x-hidden h-screen">
 
     {{-- Menu Lateral --}}
     <aside x-data="{ 
         openMenu: '{{ request()->routeIs('guia-adi.*', 'clientes.*', 'catalogos.*', 'tecnicos.*', 'estoques.*') ? 'operacao' : (request()->routeIs('requisicoes.*', 'rotas.*', 'movimentacoes.*', 'veiculos.*') ? 'logistica' : (request()->routeIs('usuarios.*') ? 'gerenciamento' : '')) }}' 
-    }" class="w-64 bg-slate-900 min-h-screen text-slate-300 flex flex-col shadow-xl sticky top-0 h-screen overflow-y-auto z-20 transition-all duration-300">
+    }" class="w-64 flex-shrink-0 bg-slate-900 h-screen text-slate-300 flex flex-col shadow-xl sticky top-0 z-20 transition-all duration-300 overflow-y-auto">
 
         <div class="p-6 text-white font-bold text-2xl border-b border-slate-800 flex items-center gap-2">
             <i class="ph ph-package text-red-500"></i> Guia ADI
@@ -106,7 +90,7 @@
             </div>
         </div>
 
-        {{-- Perfil do Usuário --}}
+        {{-- Perfil --}}
         <div class="p-4 border-t border-slate-800 bg-slate-900/50">
             <div class="flex items-center gap-3 p-2 bg-slate-800/40 rounded-xl">
                 <div class="w-10 h-10 rounded-lg bg-red-600 flex items-center justify-center text-white font-black shadow-lg">
@@ -120,21 +104,15 @@
         </div>
     </aside>
 
-    {{-- Lado Direito (Header + Conteúdo) --}}
-    <div class="flex-1 flex flex-col min-w-0 h-screen overflow-y-auto">
-        <header class="h-16 bg-white border-b border-gray-200 flex items-center justify-between px-8 sticky top-0 z-10 shadow-sm">
+    {{-- Lado Direito --}}
+    <div class="flex-1 flex flex-col min-w-0 h-screen">
+        <header class="h-16 bg-white border-b border-gray-200 flex items-center justify-between px-8 sticky top-0 z-10 shadow-sm flex-shrink-0">
             <div class="flex items-center gap-2">
                 <i class="ph ph-caret-right text-slate-400"></i>
                 <span class="text-slate-600 font-semibold tracking-tight uppercase text-sm">@yield('subtitle', 'Visão Geral')</span>
             </div>
-
+            {{-- Notificações e Logout --}}
             <div class="flex items-center gap-5 text-slate-400">
-                <div class="relative cursor-pointer hover:text-red-500 transition">
-                    <i class="ph ph-bell text-2xl"></i>
-                    <span class="absolute -top-1 -right-1 w-4 h-4 bg-red-600 text-white text-[10px] flex items-center justify-center rounded-full border-2 border-white">3</span>
-                </div>
-                <i class="ph ph-gear text-2xl hover:text-slate-600 cursor-pointer transition"></i>
-                <div class="h-8 w-[1px] bg-slate-200"></div>
                 <form method="POST" action="{{ route('logout') }}">
                     @csrf
                     <button type="submit" class="hover:text-red-600 transition flex items-center">
@@ -144,30 +122,7 @@
             </div>
         </header>
 
-        <main class="p-8 main-content">
-            {{-- Alertas de Sessão --}}
-            @if(session('success'))
-            <div x-data="{ show: true }" x-init="setTimeout(() => show = false, 5000)" x-show="show" x-transition.opacity
-                class="mb-6 flex items-center justify-between bg-emerald-50 border border-emerald-200 text-emerald-700 px-5 py-4 rounded-2xl shadow-sm">
-                <div class="flex items-center gap-3">
-                    <i class="ph ph-check-circle text-2xl"></i>
-                    <span class="font-bold">{{ session('success') }}</span>
-                </div>
-                <button @click="show = false"><i class="ph ph-x text-xl"></i></button>
-            </div>
-            @endif
-
-            @if(session('error'))
-            <div x-data="{ show: true }" x-show="show" x-transition.opacity
-                class="mb-6 flex items-center justify-between bg-red-50 border border-red-200 text-red-700 px-5 py-4 rounded-2xl shadow-sm">
-                <div class="flex items-center gap-3">
-                    <i class="ph ph-warning-circle text-2xl"></i>
-                    <span class="font-bold">{{ session('error') }}</span>
-                </div>
-                <button @click="show = false"><i class="ph ph-x text-xl"></i></button>
-            </div>
-            @endif
-
+        <main class="p-8 main-content overflow-y-auto bg-gray-50 flex-1">
             @yield('content')
         </main>
     </div>
@@ -175,5 +130,4 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     @yield('scripts')
 </body>
-
 </html>
