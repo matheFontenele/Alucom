@@ -37,7 +37,10 @@
                     <select name="cliente_id" id="cliente_select" class="w-full border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500" required>
                         <option value="">Selecione o Cliente</option>
                         @foreach($clientes as $cliente)
-                        <option value="{{ $cliente->id }}" data-cidade="{{ $cliente->cidade }}" data-estado="{{ $cliente->estado }}">
+                        <option value="{{ $cliente->id }}"
+                            data-cidade="{{ $cliente->cidade }}"
+                            data-estado="{{ $cliente->estado }}"
+                            data-etiqueta="{{ $cliente->etiqueta }}"> {{-- Adicionado aqui --}}
                             {{ $cliente->nome }}
                         </option>
                         @endforeach
@@ -73,7 +76,7 @@
                 </div>
                 <div>
                     <label class="block text-xs font-black uppercase text-gray-400 mb-1">Etiqueta</label>
-                    <select name="etiqueta" class="w-full border-gray-200 rounded-xl">
+                    <select name="etiqueta" id="etiqueta_select" class="w-full border-gray-200 rounded-xl">
                         <option value="Alucom">Alucom</option>
                         <option value="Moreia">Moreia</option>
                         <option value="IP">IP</option>
@@ -139,29 +142,26 @@
 </div>
 
 <script>
-    // 1. Atualização Automática de Cidade e Estado
+    // 1. Atualização Automática de Cidade, Estado e Etiqueta
     document.getElementById('cliente_select').addEventListener('change', function() {
         const option = this.options[this.selectedIndex];
+
+        // Preenche Cidade e Estado (Readonly)
         document.getElementById('cidade_input').value = option.getAttribute('data-cidade') || '';
         document.getElementById('estado_input').value = option.getAttribute('data-estado') || '';
-    });
 
-    // 2. Lógica Dinâmica para o Campo de Patrimônio
-    document.querySelectorAll('input[name="tipo_solicitacao"]').forEach(radio => {
-        radio.addEventListener('change', function() {
-            const divPatrimonio = document.getElementById('campo_patrimonio');
-            if (this.value === 'Substituição') {
-                divPatrimonio.classList.remove('hidden');
-                setTimeout(() => {
-                    divPatrimonio.classList.remove('scale-95', 'opacity-0');
-                }, 10);
-            } else {
-                divPatrimonio.classList.add('scale-95', 'opacity-0');
-                setTimeout(() => {
-                    divPatrimonio.classList.add('hidden');
-                }, 300);
-            }
-        });
+        // Preenche a Etiqueta (Permite edição posterior)
+        const etiquetaSugerida = option.getAttribute('data-etiqueta');
+        const selectEtiqueta = document.getElementById('etiqueta_select');
+
+        if (etiquetaSugerida) {
+            // Define o valor do select para o que veio do cliente
+            selectEtiqueta.value = etiquetaSugerida;
+
+            // Pequeno feedback visual para o usuário notar a troca
+            selectEtiqueta.classList.add('ring-2', 'ring-blue-200');
+            setTimeout(() => selectEtiqueta.classList.remove('ring-2', 'ring-blue-200'), 1000);
+        }
     });
 </script>
 @endsection
