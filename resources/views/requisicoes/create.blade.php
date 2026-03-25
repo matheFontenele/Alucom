@@ -37,9 +37,9 @@
                     <select name="cliente_id" id="cliente_select" class="w-full border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500" required>
                         <option value="">Selecione o Cliente</option>
                         @foreach($clientes as $cliente)
-                            <option value="{{ $cliente->id }}" data-cidade="{{ $cliente->cidade }}" data-estado="{{ $cliente->estado }}">
-                                {{ $cliente->nome }}
-                            </option>
+                        <option value="{{ $cliente->id }}" data-cidade="{{ $cliente->cidade }}" data-estado="{{ $cliente->estado }}">
+                            {{ $cliente->nome }}
+                        </option>
                         @endforeach
                     </select>
                 </div>
@@ -85,13 +85,19 @@
             {{-- Seção 4: Item e Quantidade --}}
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6 pt-4 border-t border-gray-100">
                 <div class="md:col-span-2">
-                    <label class="block text-xs font-black uppercase text-gray-400 mb-1">Equipamento | Insumo (Catálogo)</label>
+                    <label class="block text-xs font-black uppercase text-gray-400 mb-1">Equipamento | Insumo (Disponível em Estoque)</label>
                     <select name="catalogo_id" class="w-full border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500" required>
                         <option value="">Selecione o Item</option>
                         @foreach($catalogo as $item)
-                            <option value="{{ $item->id }}">{{ $item->nome }} - {{ $item->fabricante }}</option>
+                        <option value="{{ $item->id }}" {{ $item->equipamentos_count <= 0 ? 'disabled' : '' }}>
+                            {{ $item->nome }} - {{ $item->fabricante }}
+                            ({{ $item->equipamentos_count }} unidades em estoque)
+                        </option>
                         @endforeach
                     </select>
+                    @if($catalogo->where('equipamentos_count', '>', 0)->count() == 0)
+                    <p class="text-red-500 text-xs mt-1">Aviso: Não há itens com estoque disponível.</p>
+                    @endif
                 </div>
                 <div>
                     <label class="block text-xs font-black uppercase text-gray-400 mb-1">Quantidade Solicitada</label>

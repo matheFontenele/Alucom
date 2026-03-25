@@ -19,7 +19,11 @@ class RequisicaoController extends Controller
     public function create()
     {
         $clientes = Clientes::orderBy('nome')->get();
-        $catalogo = Catalogo::orderBy('nome')->get();
+
+        $catalogo = Catalogo::withCount('equipamentos')
+            ->orderBy('nome')
+            ->get();
+
         return view('requisicoes.create', compact('clientes', 'catalogo'));
     }
 

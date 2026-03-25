@@ -15,6 +15,14 @@
         }
     </style>
 
+    <style>
+        select option:disabled {
+            color: #cbd5e1;
+            /* Cinza claro para itens sem estoque */
+            background-color: #f8fafc;
+        }
+    </style>
+
 </head>
 
 <body class="bg-gray-50 flex">
