@@ -23,7 +23,9 @@ class MovimentacaoController extends Controller
     public function create()
     {
         $equipamentos = Equipamento::orderBy('nome')->get();
-        $clientes = Clientes::whereNull('parent_id')->orderBy('nome')->get();
+
+        $clientes = Clientes::with('parent')->orderBy('nome')->get();
+
         $estoques = Estoque::orderBy('nome')->get();
 
         return view('movimentacoes.create', compact('equipamentos', 'clientes', 'estoques'));
@@ -76,7 +78,13 @@ class MovimentacaoController extends Controller
             $equipamento->save();
 
             Movimentacao::create($request->only([
-                'equipamento_id', 'tipo', 'situacao', 'origem', 'destino', 'data_movimentacao', 'observacao'
+                'equipamento_id',
+                'tipo',
+                'situacao',
+                'origem',
+                'destino',
+                'data_movimentacao',
+                'observacao'
             ]));
 
             return redirect()->route('movimentacoes.index')->with('success', 'Movimentação registrada!');
