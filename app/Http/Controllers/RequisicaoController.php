@@ -81,7 +81,7 @@ class RequisicaoController extends Controller
         if ($request->baixa_sistema == '1') {
             Movimentacao::create([
                 'equipamento_id' => $requisicao->catalogo_id,
-                'tipo_acao' => 'Aluguel',
+                'tipo' => 'Aluguel',
                 'situacao' => 'Aguardando Rota',
                 'destino' => $requisicao->cliente_id,
                 'data_movimentacao' => now(),
