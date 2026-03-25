@@ -89,3 +89,9 @@ Route::get('/debug-seed', function () {
         return "Erro detectado: " . $e->getMessage() . " em " . $e->getFile() . ":" . $e->getLine();
     }
 });
+
+Route::get('/limpar-rota', function() {
+    Artisan::call('route:clear');
+    Artisan::call('config:clear');
+    return "Cache de rotas limpo!";
+});
