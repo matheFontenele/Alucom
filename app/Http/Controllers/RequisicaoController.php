@@ -79,28 +79,34 @@ class RequisicaoController extends Controller
     {
         $requisicao = Requisicao::findOrFail($id);
 
+        // 1. Atualiza a requisição
         $requisicao->update([
             'quantidade_separada' => $request->quantidade_separada,
             'data_separacao' => $request->data_separacao,
             'separado_por' => $request->separado_por,
             'baixa_sistema' => $request->baixa_sistema,
             'observacao_separacao' => $request->observacao_separacao,
-            // Salva o novo patrimônio se ele vier no request
             'patrimonio_novo' => $request->patrimonio_novo,
         ]);
 
+        // 2. Se marcou para dar baixa, cria a movimentação
         if ($request->baixa_sistema == '1') {
-            // Na movimentação automática, agora podemos passar o ID real do equipamento selecionado
-            // em vez de apenas o ID do catálogo, se necessário.
-            Movimentacao::create([
-                'equipamento_id' => $requisicao->catalogo_id,
-                'tipo' => 'Aluguel',
-                'origem' => 'Estoque Central',
-                'situacao' => 'Aguardando Rota',
-                'destino' => $requisicao->cliente_id,
-                'data_movimentacao' => now(),
-                'detalhes' => "Saída via Req #{$requisicao->id}. Substituindo patrimônio: {$requisicao->patrimonio_substituido} por: {$request->patrimonio_novo}"
-            ]);
+
+            $equipamentoFisico = \App\Models\Equipamento::where('tombo', $request->patrimonio_novo)->first();
+
+            if ($equipamentoFisico) {
+                \App\Models\Movimentacao::create([
+                    'equipamento_id'   => $equipamentoFisico->id,
+                    'tipo'             => 'Aluguel',
+                    'origem'           => 'Estoque Central',
+                    'situacao'         => 'Aguardando Rota',
+                    'destino'          => $requisicao->cliente_id,
+                    'data_movimentacao' => now(),
+                    'detalhes'         => "Saída via Req #{$requisicao->id}. Substituindo: {$requisicao->patrimonio_substituido} por: {$request->patrimonio_novo}"
+                ]);
+
+                $equipamentoFisico->update(['status' => 'Alugado']);
+            }
         }
 
         return redirect()->route('requisicoes.index')->with('success', 'Separação concluída!');
