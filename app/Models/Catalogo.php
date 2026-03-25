@@ -3,12 +3,13 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use App\Models\Categoria;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Catalogo extends Model
 {
     protected $table = 'catalogo';
+    
     protected $fillable = [
         'nome',
         'fabricante',
@@ -18,10 +19,16 @@ class Catalogo extends Model
         'cor',
         'descricao'
     ];
-    //Relação com categorias
+
+    // Relação com categorias
     public function categoria(): BelongsTo
     {
         return $this->belongsTo(Categoria::class, 'categoria_id');
+    }
+
+    public function equipamentos(): HasMany
+    {
+        return $this->hasMany(Equipamento::class, 'catalogo_id');
     }
 
     public function getCorHexAttribute()
@@ -39,9 +46,11 @@ class Catalogo extends Model
 
     public function ehInsumo(): bool
     {
-        // Adicione aqui todos os nomes de categorias que devem aparecer no modal de Insumos
-        $categoriasInsumos = ['Suprimentos', 'Toner', 'Cartucho', 'Tintas', 'Papel'];
+        if (!$this->categoria) {
+            return false;
+        }
 
+        $categoriasInsumos = ['Suprimentos', 'Toner', 'Cartucho', 'Tintas', 'Papel'];
         return in_array($this->categoria->nome, $categoriasInsumos);
     }
 }
