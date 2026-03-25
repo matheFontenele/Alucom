@@ -43,7 +43,7 @@ class RotaController extends Controller
             'estado_destino' => 'required|string|max:2',
             'data_saida' => 'required|date',
             'previsao_chegada' => 'required|date|after_or_equal:data_saida',
-            'requisicoes' => 'required|array|min:1', 
+            'requisicoes' => 'required|array|min:1',
         ]);
 
         try {
@@ -66,6 +66,7 @@ class RotaController extends Controller
 
             // Atualiza a situação para "Em Rota"
             Requisicao::whereIn('id', $request->requisicoes)->update([
+                'rota_id' => $rota->id,
                 'situacao' => 'Em Rota'
             ]);
 
