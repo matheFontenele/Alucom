@@ -10,4 +10,12 @@ class Rota extends Model
     {
         return $this->belongsToMany(Requisicao::class, 'rota_requisicao');
     }
+    public function motorista()
+    {
+        return $this->belongsTo(User::class, 'user_id');
+    }
+    public function veiculo()
+    {
+        return $this->belongsTo(Veiculo::class);
+    }
 }

@@ -9,6 +9,9 @@ use App\Http\Controllers\TecnicosController;
 use App\Http\Controllers\MovimentacaoController;
 use App\Http\Controllers\CatalogoController;
 use App\Http\Controllers\RequisicaoController;
+use App\Http\Controllers\RotaController;
+use App\Http\Controllers\VeiculoController;
+use App\Http\Controllers\UserController;
 use App\Models\Subcategoria;
 use Illuminate\Support\Facades\Artisan;
 
@@ -29,6 +32,13 @@ Route::resource('movimentacoes', MovimentacaoController::class);
 Route::resource('catalogo', CatalogoController::class)->names('catalogos');
 
 /**
+ * LOGÍSTICA (Rotas, Veículos e Usuários/Motoristas)
+ */
+Route::resource('rotas', RotaController::class);
+Route::resource('veiculos', VeiculoController::class);
+Route::resource('usuarios', UserController::class)->names('usuarios');
+
+/**
  * SISTEMA DE REQUISIÇÕES & SEPARAÇÃO
  */
 
@@ -39,7 +49,7 @@ Route::get('/requisicoes/{id}/separacao', [RequisicaoController::class, 'separac
 Route::put('/requisicoes/{id}/separar', [RequisicaoController::class, 'separarUpdate'])
     ->name('requisicoes.separar.update');
 
-// 2. Resource de Requisições (Gerencia index, create, store, show, edit, update, destroy)
+// 2. Resource de Requisições
 Route::resource('requisicoes', RequisicaoController::class);
 
 
@@ -58,10 +68,9 @@ Route::get('/estoques/{estoque}/detalhes/{nome}', [EstoqueController::class, 'de
 
 
 /**
- * UTILITÁRIOS DE MANUTENÇÃO (Ambiente Render/Produção)
+ * UTILITÁRIOS DE MANUTENÇÃO
  */
 
-// Rota para popular o banco sem limpar dados existentes
 Route::get('/popular-banco', function () {
     try {
         Artisan::call('db:seed', ['--force' => true]);
@@ -71,7 +80,6 @@ Route::get('/popular-banco', function () {
     }
 });
 
-// Rota de Debug (CUIDADO: Limpa o banco no Render)
 Route::get('/debug-seed', function () {
     try {
         Artisan::call('migrate:fresh', ['--force' => true]);

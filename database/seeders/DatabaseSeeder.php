@@ -27,6 +27,7 @@ class DatabaseSeeder extends Seeder
             CatalogoSeeder::class,             // 5º Catálogo (Base para Equipamentos)
             CadastroEquipamentosSeeder::class, // 6º Itens manuais
             EquipamentoSeeder::class,          // 7º Importação do CSV (GuiaAdi)
+            LogisticaSeeder::class,            // 8º importação de Logistica
         ]);
     }
 }

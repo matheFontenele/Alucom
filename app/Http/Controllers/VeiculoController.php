@@ -7,59 +7,50 @@ use Illuminate\Http\Request;
 
 class VeiculoController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
     public function index()
     {
-        //
+        $veiculos = Veiculo::orderBy('modelo')->get();
+        return view('veiculos.index', compact('veiculos'));
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
     public function create()
     {
-        //
+        return view('veiculos.create');
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(Request $request)
     {
-        //
+        $request->validate([
+            'placa'  => 'required|unique:veiculos|max:10',
+            'modelo' => 'required|string|max:255',
+            'marca'  => 'nullable|string'
+        ]);
+
+        Veiculo::create($request->all());
+
+        return redirect()->route('veiculos.index')->with('success', 'Veículo cadastrado!');
     }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(Veiculo $veiculo)
-    {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
     public function edit(Veiculo $veiculo)
     {
-        //
+        return view('veiculos.edit', compact('veiculo'));
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
     public function update(Request $request, Veiculo $veiculo)
     {
-        //
+        $request->validate([
+            'placa'  => 'required|max:10|unique:veiculos,placa,' . $veiculo->id,
+            'modelo' => 'required|string|max:255',
+        ]);
+
+        $veiculo->update($request->all());
+
+        return redirect()->route('veiculos.index')->with('success', 'Veículo atualizado!');
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
     public function destroy(Veiculo $veiculo)
     {
-        //
+        $veiculo->delete();
+        return redirect()->route('veiculos.index')->with('success', 'Veículo removido!');
     }
 }

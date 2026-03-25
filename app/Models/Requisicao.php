@@ -43,7 +43,7 @@ class Requisicao extends Model
         return $this->belongsTo(Catalogo::class, 'catalogo_id');
     }
 
-    public function rotas()
+    public function requisicoes_rota()
     {
         return $this->belongsToMany(Rota::class, 'rota_requisicao');
     }
