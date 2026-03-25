@@ -131,7 +131,13 @@
 <script src="https://cdn.jsdelivr.net/npm/tom-select@2.2.2/dist/js/tom-select.complete.min.js"></script>
 <script>
     // Inicializar busca digitável nos selects
-    const config = { create: false, sortField: { field: "text", order: "asc" }};
+    const config = {
+        create: false,
+        sortField: {
+            field: "text",
+            order: "asc"
+        }
+    };
     new TomSelect("#equipamento_select", config);
     const tsOrigem = new TomSelect("#origem_select", config);
     new TomSelect("#destino_select", config);

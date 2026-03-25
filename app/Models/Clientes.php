@@ -3,6 +3,8 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Clientes extends Model
 {
@@ -32,5 +34,19 @@ class Clientes extends Model
     public function pai()
     {
         return $this->belongsTo(Clientes::class, 'parent_id');
+    }
+
+    public function parent(): BelongsTo
+    {
+        // Certifique-se de que o nome da coluna no banco é 'parent_id'
+        return $this->belongsTo(Clientes::class, 'parent_id');
+    }
+
+    /**
+     * Define a relação com as "Secretarias/Filhos"
+     */
+    public function children(): HasMany
+    {
+        return $this->hasMany(Clientes::class, 'parent_id');
     }
 }
