@@ -82,6 +82,7 @@ class RequisicaoController extends Controller
             Movimentacao::create([
                 'equipamento_id' => $requisicao->catalogo_id,
                 'tipo' => 'Aluguel',
+                'origem' => 'Estoque Central',
                 'situacao' => 'Aguardando Rota',
                 'destino' => $requisicao->cliente_id,
                 'data_movimentacao' => now(),
