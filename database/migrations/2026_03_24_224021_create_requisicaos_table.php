@@ -31,7 +31,8 @@ return new class extends Migration
             $table->enum('etiqueta', ['Alucom', 'Moreia', 'IP', 'ZapLock']);
             $table->integer('quantidade');
             $table->enum('tipo_solicitacao', ['Substituição', 'Novo']);
-            $table->string('patrimonio_substituido')->nullable(); // Ativo se for Substituição
+            $table->string('patrimonio_substituido')->nullable();
+            $table->string('patrimonio_novo')->nullable();
 
             // Campos de Separação (Sua nova aba)
             $table->integer('quantidade_separada')->nullable();

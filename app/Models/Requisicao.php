@@ -25,6 +25,7 @@ class Requisicao extends Model
         'quantidade',
         'tipo_solicitacao',
         'patrimonio_substituido',
+        'patrimonio_novo',
         'quantidade_separada',
         'data_separacao',
         'separado_por',

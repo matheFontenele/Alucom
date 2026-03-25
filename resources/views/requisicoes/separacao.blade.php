@@ -18,7 +18,7 @@
         <div class="p-6 bg-gray-50 border-b flex justify-between items-center text-sm">
             <div>
                 <span class="text-gray-500 uppercase font-bold text-[10px]">Item Solicitado:</span>
-                <p class="text-gray-800 font-bold text-lg">{{ $requisicao->item->modelo }}</p>
+                <p class="text-gray-800 font-bold text-lg">{{ $requisicao->item->nome ?? 'Item não identificado' }}</p>
             </div>
             <div class="text-right">
                 <span class="text-gray-500 uppercase font-bold text-[10px]">Qtd. Solicitada:</span>
@@ -62,20 +62,20 @@
 
             {{-- Campo de Patrimônio Novo (Aparece apenas se for Substituição) --}}
             @if($requisicao->tipo_solicitacao === 'Substituição')
-            <div class="md:col-span-2 bg-blue-50 p-4 rounded-xl border border-blue-100">
-                <label class="block text-sm font-bold text-blue-800 mb-1">
-                    <i class="ph ph-barcode"></i> Selecione o Patrimônio do Equipamento Novo
+            <div class="bg-blue-50 p-5 rounded-xl border-2 border-blue-200">
+                <label class="block text-sm font-bold text-blue-900 mb-2">
+                    <i class="ph ph-barcode font-bold"></i> SELECIONE O TOMBO DO NOVO EQUIPAMENTO
                 </label>
-                <select name="patrimonio_novo" class="w-full border-2 border-blue-200 rounded-xl px-4 py-3 focus:border-blue-500 font-medium" required>
-                    <option value="">Selecione o Tombo disponível...</option>
+                <select name="patrimonio_novo" class="w-full border-2 border-blue-300 rounded-xl px-4 py-3 focus:border-blue-600 font-bold text-blue-900" required>
+                    <option value="">Buscar tombo disponível no estoque...</option>
                     @foreach($tombosDisponiveis as $equip)
-                    <option value="{{ $equip->patrimonio }}">
-                        {{ $equip->patrimonio }} - {{ $equip->modelo }} ({{ $equip->situacao }})
-                    </option>
+                        <option value="{{ $equip->tombo }}">
+                            TOMBO: {{ $equip->tombo }} | {{ $equip->nome }} {{ $equip->cor ? "($equip->cor)" : "" }}
+                        </option>
                     @endforeach
                 </select>
-                <p class="text-[10px] text-blue-600 mt-1 uppercase font-bold italic">
-                    * Obrigatório para processos de substituição.
+                <p class="text-[11px] text-blue-700 mt-2 italic font-medium">
+                    * Exibindo apenas itens com status "Disponivel" vinculados a este modelo.
                 </p>
             </div>
             @endif

@@ -68,8 +68,8 @@ class RequisicaoController extends Controller
         $requisicao = Requisicao::with(['cliente', 'item'])->findOrFail($id);
 
         $tombosDisponiveis = \App\Models\Equipamento::where('catalogo_id', $requisicao->catalogo_id)
-            ->where('situacao', 'Disponível')
-            ->orderBy('patrimonio')
+            ->where('status', 'Disponivel')
+            ->orderBy('tombo', 'asc')
             ->get();
 
         return view('requisicoes.separacao', compact('requisicao', 'tombosDisponiveis'));
