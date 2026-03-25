@@ -53,6 +53,12 @@ class RequisicaoController extends Controller
         return redirect()->route('requisicoes.index')->with('success', 'Requisição criada com sucesso!');
     }
 
+    public function show($id)
+    {
+        $requisicao = Requisicao::with(['cliente', 'item'])->findOrFail($id);
+        return view('requisicoes.show', compact('requisicao'));
+    }
+
     public function separacao($id)
     {
         $requisicao = Requisicao::with(['cliente', 'item'])->findOrFail($id);
@@ -75,7 +81,7 @@ class RequisicaoController extends Controller
         if ($request->baixa_sistema == '1') {
             Movimentacao::create([
                 'equipamento_id' => $requisicao->catalogo_id,
-                'tipo_acao' => 'Aluguel', 
+                'tipo_acao' => 'Aluguel',
                 'situacao' => 'Aguardando Rota',
                 'destino' => $requisicao->cliente_id,
                 'data_movimentacao' => now(),

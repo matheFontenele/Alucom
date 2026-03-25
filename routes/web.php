@@ -8,7 +8,7 @@ use App\Http\Controllers\EquipamentoController;
 use App\Http\Controllers\TecnicosController;
 use App\Http\Controllers\MovimentacaoController;
 use App\Http\Controllers\CatalogoController;
-use App\Http\Controllers\RequisicaoController; // <-- ADICIONADO
+use App\Http\Controllers\RequisicaoController;
 use App\Models\Subcategoria;
 use Illuminate\Support\Facades\Artisan;
 
@@ -31,13 +31,15 @@ Route::resource('catalogo', CatalogoController::class)->names('catalogos');
 /**
  * SISTEMA DE REQUISIÇÕES & SEPARAÇÃO
  */
-// Rota customizada para a "Aba" de Separação (deve vir antes do resource para não dar conflito com o {id})
+
+// 1. Rotas Customizadas de Separação (Devem vir ANTES do resource)
 Route::get('/requisicoes/{id}/separacao', [RequisicaoController::class, 'separacao'])
     ->name('requisicoes.separacao');
 
 Route::put('/requisicoes/{id}/separar', [RequisicaoController::class, 'separarUpdate'])
     ->name('requisicoes.separar.update');
 
+// 2. Resource de Requisições (Gerencia index, create, store, show, edit, update, destroy)
 Route::resource('requisicoes', RequisicaoController::class);
 
 
@@ -69,7 +71,7 @@ Route::get('/popular-banco', function () {
     }
 });
 
-// Rota de Debug (CUIDADO: migrate:fresh apaga todos os dados do banco)
+// Rota de Debug (CUIDADO: Limpa o banco no Render)
 Route::get('/debug-seed', function () {
     try {
         Artisan::call('migrate:fresh', ['--force' => true]);
