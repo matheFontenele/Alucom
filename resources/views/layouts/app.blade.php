@@ -11,88 +11,79 @@
 
     <style>
         [x-cloak] { display: none !important; }
-        select option:disabled {
-            color: #cbd5e1;
-            background-color: #f8fafc;
-        }
-        /* Custom scrollbar para o menu lateral */
-        aside::-webkit-scrollbar {
-            width: 4px;
-        }
-        aside::-webkit-scrollbar-thumb {
-            background: #334155;
-            border-radius: 10px;
-        }
+        select option:disabled { color: #cbd5e1; background-color: #f8fafc; }
+        aside::-webkit-scrollbar { width: 4px; }
+        aside::-webkit-scrollbar-thumb { background: #334155; border-radius: 10px; }
     </style>
 </head>
 
 <body class="bg-gray-50 flex font-sans text-slate-900">
 
-    <aside class="w-64 bg-slate-900 min-h-screen text-slate-300 flex flex-col shadow-xl sticky top-0 h-screen overflow-y-auto">
+    <aside x-data="{ 
+        openMenu: '{{ request()->routeIs('guia-adi.*', 'clientes.*', 'catalogos.*', 'tecnicos.*', 'estoques.*') ? 'operacao' : (request()->routeIs('requisicoes.*', 'rotas.*', 'movimentacoes.*', 'veiculos.*') ? 'logistica' : (request()->routeIs('usuarios.*') ? 'gerenciamento' : '')) }}' 
+    }" class="w-64 bg-slate-900 min-h-screen text-slate-300 flex flex-col shadow-xl sticky top-0 h-screen overflow-y-auto">
+        
         <div class="p-6 text-white font-bold text-2xl border-b border-slate-800 flex items-center gap-2">
             <i class="ph ph-package text-red-500"></i> Guia ADI
         </div>
 
-        <div class="flex-1 py-4">
-            <div class="px-6 mb-2">
-                <span class="text-[10px] font-black text-slate-500 uppercase tracking-widest">Operação</span>
+        <div class="flex-1 py-4 space-y-2">
+            
+            <div class="px-4">
+                <button @click="openMenu = (openMenu === 'operacao' ? '' : 'operacao')" 
+                    class="w-full flex items-center justify-between p-3 rounded-lg hover:bg-slate-800 transition group"
+                    :class="openMenu === 'operacao' ? 'text-white' : ''">
+                    <div class="flex items-center gap-3">
+                        <i class="ph ph-cpu text-xl text-red-500"></i>
+                        <span class="text-sm font-bold uppercase tracking-wider">Operações</span>
+                    </div>
+                    <i class="ph ph-caret-down transition-transform duration-300" :class="openMenu === 'operacao' ? 'rotate-180' : ''"></i>
+                </button>
+
+                <div x-show="openMenu === 'operacao'" x-cloak x-collapse class="mt-1 space-y-1 ml-4 border-l border-slate-700 pl-2">
+                    <x-nav-link href="{{ route('guia-adi.index') }}" active="{{ request()->routeIs('guia-adi.*') }}" icon="ph-printer" label="Guia Impressoras" />
+                    <x-nav-link href="{{ route('clientes.index') }}" active="{{ request()->routeIs('clientes.*') }}" icon="ph-building-office" label="Clientes" />
+                    <x-nav-link href="{{ route('catalogos.index') }}" active="{{ request()->routeIs('catalogos.*') }}" icon="ph-book-open-text" label="Catálogo" />
+                    <x-nav-link href="{{ route('tecnicos.index') }}" active="{{ request()->routeIs('tecnicos.*') }}" icon="ph-wrench" label="Técnicos" />
+                    <x-nav-link href="{{ route('estoques.index') }}" active="{{ request()->routeIs('estoques.*') }}" icon="ph-archive" label="Estoques" />
+                </div>
             </div>
-            <nav class="px-4 space-y-1 mb-6">
-                <a href="{{ route('guia-adi.index') }}"
-                    class="flex items-center gap-3 p-3 rounded-lg transition {{ request()->routeIs('guia-adi.*') ? 'bg-red-600 text-white shadow-lg shadow-red-900/20' : 'hover:bg-slate-800 hover:text-white' }}">
-                    <i class="ph ph-printer text-xl"></i> Guia Impressoras
-                </a>
 
-                <a href="{{ route('requisicoes.index') }}"
-                    class="flex items-center gap-3 p-3 rounded-lg transition {{ request()->routeIs('requisicoes.*') ? 'bg-red-600 text-white shadow-lg shadow-red-900/20' : 'hover:bg-slate-800 hover:text-white' }}">
-                    <i class="ph ph-clipboard-text text-xl"></i> Requisições
-                </a>
+            <div class="px-4">
+                <button @click="openMenu = (openMenu === 'logistica' ? '' : 'logistica')" 
+                    class="w-full flex items-center justify-between p-3 rounded-lg hover:bg-slate-800 transition group"
+                    :class="openMenu === 'logistica' ? 'text-white' : ''">
+                    <div class="flex items-center gap-3">
+                        <i class="ph ph-truck text-xl text-blue-500"></i>
+                        <span class="text-sm font-bold uppercase tracking-wider">Logística</span>
+                    </div>
+                    <i class="ph ph-caret-down transition-transform duration-300" :class="openMenu === 'logistica' ? 'rotate-180' : ''"></i>
+                </button>
 
-                <a href="{{ route('rotas.index') }}"
-                    class="flex items-center gap-3 p-3 rounded-lg transition {{ request()->routeIs('rotas.*') ? 'bg-red-600 text-white shadow-lg shadow-red-900/20' : 'hover:bg-slate-800 hover:text-white' }}">
-                    <i class="ph ph-truck text-xl"></i> Rotas
-                </a>
-
-                <a href="{{ route('movimentacoes.index') }}"
-                    class="flex items-center gap-3 p-3 rounded-lg transition {{ request()->routeIs('movimentacoes.*') ? 'bg-red-600 text-white shadow-lg shadow-red-900/20' : 'hover:bg-slate-800 hover:text-white' }}">
-                    <i class="ph ph-arrows-clockwise text-xl"></i> Movimentações
-                </a>
-            </nav>
-
-            <div class="px-6 mb-2">
-                <span class="text-[10px] font-black text-slate-500 uppercase tracking-widest">Gerenciamento</span>
+                <div x-show="openMenu === 'logistica'" x-cloak x-collapse class="mt-1 space-y-1 ml-4 border-l border-slate-700 pl-2">
+                    <x-nav-link href="{{ route('requisicoes.index') }}" active="{{ request()->routeIs('requisicoes.*') }}" icon="ph-clipboard-text" label="Requisições" />
+                    <x-nav-link href="{{ route('rotas.index') }}" active="{{ request()->routeIs('rotas.*') }}" icon="ph-map-trifold" label="Rotas" />
+                    <x-nav-link href="{{ route('movimentacoes.index') }}" active="{{ request()->routeIs('movimentacoes.*') }}" icon="ph-arrows-clockwise" label="Movimentações" />
+                    <x-nav-link href="{{ route('veiculos.index') }}" active="{{ request()->routeIs('veiculos.*') }}" icon="ph-car" label="Veículos" />
+                </div>
             </div>
-            <nav class="px-4 space-y-1">
-                <a href="{{ route('usuarios.index') }}"
-                    class="flex items-center gap-3 p-3 rounded-lg transition {{ request()->routeIs('usuarios.*') ? 'bg-slate-700 text-white' : 'hover:bg-slate-800 hover:text-white' }}">
-                    <i class="ph ph-users-three text-xl"></i> Usuários
-                </a>
 
-                <a href="{{ route('catalogos.index') }}"
-                    class="flex items-center gap-3 p-3 rounded-lg transition {{ request()->routeIs('catalogos.*') ? 'bg-slate-700 text-white' : 'hover:bg-slate-800 hover:text-white' }}">
-                    <i class="ph ph-book-open-text text-xl"></i> Catálogo
-                </a>
+            <div class="px-4">
+                <button @click="openMenu = (openMenu === 'gerenciamento' ? '' : 'gerenciamento')" 
+                    class="w-full flex items-center justify-between p-3 rounded-lg hover:bg-slate-800 transition group"
+                    :class="openMenu === 'gerenciamento' ? 'text-white' : ''">
+                    <div class="flex items-center gap-3">
+                        <i class="ph ph-gear text-xl text-emerald-500"></i>
+                        <span class="text-sm font-bold uppercase tracking-wider">Gerenciamento</span>
+                    </div>
+                    <i class="ph ph-caret-down transition-transform duration-300" :class="openMenu === 'gerenciamento' ? 'rotate-180' : ''"></i>
+                </button>
 
-                <a href="{{ route('veiculos.index') }}"
-                    class="flex items-center gap-3 p-3 rounded-lg transition {{ request()->routeIs('veiculos.*') ? 'bg-slate-700 text-white' : 'hover:bg-slate-800 hover:text-white' }}">
-                    <i class="ph ph-car text-xl"></i> Veículos
-                </a>
+                <div x-show="openMenu === 'gerenciamento'" x-cloak x-collapse class="mt-1 space-y-1 ml-4 border-l border-slate-700 pl-2">
+                    <x-nav-link href="{{ route('usuarios.index') }}" active="{{ request()->routeIs('usuarios.*') }}" icon="ph-users-three" label="Usuários" />
+                </div>
+            </div>
 
-                <a href="{{ route('clientes.index') }}"
-                    class="flex items-center gap-3 p-3 rounded-lg transition {{ request()->routeIs('clientes.*') ? 'hover:bg-slate-800 hover:text-white' : '' }}">
-                    <i class="ph ph-building-office text-xl"></i> Clientes
-                </a>
-
-                <a href="{{ route('estoques.index') }}"
-                    class="flex items-center gap-3 p-3 rounded-lg transition {{ request()->routeIs('estoques.*') ? 'hover:bg-slate-800 hover:text-white' : '' }}">
-                    <i class="ph ph-archive text-xl"></i> Estoques
-                </a>
-
-                <a href="{{ route('equipamentos.index') }}"
-                    class="flex items-center gap-3 p-3 rounded-lg transition {{ request()->routeIs('equipamentos.*') ? 'hover:bg-slate-800 hover:text-white' : '' }}">
-                    <i class="ph ph-desktop text-xl"></i> Itens Físicos
-                </a>
-            </nav>
         </div>
 
         <div class="p-4 border-t border-slate-800 bg-slate-900/50">
@@ -122,7 +113,7 @@
                 </div>
                 <i class="ph ph-gear text-2xl hover:text-slate-600 cursor-pointer transition"></i>
                 <div class="h-8 w-[1px] bg-slate-200"></div>
-                <form method="POST" action="/logout">
+                <form method="POST" action="{{ route('logout') }}">
                     @csrf
                     <button type="submit" class="hover:text-red-600 transition">
                         <i class="ph ph-sign-out text-2xl"></i>
