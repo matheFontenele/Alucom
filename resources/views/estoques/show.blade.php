@@ -12,6 +12,7 @@
     </ul>
 </div>
 @endif
+
 <div class="container mx-auto p-6">
     {{-- Exibição de Erros de Validação --}}
     @if ($errors->any())
@@ -226,7 +227,10 @@
                     @foreach($modelosCatalogo as $modelo)
                     @if($modelo->ehInsumo())
                     <option value="{{ $modelo->id }}">
-                        {{ $modelo->nome }} ({{ $modelo->categoria->nome ?? 'S/Cat' }})
+                        {{-- Exibe a cor se houver, para diferenciar os toners --}}
+                        {{ $modelo->nome }} 
+                        @if($modelo->cor) - {{ strtoupper($modelo->cor) }} @endif 
+                        ({{ $modelo->categoria->nome ?? 'S/Cat' }})
                     </option>
                     @endif
                     @endforeach

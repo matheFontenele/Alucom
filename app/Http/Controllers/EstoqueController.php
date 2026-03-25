@@ -52,7 +52,6 @@ class EstoqueController extends Controller
         $estoque = Estoque::findOrFail($id);
 
         // 1. Buscamos todos os modelos do catálogo COM a categoria carregada.
-        // Isso é CRUCIAL para o filtro de Equipamentos vs Insumos no Blade.
         $modelosCatalogo = Catalogo::with('categoria')->orderBy('nome')->get();
 
         // 2. Iniciamos a query de equipamentos deste estoque
