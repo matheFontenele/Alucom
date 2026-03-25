@@ -80,7 +80,7 @@
                         <option value="Alucom">Alucom</option>
                         <option value="Moreia">Moreia</option>
                         <option value="IP">IP</option>
-                        <option value="ZapLock">ZapLock</option>
+                        <option value="ZapLoc">ZapLoc</option>
                     </select>
                 </div>
             </div>
