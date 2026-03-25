@@ -66,7 +66,13 @@ class RequisicaoController extends Controller
     public function separacao($id)
     {
         $requisicao = Requisicao::with(['cliente', 'item'])->findOrFail($id);
-        return view('requisicoes.separacao', compact('requisicao'));
+
+        $tombosDisponiveis = \App\Models\Equipamento::where('catalogo_id', $requisicao->catalogo_id)
+            ->where('situacao', 'Disponível')
+            ->orderBy('patrimonio')
+            ->get();
+
+        return view('requisicoes.separacao', compact('requisicao', 'tombosDisponiveis'));
     }
 
     public function separarUpdate(Request $request, $id)
@@ -79,10 +85,13 @@ class RequisicaoController extends Controller
             'separado_por' => $request->separado_por,
             'baixa_sistema' => $request->baixa_sistema,
             'observacao_separacao' => $request->observacao_separacao,
+            // Salva o novo patrimônio se ele vier no request
+            'patrimonio_novo' => $request->patrimonio_novo,
         ]);
 
-        // Se marcou "Sim" para baixa (valor '1'), gera movimentação automática
         if ($request->baixa_sistema == '1') {
+            // Na movimentação automática, agora podemos passar o ID real do equipamento selecionado
+            // em vez de apenas o ID do catálogo, se necessário.
             Movimentacao::create([
                 'equipamento_id' => $requisicao->catalogo_id,
                 'tipo' => 'Aluguel',
@@ -90,11 +99,10 @@ class RequisicaoController extends Controller
                 'situacao' => 'Aguardando Rota',
                 'destino' => $requisicao->cliente_id,
                 'data_movimentacao' => now(),
-                'detalhes' => "Saída automática via Requisição #{$requisicao->id}"
+                'detalhes' => "Saída via Req #{$requisicao->id}. Substituindo patrimônio: {$requisicao->patrimonio_substituido} por: {$request->patrimonio_novo}"
             ]);
         }
 
-        return redirect()->route('requisicoes.index')
-            ->with('success', 'Separação concluída e movimentação gerada!');
+        return redirect()->route('requisicoes.index')->with('success', 'Separação concluída!');
     }
 }

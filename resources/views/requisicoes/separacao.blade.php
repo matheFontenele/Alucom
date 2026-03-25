@@ -35,8 +35,8 @@
                 <div>
                     <label class="block text-sm font-bold text-gray-700 mb-1">Quantidade Separada</label>
                     <div class="relative">
-                        <input type="number" name="quantidade_separada" value="{{ $requisicao->quantidade }}" 
-                               class="w-full border-2 border-gray-200 rounded-xl px-4 py-3 focus:border-green-500 focus:ring-0 text-xl font-bold">
+                        <input type="number" name="quantidade_separada" value="{{ $requisicao->quantidade }}"
+                            class="w-full border-2 border-gray-200 rounded-xl px-4 py-3 focus:border-green-500 focus:ring-0 text-xl font-bold">
                         <span class="absolute right-4 top-3 text-gray-400">UN</span>
                     </div>
                 </div>
@@ -44,8 +44,8 @@
                 {{-- Data da Separação --}}
                 <div>
                     <label class="block text-sm font-bold text-gray-700 mb-1">Data da Separação</label>
-                    <input type="date" name="data_separacao" value="{{ date('Y-m-d') }}" 
-                           class="w-full border-2 border-gray-200 rounded-xl px-4 py-3 focus:border-green-500">
+                    <input type="date" name="data_separacao" value="{{ date('Y-m-d') }}"
+                        class="w-full border-2 border-gray-200 rounded-xl px-4 py-3 focus:border-green-500">
                 </div>
             </div>
 
@@ -59,6 +59,26 @@
                     <option value="Fontenele">Fontenele (Admin)</option>
                 </select>
             </div>
+
+            {{-- Campo de Patrimônio Novo (Aparece apenas se for Substituição) --}}
+            @if($requisicao->tipo_solicitacao === 'Substituição')
+            <div class="md:col-span-2 bg-blue-50 p-4 rounded-xl border border-blue-100">
+                <label class="block text-sm font-bold text-blue-800 mb-1">
+                    <i class="ph ph-barcode"></i> Selecione o Patrimônio do Equipamento Novo
+                </label>
+                <select name="patrimonio_novo" class="w-full border-2 border-blue-200 rounded-xl px-4 py-3 focus:border-blue-500 font-medium" required>
+                    <option value="">Selecione o Tombo disponível...</option>
+                    @foreach($tombosDisponiveis as $equip)
+                    <option value="{{ $equip->patrimonio }}">
+                        {{ $equip->patrimonio }} - {{ $equip->modelo }} ({{ $equip->situacao }})
+                    </option>
+                    @endforeach
+                </select>
+                <p class="text-[10px] text-blue-600 mt-1 uppercase font-bold italic">
+                    * Obrigatório para processos de substituição.
+                </p>
+            </div>
+            @endif
 
             {{-- Baixa no Sistema --}}
             <div class="bg-amber-50 p-4 rounded-xl border border-amber-100">
@@ -78,8 +98,8 @@
             {{-- Observação --}}
             <div>
                 <label class="block text-sm font-bold text-gray-700 mb-1">Observação do Estoque</label>
-                <textarea name="observacao_separacao" rows="3" placeholder="Ex: Item com etiqueta Moreia aplicada." 
-                          class="w-full border-2 border-gray-200 rounded-xl px-4 py-3 focus:border-green-500"></textarea>
+                <textarea name="observacao_separacao" rows="3" placeholder="Ex: Item com etiqueta Moreia aplicada."
+                    class="w-full border-2 border-gray-200 rounded-xl px-4 py-3 focus:border-green-500"></textarea>
             </div>
 
             <div class="flex gap-4 pt-4">
