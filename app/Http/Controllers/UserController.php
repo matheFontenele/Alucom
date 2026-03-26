@@ -19,7 +19,7 @@ class UserController extends Controller
         // Lista de funções que definimos anteriormente
         $funcoes = [
             'Estoque', 'Técnico', 'Motorista', 
-            'Administrativo', 'Logística', 'Financeiro', 'Gerência'
+            'Administrativo', 'Logística', 'Financeiro', 'Gerência', 'Direção'
         ];
         return view('usuarios.create', compact('funcoes'));
     }
@@ -46,7 +46,7 @@ class UserController extends Controller
 
     public function edit(User $usuario)
     {
-        $funcoes = ['Estoque', 'Técnico', 'Motorista', 'Administrativo', 'Logística', 'Financeiro', 'Gerência'];
+        $funcoes = ['Estoque', 'Técnico', 'Motorista', 'Administrativo', 'Logística', 'Financeiro', 'Gerência', 'Direção'];
         return view('usuarios.edit', compact('usuario', 'funcoes'));
     }
 
