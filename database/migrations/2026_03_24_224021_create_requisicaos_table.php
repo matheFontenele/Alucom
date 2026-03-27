@@ -28,7 +28,7 @@ return new class extends Migration
             $table->string('estado');
             $table->string('cidade');
 
-            $table->enum('etiqueta', ['Alucom', 'Moreia', 'IP', 'ZapLock']);
+            $table->enum('etiqueta', ['Alucom', 'Moreia', 'IP', 'ZapLoc']);
             $table->integer('quantidade');
             $table->enum('tipo_solicitacao', ['Substituição', 'Novo']);
             $table->string('patrimonio_substituido')->nullable();
