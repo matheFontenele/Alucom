@@ -6,16 +6,28 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>GUIA ADI - @yield('title', 'Dashboard')</title>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
-    
+
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/@alpinejs/collapse@3.x.x/dist/cdn.min.js"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 
     <style>
-        [x-cloak] { display: none !important; }
-        aside::-webkit-scrollbar { width: 4px; }
-        aside::-webkit-scrollbar-thumb { background: #334155; border-radius: 10px; }
-        .main-content { min-height: calc(100vh - 64px); }
+        [x-cloak] {
+            display: none !important;
+        }
+
+        aside::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        aside::-webkit-scrollbar-thumb {
+            background: #334155;
+            border-radius: 10px;
+        }
+
+        .main-content {
+            min-height: calc(100vh - 64px);
+        }
     </style>
 </head>
 
@@ -124,10 +136,40 @@
 
         <main class="p-8 main-content overflow-y-auto bg-gray-50 flex-1">
             @yield('content')
+            <div class="max-w-6xl mx-auto px-4">
+                @if(session('success'))
+                <div class="bg-emerald-500 text-white p-4 rounded-2xl mb-6 shadow-lg shadow-emerald-900/20 flex items-center gap-3">
+                    <i class="ph ph-check-circle text-2xl"></i>
+                    <span class="font-bold">{{ session('success') }}</span>
+                </div>
+                @endif
+
+                @if(session('error'))
+                <div class="bg-red-500 text-white p-4 rounded-2xl mb-6 shadow-lg shadow-red-900/20 flex items-center gap-3">
+                    <i class="ph ph-warning-circle text-2xl"></i>
+                    <span class="font-bold">{{ session('error') }}</span>
+                </div>
+                @endif
+
+                @if($errors->any())
+                <div class="bg-orange-500 text-white p-4 rounded-2xl mb-6 shadow-lg shadow-orange-900/20">
+                    <div class="flex items-center gap-3 mb-2">
+                        <i class="ph ph-warning text-2xl"></i>
+                        <span class="font-bold uppercase text-sm tracking-widest">Atenção: Verifique os dados</span>
+                    </div>
+                    <ul class="list-disc list-inside text-sm font-medium opacity-90">
+                        @foreach($errors->all() as $error)
+                        <li>{{ $error }}</li>
+                        @endforeach
+                    </ul>
+                </div>
+                @endif
+            </div>
         </main>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     @yield('scripts')
 </body>
+
 </html>

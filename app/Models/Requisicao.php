@@ -30,7 +30,9 @@ class Requisicao extends Model
         'data_separacao',
         'separado_por',
         'baixa_sistema',
-        'observacao_separacao'
+        'observacao_separacao',
+        'situacao',
+        'rota_id'
     ];
 
     public function cliente()
