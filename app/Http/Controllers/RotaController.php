@@ -14,7 +14,7 @@ class RotaController extends Controller
 {
     public function index()
     {
-        $rotas = Rota::with(['motorista', 'veiculo', 'requisicoes'])
+        $rotas = Rota::with(['motoristaa', 'veiculo', 'requisicoes'])
             ->orderBy('data_saida', 'desc')
             ->get();
         return view('rotas.index', compact('rotas'));
@@ -35,6 +35,7 @@ class RotaController extends Controller
 
     public function store(Request $request)
     {
+        // 1. Validação com mensagens personalizadas para sabermos o que falhou
         $request->validate([
             'user_id' => 'required|exists:users,id',
             'veiculo_id' => 'required|exists:veiculos,id',
@@ -44,6 +45,9 @@ class RotaController extends Controller
             'data_saida' => 'required|date',
             'previsao_chegada' => 'required|date|after_or_equal:data_saida',
             'requisicoes' => 'required|array|min:1',
+        ], [
+            'requisicoes.required' => 'Você precisa selecionar pelo menos uma requisição para a carga!',
+            'previsao_chegada.after_or_equal' => 'A data de chegada não pode ser anterior à data de saída.'
         ]);
 
         try {
@@ -57,24 +61,22 @@ class RotaController extends Controller
                 'estado_destino' => $request->estado_destino,
                 'data_saida' => $request->data_saida,
                 'previsao_chegada' => $request->previsao_chegada,
-                'status' => 'Em Preparação',
+                'status' => 'Em Rota', // Já mudamos para Em Rota direto
                 'observacoes' => $request->observacoes,
             ]);
 
-            // Vincula os IDs recebidos do formulário à rota
             $rota->requisicoes()->attach($request->requisicoes);
 
-            // Atualiza a situação para "Em Rota"
+            // Atualiza as requisições vinculadas
             Requisicao::whereIn('id', $request->requisicoes)->update([
-                'rota_id' => $rota->id,
                 'situacao' => 'Em Rota'
             ]);
 
             DB::commit();
-            return redirect()->route('rotas.index')->with('success', 'Rota criada e carga vinculada com sucesso!');
+            return redirect()->route('rotas.index')->with('success', 'Rota despachada com sucesso!');
         } catch (\Exception $e) {
             DB::rollBack();
-            return back()->with('error', 'Erro ao criar rota: ' . $e->getMessage());
+            return back()->withInput()->with('error', 'Erro técnico: ' . $e->getMessage());
         }
     }
 }
