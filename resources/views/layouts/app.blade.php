@@ -35,7 +35,7 @@
 
     {{-- Menu Lateral --}}
     <aside x-data="{ 
-        openMenu: '{{ request()->routeIs('guia-adi.*', 'clientes.*', 'catalogos.*', 'tecnicos.*', 'estoques.*') ? 'operacao' : (request()->routeIs('requisicoes.*', 'rotas.*', 'movimentacoes.*', 'veiculos.*') ? 'logistica' : (request()->routeIs('usuarios.*') ? 'gerenciamento' : '')) }}' 
+        openMenu: '{{ request()->routeIs('guia-adi.*', 'clientes.*', 'catalogos.*', 'equipamentos.*', 'tecnicos.*', 'estoques.*') ? 'operacao' : (request()->routeIs('requisicoes.*', 'rotas.*', 'movimentacoes.*', 'veiculos.*') ? 'logistica' : (request()->routeIs('usuarios.*') ? 'gerenciamento' : '')) }}' 
     }" class="w-64 flex-shrink-0 bg-slate-900 h-screen text-slate-300 flex flex-col shadow-xl sticky top-0 z-20 transition-all duration-300 overflow-y-auto">
 
         <div class="p-6 text-white font-bold text-2xl border-b border-slate-800 flex items-center gap-2">
@@ -59,6 +59,10 @@
                     <x-nav-link href="{{ route('guia-adi.index') }}" active="{{ request()->routeIs('guia-adi.*') }}" icon="ph-printer" label="Guia Impressoras" />
                     <x-nav-link href="{{ route('clientes.index') }}" active="{{ request()->routeIs('clientes.*') }}" icon="ph-building-office" label="Clientes" />
                     <x-nav-link href="{{ route('catalogos.index') }}" active="{{ request()->routeIs('catalogos.*') }}" icon="ph-book-open-text" label="Catálogo" />
+                    
+                    {{-- Aba Equipamentos Adicionada --}}
+                    <x-nav-link href="{{ route('equipamentos.index') }}" active="{{ request()->routeIs('equipamentos.*') }}" icon="ph-hard-drives" label="Equipamentos" />
+                    
                     <x-nav-link href="{{ route('tecnicos.index') }}" active="{{ request()->routeIs('tecnicos.*') }}" icon="ph-wrench" label="Técnicos" />
                     <x-nav-link href="{{ route('estoques.index') }}" active="{{ request()->routeIs('estoques.*') }}" icon="ph-archive" label="Estoques" />
                 </div>
@@ -135,8 +139,7 @@
         </header>
 
         <main class="p-8 main-content overflow-y-auto bg-gray-50 flex-1">
-            @yield('content')
-            <div class="max-w-6xl mx-auto px-4">
+            <div class="max-w-7xl mx-auto">
                 @if(session('success'))
                 <div class="bg-emerald-500 text-white p-4 rounded-2xl mb-6 shadow-lg shadow-emerald-900/20 flex items-center gap-3">
                     <i class="ph ph-check-circle text-2xl"></i>
@@ -164,6 +167,8 @@
                     </ul>
                 </div>
                 @endif
+
+                @yield('content')
             </div>
         </main>
     </div>
