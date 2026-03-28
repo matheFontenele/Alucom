@@ -14,11 +14,10 @@ class RotaController extends Controller
 {
     public function index()
     {
-        // CORREÇÃO: motorista (com um 'a' apenas)
         $rotas = Rota::with(['motorista', 'veiculo', 'requisicoes'])
             ->orderBy('data_saida', 'desc')
             ->get();
-            
+
         return view('rotas.index', compact('rotas'));
     }
 
@@ -62,7 +61,7 @@ class RotaController extends Controller
                 'estado_destino' => $request->estado_destino,
                 'data_saida' => $request->data_saida,
                 'previsao_chegada' => $request->previsao_chegada,
-                'status' => 'Em Rota', 
+                'status' => 'Em Rota',
                 'observacoes' => $request->observacoes,
             ]);
 
@@ -73,19 +72,24 @@ class RotaController extends Controller
             foreach ($request->requisicoes as $id) {
                 $req = Requisicao::find($id);
                 if ($req) {
-                    // Se no seu banco o campo for 'situacao', mantenha assim. 
-                    // Se for 'status', troque abaixo:
-                    $req->situacao = 'Em Rota'; 
+                    $req->situacao = 'Em Rota';
                     $req->save();
                 }
             }
 
             DB::commit();
             return redirect()->route('rotas.index')->with('success', 'Rota despachada com sucesso!');
-
         } catch (\Exception $e) {
             DB::rollBack();
             return back()->withInput()->with('error', 'Erro técnico: ' . $e->getMessage());
         }
+    }
+
+    public function show($id)
+    {
+        // Busca a rota com os relacionamentos necessários
+        $rota = Rota::with(['motorista', 'veiculo', 'requisicoes.cliente'])->findOrFail($id);
+
+        return view('rotas.show', compact('rota'));
     }
 }
