@@ -26,7 +26,7 @@
     </div>
 
     <div class="bg-white rounded-3xl shadow-sm border border-slate-200 overflow-hidden print:shadow-none print:border-none">
-        
+
         <div class="p-8 border-b-2 border-slate-100 bg-slate-50/50 flex justify-between items-center">
             <div class="flex items-center gap-4">
                 <div class="w-16 h-16 bg-red-600 rounded-2xl flex items-center justify-center text-white text-3xl shadow-lg">
@@ -85,7 +85,7 @@
                                 <span class="block font-bold">{{ $req->cliente->nome }}</span>
                                 <span class="text-[10px] text-slate-400 font-bold uppercase">{{ $rota->cidade_destino }} - {{ $rota->estado_destino }}</span>
                             </td>
-                            <td class="px-6 py-4 text-sm">{{ $req->catalogo->modelo }}</td>
+                            <td class="px-6 py-4 text-sm">{{ $req->catalogo->modelo ?? 'Modelo não encontrado' }}</td>
                             <td class="px-6 py-4">
                                 <span class="bg-slate-100 text-slate-800 px-2 py-1 rounded font-mono font-bold uppercase text-xs">
                                     {{ $req->patrimonio_novo }}
@@ -124,11 +124,24 @@
 </div>
 
 <style>
-@media print {
-    body { background: white; }
-    aside, header, .print\:hidden { display: none !important; }
-    main { padding: 0 !important; }
-    .container { max-width: 100% !important; }
-}
+    @media print {
+        body {
+            background: white;
+        }
+
+        aside,
+        header,
+        .print\:hidden {
+            display: none !important;
+        }
+
+        main {
+            padding: 0 !important;
+        }
+
+        .container {
+            max-width: 100% !important;
+        }
+    }
 </style>
 @endsection

@@ -85,10 +85,15 @@ class RotaController extends Controller
         }
     }
 
+    // 5 Detalhes de uma rota esxpessifica
     public function show($id)
     {
-        // Busca a rota com os relacionamentos necessários
-        $rota = Rota::with(['motorista', 'veiculo', 'requisicoes.cliente'])->findOrFail($id);
+        $rota = Rota::with([
+            'motorista',
+            'veiculo',
+            'requisicoes.cliente',
+            'requisicoes.catalogo'
+        ])->findOrFail($id);
 
         return view('rotas.show', compact('rota'));
     }
