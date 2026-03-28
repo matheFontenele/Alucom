@@ -3,13 +3,13 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use App\Http\Controllers\CatalogoController;
 
 class Requisicao extends Model
 {
 
     protected $table = 'requisicoes';
-
     protected $fillable = [
         'oficio',
         'solicitante',
@@ -35,7 +35,12 @@ class Requisicao extends Model
         'rota_id'
     ];
 
-    public function cliente()
+    public function catalogo(): BelongsTo
+    {
+        return $this->belongsTo(Catalogo::class, 'catalogo_id');
+    }
+
+    public function cliente(): BelongsTo
     {
         return $this->belongsTo(Clientes::class);
     }
