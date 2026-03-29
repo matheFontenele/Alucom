@@ -29,8 +29,11 @@
                     <label class="block text-xs font-black text-slate-500 uppercase mb-2">Função / Cargo</label>
                     <select name="funcao" required class="w-full rounded-xl border-slate-200 focus:border-red-500 focus:ring-red-500 p-3">
                         <option value="">Selecione...</option>
-                        @foreach(['Estoque', 'Técnico', 'Motorista', 'Administrativo', 'Logística', 'Financeiro', 'Gerência', Direção] as $funcao)
-                            <option value="{{ $funcao }}">{{ $funcao }}</option>
+                        {{-- Use a variável $funcoes que vem do Controller --}}
+                        @foreach($funcoes as $funcao)
+                        <option value="{{ $funcao }}" {{ old('funcao') == $funcao ? 'selected' : '' }}>
+                            {{ $funcao }}
+                        </option>
                         @endforeach
                     </select>
                 </div>
