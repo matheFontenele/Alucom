@@ -87,7 +87,7 @@
                                 <span class="block font-bold">{{ $req->cliente->nome ?? 'Cliente não informado' }}</span>
                                 <span class="text-[10px] text-slate-400 font-bold uppercase">{{ $rota->cidade_destino }} - {{ $rota->estado_destino }}</span>
                             </td>
-                            <td class="px-6 py-4 text-sm">{{ $req->catalogo->modelo ?? 'Modelo não encontrado' }}</td>
+                            <td class="px-6 py-4 text-sm">{{ $req->catalogo->nome ?? 'Modelo não encontrado' }}</td>
                             <td class="px-6 py-4">
                                 <span class="bg-slate-100 text-slate-800 px-2 py-1 rounded font-mono font-bold uppercase text-xs">
                                     {{ $req->patrimonio_novo ?? 'N/D' }}
