@@ -184,7 +184,7 @@
                 <td class="text-center border border-black px-1">1</td>
                 <td class="border border-black px-1"></td>
                 <td class="border border-black px-1 uppercase">
-                    {{ $req->catalogo->modelo ?? 'EQUIPAMENTO NÃO ESPECIFICADO' }} 
+                    {{ $req->catalogo->nome ?? 'EQUIPAMENTO NÃO ESPECIFICADO' }} 
                     {{ $req->patrimonio_novo ? '- PAT: ' . $req->patrimonio_novo : '' }}
                 </td>
             </tr>
