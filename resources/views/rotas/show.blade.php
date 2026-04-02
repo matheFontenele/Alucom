@@ -3,8 +3,11 @@
 @section('subtitle', 'Logística / Manifesto de Carga')
 
 @section('content')
-<div class="max-w-5xl mx-auto">
-    <div class="flex justify-between items-center mb-8 print:hidden">
+{{-- ========================================== --}}
+{{-- MODO TELA (Invisível na impressão)         --}}
+{{-- ========================================== --}}
+<div class="max-w-5xl mx-auto print:hidden">
+    <div class="flex justify-between items-center mb-8">
         <div>
             <a href="{{ route('rotas.index') }}" class="text-slate-400 hover:text-slate-600 flex items-center gap-2 mb-2 transition text-sm font-bold">
                 <i class="ph ph-arrow-left"></i> Voltar para Rotas
@@ -25,8 +28,8 @@
         </div>
     </div>
 
-    <div class="bg-white rounded-3xl shadow-sm border border-slate-200 overflow-hidden print:shadow-none print:border-none">
-
+    {{-- O Seu Card Original da Tela --}}
+    <div class="bg-white rounded-3xl shadow-sm border border-slate-200 overflow-hidden">
         <div class="p-8 border-b-2 border-slate-100 bg-slate-50/50 flex justify-between items-center">
             <div class="flex items-center gap-4">
                 <div class="w-16 h-16 bg-red-600 rounded-2xl flex items-center justify-center text-white text-3xl shadow-lg">
@@ -74,7 +77,6 @@
                             <th class="px-6 py-4 text-[10px] font-black text-slate-400 uppercase">Destinatário / Cliente</th>
                             <th class="px-6 py-4 text-[10px] font-black text-slate-400 uppercase">Equipamento / Modelo</th>
                             <th class="px-6 py-4 text-[10px] font-black text-slate-400 uppercase">Patrimônio</th>
-                            <th class="px-6 py-4 text-[10px] font-black text-slate-400 uppercase text-center print:hidden">Confere</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-slate-100 font-medium text-slate-700">
@@ -82,33 +84,19 @@
                         <tr class="hover:bg-slate-50/50 transition">
                             <td class="px-6 py-4 font-bold text-red-600 text-sm">#{{ $req->id }}</td>
                             <td class="px-6 py-4">
-                                <span class="block font-bold">{{ $req->cliente->nome }}</span>
+                                <span class="block font-bold">{{ $req->cliente->nome ?? 'Cliente não informado' }}</span>
                                 <span class="text-[10px] text-slate-400 font-bold uppercase">{{ $rota->cidade_destino }} - {{ $rota->estado_destino }}</span>
                             </td>
                             <td class="px-6 py-4 text-sm">{{ $req->catalogo->modelo ?? 'Modelo não encontrado' }}</td>
                             <td class="px-6 py-4">
                                 <span class="bg-slate-100 text-slate-800 px-2 py-1 rounded font-mono font-bold uppercase text-xs">
-                                    {{ $req->patrimonio_novo }}
+                                    {{ $req->patrimonio_novo ?? 'N/D' }}
                                 </span>
-                            </td>
-                            <td class="px-6 py-4 text-center print:hidden">
-                                <div class="w-6 h-6 border-2 border-slate-200 rounded mx-auto"></div>
                             </td>
                         </tr>
                         @endforeach
                     </tbody>
                 </table>
-            </div>
-
-            <div class="hidden print:grid grid-cols-2 gap-12 mt-20">
-                <div class="border-t-2 border-slate-300 pt-4 text-center">
-                    <p class="text-xs font-black text-slate-400 uppercase">Responsável pelo Carregamento</p>
-                    <p class="text-sm font-bold text-slate-800 mt-1">Alucom ADI</p>
-                </div>
-                <div class="border-t-2 border-slate-300 pt-4 text-center">
-                    <p class="text-xs font-black text-slate-400 uppercase">Assinatura do Motorista</p>
-                    <p class="text-sm font-bold text-slate-800 mt-1">{{ $rota->motorista->name }}</p>
-                </div>
             </div>
         </div>
 
@@ -123,24 +111,138 @@
     </div>
 </div>
 
+{{-- ========================================== --}}
+{{-- MODO IMPRESSÃO (Oculto na tela, visível só ao imprimir) --}}
+{{-- ========================================== --}}
+<div class="hidden print:block w-full text-black bg-white" style="font-family: Arial, sans-serif;">
+    <table class="w-full border-collapse border border-black text-[13px] leading-tight">
+        <tbody>
+            {{-- Cabeçalho ROMANEIO --}}
+            <tr>
+                <td colspan="3" class="text-center font-bold text-base py-1 border border-black print-bg-yellow" style="background-color: #FFFF00 !important;">ROMANEIO</td>
+            </tr>
+            
+            {{-- Informações do Destino/Cliente --}}
+            @php
+                // Pega o primeiro cliente como referência para o cabeçalho
+                $primeiroCliente = $rota->requisicoes->first()->cliente ?? null;
+            @endphp
+            <tr>
+                <td class="font-bold uppercase border border-black px-1 w-[120px]">CLIENTE:</td>
+                <td colspan="2" class="border border-black px-1">{{ $primeiroCliente ? $primeiroCliente->nome : 'DIVERSOS' }}</td>
+            </tr>
+            <tr>
+                <td class="font-bold uppercase border border-black px-1">ENDEREÇO:</td>
+                <td colspan="2" class="border border-black px-1">{{ $rota->cidade_destino }} - {{ $rota->estado_destino }}</td>
+            </tr>
+            <tr>
+                <td class="font-bold uppercase border border-black px-1">CNPJ:</td>
+                <td colspan="2" class="border border-black px-1">{{ $primeiroCliente->cnpj ?? '' }}</td>
+            </tr>
+            <tr>
+                <td class="font-bold uppercase border border-black px-1">TIPO:</td>
+                <td colspan="2" class="border border-black px-1 font-bold" style="color: #CC0000;">
+                    <span style="background-color: #FFCCCC !important; padding: 0 4px; border-radius: 2px;" class="print-bg-red-light">ROTA</span>
+                </td>
+            </tr>
+            <tr>
+                <td class="font-bold uppercase border border-black px-1">EMPRESA ENTRI:</td>
+                <td colspan="2" class="border border-black px-1"></td>
+            </tr>
+            <tr>
+                <td class="font-bold uppercase border border-black px-1">EMPRESA:</td>
+                <td colspan="2" class="border border-black px-1 font-bold text-white print-bg-red-dark" style="background-color: #990000 !important;">
+                    Alucom
+                </td>
+            </tr>
+            <tr>
+                <td class="font-bold uppercase border border-black px-1">SAIDA :</td>
+                <td colspan="2" class="border border-black px-1 text-center font-bold">ALUCOM FORTALEZA</td>
+            </tr>
+            <tr>
+                <td class="font-bold uppercase border border-black px-1">MOTORISTA:</td>
+                <td colspan="2" class="border border-black px-1">{{ $rota->motorista->name }}</td>
+            </tr>
+            <tr>
+                <td class="font-bold uppercase border border-black px-1">VEICULO:</td>
+                <td colspan="2" class="border border-black px-1">{{ $rota->veiculo->modelo }} - {{ strtoupper($rota->veiculo->placa) }}</td>
+            </tr>
+
+            {{-- Sub-título Equipamentos --}}
+            <tr>
+                <td colspan="3" class="text-center font-bold py-1 border border-black print-bg-yellow" style="background-color: #FFFF00 !important;">EQUIPAMENTOS</td>
+            </tr>
+            <tr>
+                <td class="font-bold uppercase border border-black px-1 text-center w-[80px]">QUANT.:</td>
+                <td class="font-bold uppercase border border-black px-1 w-[100px]">PESO:</td>
+                <td class="font-bold uppercase border border-black px-1">TIPO:</td>
+            </tr>
+
+            {{-- Loop de Requisições --}}
+            @foreach($rota->requisicoes as $req)
+            <tr>
+                <td class="text-center border border-black px-1">1</td>
+                <td class="border border-black px-1"></td>
+                <td class="border border-black px-1 uppercase">
+                    {{ $req->catalogo->modelo ?? 'EQUIPAMENTO NÃO ESPECIFICADO' }} 
+                    {{ $req->patrimonio_novo ? '- PAT: ' . $req->patrimonio_novo : '' }}
+                </td>
+            </tr>
+            @endforeach
+
+            {{-- Linhas em branco extra para preencher papel e ficar igual a planilha --}}
+            @for($i = 0; $i < 10; $i++)
+            <tr>
+                <td class="border border-black px-1 py-[9px]"></td>
+                <td class="border border-black px-1"></td>
+                <td class="border border-black px-1"></td>
+            </tr>
+            @endfor
+
+            {{-- Rodapé --}}
+            <tr>
+                <td colspan="3" class="border border-black px-1 text-xs">
+                    No caso de transportadora informar a quantidade de volume
+                </td>
+            </tr>
+            <tr>
+                <td colspan="2" class="border border-black px-1">Volume =</td>
+                <td class="border border-black px-1 font-bold">{{ $rota->requisicoes->count() }}</td>
+            </tr>
+            <tr>
+                <td colspan="2" class="border border-black px-1">Peso =</td>
+                <td class="border border-black px-1"></td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+
 <style>
     @media print {
+        @page {
+            margin: 1cm; /* Margem padrão de impressão */
+        }
         body {
-            background: white;
+            background: white !important;
+            /* Instrução super importante para o navegador imprimir os fundos coloridos */
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
         }
 
-        aside,
-        header,
-        .print\:hidden {
+        /* Esconde a interface original, sidebar do admin etc */
+        aside, header, nav, .print\:hidden {
             display: none !important;
         }
 
+        /* Removemos paddings do main que podem empurrar a impressão */
         main {
             padding: 0 !important;
+            margin: 0 !important;
         }
 
         .container {
             max-width: 100% !important;
+            padding: 0 !important;
         }
     }
 </style>
