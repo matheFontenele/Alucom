@@ -28,7 +28,7 @@
         </div>
     </div>
 
-    {{-- O Seu Card Original da Tela --}}
+    {{-- Card Original da Tela --}}
     <div class="bg-white rounded-3xl shadow-sm border border-slate-200 overflow-hidden">
         <div class="p-8 border-b-2 border-slate-100 bg-slate-50/50 flex justify-between items-center">
             <div class="flex items-center gap-4">
@@ -87,6 +87,7 @@
                                 <span class="block font-bold">{{ $req->cliente->nome ?? 'Cliente não informado' }}</span>
                                 <span class="text-[10px] text-slate-400 font-bold uppercase">{{ $rota->cidade_destino }} - {{ $rota->estado_destino }}</span>
                             </td>
+                            {{-- Ajustado de modelo para nome --}}
                             <td class="px-6 py-4 text-sm">{{ $req->catalogo->nome ?? 'Modelo não encontrado' }}</td>
                             <td class="px-6 py-4">
                                 <span class="bg-slate-100 text-slate-800 px-2 py-1 rounded font-mono font-bold uppercase text-xs">
@@ -112,7 +113,7 @@
 </div>
 
 {{-- ========================================== --}}
-{{-- MODO IMPRESSÃO (Oculto na tela, visível só ao imprimir) --}}
+{{-- MODO IMPRESSÃO (Oculto na tela)            --}}
 {{-- ========================================== --}}
 <div class="hidden print:block w-full text-black bg-white" style="font-family: Arial, sans-serif;">
     <table class="w-full border-collapse border border-black text-[13px] leading-tight">
@@ -122,14 +123,13 @@
                 <td colspan="3" class="text-center font-bold text-base py-1 border border-black print-bg-yellow" style="background-color: #FFFF00 !important;">ROMANEIO</td>
             </tr>
             
-            {{-- Informações do Destino/Cliente --}}
             @php
-                // Pega o primeiro cliente como referência para o cabeçalho
-                $primeiroCliente = $rota->requisicoes->first()->cliente ?? null;
+                $primeiraReq = $rota->requisicoes->first();
+                $primeiroCliente = $primeiraReq->cliente ?? null;
             @endphp
             <tr>
                 <td class="font-bold uppercase border border-black px-1 w-[120px]">CLIENTE:</td>
-                <td colspan="2" class="border border-black px-1">{{ $primeiroCliente ? $primeiroCliente->nome : 'DIVERSOS' }}</td>
+                <td colspan="2" class="border border-black px-1">{{ $primeiroCliente ? ($primeiroCliente->nome_fantasia ?? $primeiroCliente->nome) : 'DIVERSOS' }}</td>
             </tr>
             <tr>
                 <td class="font-bold uppercase border border-black px-1">ENDEREÇO:</td>
@@ -142,7 +142,7 @@
             <tr>
                 <td class="font-bold uppercase border border-black px-1">TIPO:</td>
                 <td colspan="2" class="border border-black px-1 font-bold" style="color: #CC0000;">
-                    <span style="background-color: #FFCCCC !important; padding: 0 4px; border-radius: 2px;" class="print-bg-red-light">ROTA</span>
+                    <span style="background-color: #FFCCCC !important; padding: 0 4px; border-radius: 2px;">ROTA</span>
                 </td>
             </tr>
             <tr>
@@ -151,7 +151,7 @@
             </tr>
             <tr>
                 <td class="font-bold uppercase border border-black px-1">EMPRESA:</td>
-                <td colspan="2" class="border border-black px-1 font-bold text-white print-bg-red-dark" style="background-color: #990000 !important;">
+                <td colspan="2" class="border border-black px-1 font-bold text-white" style="background-color: #990000 !important;">
                     Alucom
                 </td>
             </tr>
@@ -168,7 +168,6 @@
                 <td colspan="2" class="border border-black px-1">{{ $rota->veiculo->modelo }} - {{ strtoupper($rota->veiculo->placa) }}</td>
             </tr>
 
-            {{-- Sub-título Equipamentos --}}
             <tr>
                 <td colspan="3" class="text-center font-bold py-1 border border-black print-bg-yellow" style="background-color: #FFFF00 !important;">EQUIPAMENTOS</td>
             </tr>
@@ -178,20 +177,22 @@
                 <td class="font-bold uppercase border border-black px-1">TIPO:</td>
             </tr>
 
-            {{-- Loop de Requisições --}}
+            {{-- Loop de Requisições na Impressão --}}
             @foreach($rota->requisicoes as $req)
             <tr>
-                <td class="text-center border border-black px-1">1</td>
+                <td class="text-center border border-black px-1">{{ $req->quantidade ?? 1 }}</td>
                 <td class="border border-black px-1"></td>
                 <td class="border border-black px-1 uppercase">
+                    {{-- Ajustado de modelo para nome --}}
                     {{ $req->catalogo->nome ?? 'EQUIPAMENTO NÃO ESPECIFICADO' }} 
                     {{ $req->patrimonio_novo ? '- PAT: ' . $req->patrimonio_novo : '' }}
                 </td>
             </tr>
             @endforeach
 
-            {{-- Linhas em branco extra para preencher papel e ficar igual a planilha --}}
-            @for($i = 0; $i < 10; $i++)
+            {{-- Linhas em branco extra --}}
+            @php $linhasExtras = 12 - $rota->requisicoes->count(); @endphp
+            @for($i = 0; $i < ($linhasExtras > 0 ? $linhasExtras : 5); $i++)
             <tr>
                 <td class="border border-black px-1 py-[9px]"></td>
                 <td class="border border-black px-1"></td>
@@ -199,7 +200,6 @@
             </tr>
             @endfor
 
-            {{-- Rodapé --}}
             <tr>
                 <td colspan="3" class="border border-black px-1 text-xs">
                     No caso de transportadora informar a quantidade de volume
@@ -219,31 +219,14 @@
 
 <style>
     @media print {
-        @page {
-            margin: 1cm; /* Margem padrão de impressão */
-        }
+        @page { margin: 1cm; }
         body {
             background: white !important;
-            /* Instrução super importante para o navegador imprimir os fundos coloridos */
             -webkit-print-color-adjust: exact !important;
             print-color-adjust: exact !important;
         }
-
-        /* Esconde a interface original, sidebar do admin etc */
-        aside, header, nav, .print\:hidden {
-            display: none !important;
-        }
-
-        /* Removemos paddings do main que podem empurrar a impressão */
-        main {
-            padding: 0 !important;
-            margin: 0 !important;
-        }
-
-        .container {
-            max-width: 100% !important;
-            padding: 0 !important;
-        }
+        aside, header, nav, .print\:hidden { display: none !important; }
+        main { padding: 0 !important; margin: 0 !important; }
     }
 </style>
 @endsection
