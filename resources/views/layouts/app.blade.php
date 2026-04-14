@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GUIA ADI - @yield('title', 'Dashboard')</title>
+    <title>AS - Sistema - @yield('title', 'Dashboard')</title>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
@@ -12,22 +12,10 @@
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 
     <style>
-        [x-cloak] {
-            display: none !important;
-        }
-
-        aside::-webkit-scrollbar {
-            width: 4px;
-        }
-
-        aside::-webkit-scrollbar-thumb {
-            background: #334155;
-            border-radius: 10px;
-        }
-
-        .main-content {
-            min-height: calc(100vh - 64px);
-        }
+        [x-cloak] { display: none !important; }
+        aside::-webkit-scrollbar { width: 4px; }
+        aside::-webkit-scrollbar-thumb { background: #334155; border-radius: 10px; }
+        .main-content { min-height: calc(100vh - 64px); }
     </style>
 </head>
 
@@ -43,7 +31,7 @@
         </div>
 
         <div class="flex-1 py-4 space-y-2">
-            {{-- Grupo: Operações --}}
+            {{-- Grupo: Operações (Visível para todos os logados) --}}
             <div class="px-4">
                 <button @click="openMenu = (openMenu === 'operacao' ? '' : 'operacao')"
                     class="w-full flex items-center justify-between p-3 rounded-lg hover:bg-slate-800 transition group"
@@ -59,16 +47,14 @@
                     <x-nav-link href="{{ route('guia-adi.index') }}" active="{{ request()->routeIs('guia-adi.*') }}" icon="ph-printer" label="Guia Impressoras" />
                     <x-nav-link href="{{ route('clientes.index') }}" active="{{ request()->routeIs('clientes.*') }}" icon="ph-building-office" label="Clientes" />
                     <x-nav-link href="{{ route('catalogos.index') }}" active="{{ request()->routeIs('catalogos.*') }}" icon="ph-book-open-text" label="Catálogo" />
-                    
-                    {{-- Aba Equipamentos Adicionada --}}
                     <x-nav-link href="{{ route('equipamentos.index') }}" active="{{ request()->routeIs('equipamentos.*') }}" icon="ph-hard-drives" label="Equipamentos" />
-                    
                     <x-nav-link href="{{ route('tecnicos.index') }}" active="{{ request()->routeIs('tecnicos.*') }}" icon="ph-wrench" label="Técnicos" />
                     <x-nav-link href="{{ route('estoques.index') }}" active="{{ request()->routeIs('estoques.*') }}" icon="ph-archive" label="Estoques" />
                 </div>
             </div>
 
-            {{-- Grupo: Logística --}}
+            {{-- Grupo: Logística (Filtro por função) --}}
+            @if(in_array(Auth::user()->funcao, ['Direção', 'Gerência', 'Logística', 'Motorista']))
             <div class="px-4">
                 <button @click="openMenu = (openMenu === 'logistica' ? '' : 'logistica')"
                     class="w-full flex items-center justify-between p-3 rounded-lg hover:bg-slate-800 transition group"
@@ -87,8 +73,10 @@
                     <x-nav-link href="{{ route('veiculos.index') }}" active="{{ request()->routeIs('veiculos.*') }}" icon="ph-car" label="Veículos" />
                 </div>
             </div>
+            @endif
 
-            {{-- Grupo: Gerenciamento --}}
+            {{-- Grupo: Gerenciamento (Apenas Direção e Gerência) --}}
+            @if(in_array(Auth::user()->funcao, ['Direção', 'Gerência']))
             <div class="px-4">
                 <button @click="openMenu = (openMenu === 'gerenciamento' ? '' : 'gerenciamento')"
                     class="w-full flex items-center justify-between p-3 rounded-lg hover:bg-slate-800 transition group"
@@ -104,17 +92,18 @@
                     <x-nav-link href="{{ route('usuarios.index') }}" active="{{ request()->routeIs('usuarios.*') }}" icon="ph-users-three" label="Usuários" />
                 </div>
             </div>
+            @endif
         </div>
 
         {{-- Perfil --}}
         <div class="p-4 border-t border-slate-800 bg-slate-900/50">
-            <div class="flex items-center gap-3 p-2 bg-slate-800/40 rounded-xl">
-                <div class="w-10 h-10 rounded-lg bg-red-600 flex items-center justify-center text-white font-black shadow-lg">
-                    {{ substr(Auth::user()->name ?? 'A', 0, 1) }}
+            <div class="flex items-center gap-3 p-2 bg-slate-800/40 rounded-xl border border-slate-700/50">
+                <div class="w-10 h-10 rounded-lg bg-red-600 flex items-center justify-center text-white font-black shadow-lg uppercase">
+                    {{ substr(Auth::user()->name ?? 'U', 0, 1) }}
                 </div>
                 <div class="flex flex-col overflow-hidden">
                     <span class="text-sm font-bold text-white truncate">{{ Auth::user()->name ?? 'Usuário' }}</span>
-                    <span class="text-[10px] text-slate-500 uppercase font-bold">{{ Auth::user()->funcao ?? 'Admin' }}</span>
+                    <span class="text-[10px] text-slate-500 uppercase font-bold tracking-wider">{{ Auth::user()->funcao ?? 'Acesso' }}</span>
                 </div>
             </div>
         </div>
@@ -127,45 +116,36 @@
                 <i class="ph ph-caret-right text-slate-400"></i>
                 <span class="text-slate-600 font-semibold tracking-tight uppercase text-sm">@yield('subtitle', 'Visão Geral')</span>
             </div>
-            {{-- Notificações e Logout --}}
+
+            {{-- Logout Funcional --}}
             <div class="flex items-center gap-5 text-slate-400">
-                <form method="POST" action="{{ route('logout') }}">
+                <form id="logout-form" action="{{ route('logout') }}" method="POST" class="hidden">
                     @csrf
-                    <button type="submit" class="hover:text-red-600 transition flex items-center">
-                        <i class="ph ph-sign-out text-2xl"></i>
-                    </button>
                 </form>
+                <button type="button" 
+                    onclick="event.preventDefault(); document.getElementById('logout-form').submit();"
+                    class="hover:text-red-600 transition-all duration-200 flex items-center group" 
+                    title="Sair do Sistema">
+                    <i class="ph ph-sign-out text-2xl group-hover:translate-x-1 transition-transform"></i>
+                </button>
             </div>
         </header>
 
         <main class="p-8 main-content overflow-y-auto bg-gray-50 flex-1">
             <div class="max-w-7xl mx-auto">
+                {{-- Alertas de Sessão --}}
                 @if(session('success'))
-                <div class="bg-emerald-500 text-white p-4 rounded-2xl mb-6 shadow-lg shadow-emerald-900/20 flex items-center gap-3">
-                    <i class="ph ph-check-circle text-2xl"></i>
-                    <span class="font-bold">{{ session('success') }}</span>
-                </div>
+                    <div class="bg-emerald-500 text-white p-4 rounded-2xl mb-6 shadow-lg shadow-emerald-900/20 flex items-center gap-3">
+                        <i class="ph ph-check-circle text-2xl"></i>
+                        <span class="font-bold">{{ session('success') }}</span>
+                    </div>
                 @endif
 
                 @if(session('error'))
-                <div class="bg-red-500 text-white p-4 rounded-2xl mb-6 shadow-lg shadow-red-900/20 flex items-center gap-3">
-                    <i class="ph ph-warning-circle text-2xl"></i>
-                    <span class="font-bold">{{ session('error') }}</span>
-                </div>
-                @endif
-
-                @if($errors->any())
-                <div class="bg-orange-500 text-white p-4 rounded-2xl mb-6 shadow-lg shadow-orange-900/20">
-                    <div class="flex items-center gap-3 mb-2">
-                        <i class="ph ph-warning text-2xl"></i>
-                        <span class="font-bold uppercase text-sm tracking-widest">Atenção: Verifique os dados</span>
+                    <div class="bg-red-500 text-white p-4 rounded-2xl mb-6 shadow-lg shadow-red-900/20 flex items-center gap-3">
+                        <i class="ph ph-warning-circle text-2xl"></i>
+                        <span class="font-bold">{{ session('error') }}</span>
                     </div>
-                    <ul class="list-disc list-inside text-sm font-medium opacity-90">
-                        @foreach($errors->all() as $error)
-                        <li>{{ $error }}</li>
-                        @endforeach
-                    </ul>
-                </div>
                 @endif
 
                 @yield('content')
@@ -176,5 +156,4 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     @yield('scripts')
 </body>
-
 </html>
