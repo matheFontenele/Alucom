@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="pt-br">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,6 +8,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
 </head>
+
 <body class="bg-slate-50 flex items-center justify-center h-screen font-sans">
     <div class="w-full max-w-md p-8">
         <div class="bg-white rounded-3xl shadow-2xl overflow-hidden border border-gray-100">
@@ -21,6 +23,13 @@
             <form action="{{ route('login') }}" method="POST" class="p-8 space-y-5">
                 @csrf
                 <div>
+                    @if ($errors->any())
+                    <div class="bg-red-50 text-red-600 p-3 rounded-lg text-xs font-bold mb-4 border border-red-100">
+                        @foreach ($errors->all() as $error)
+                        <p>{{ $error }}</p>
+                        @endforeach
+                    </div>
+                    @endif
                     <label class="block text-xs font-bold uppercase text-slate-500 mb-1 ml-1">E-mail Corporativo</label>
                     <div class="relative">
                         <i class="ph ph-envelope-simple absolute left-3 top-3 text-slate-400"></i>
@@ -40,7 +49,7 @@
                     </div>
                 </div>
 
-                <button type="submit" 
+                <button type="submit"
                     class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-4 rounded-xl shadow-lg shadow-red-900/20 transition-all transform active:scale-[0.98]">
                     Acessar Sistema
                 </button>
@@ -49,4 +58,5 @@
         <p class="text-center text-slate-400 text-xs mt-6 uppercase font-bold tracking-tighter">© {{ date('Y') }} Alucom - Versão 2.0</p>
     </div>
 </body>
+
 </html>

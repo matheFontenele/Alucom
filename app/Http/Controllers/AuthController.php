@@ -19,7 +19,7 @@ class AuthController extends Controller
 
         if (Auth::attempt($credenciais)) {
             $request->session()->regenerate();
-            return redirect()->intended('guia-adi');
+            return redirect()->intended(route('guia-adi.index'));
         }
 
         return back()->withErrors(['email' => 'Usuário ou senha inválidos.']);
