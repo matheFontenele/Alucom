@@ -15,7 +15,7 @@ class LogisticaSeeder extends Seeder
         $usuarios = [
             [
                 'name' => 'Imna',
-                'email' => 'admin.admin@alucom.com',
+                'email' => 'admin@alucom.com',
                 'password' => Hash::make('admin123'),
                 'funcao' => 'Direção',
             ],
