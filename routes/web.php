@@ -97,6 +97,15 @@ Route::get('/debug-seed', function () {
     }
 });
 
+// BUSCAR DADOS DE CADASTOS (OBS APENAS TESTE APAGAR DEPOIS)
+Route::get('/check-user', function () {
+    $user = \App\Models\User::where('email', 'admin@alucom.com')->first();
+    if (!$user) {
+        return "Usuário admin@alucom.com NÃO existe no banco.";
+    }
+    return "Usuário encontrado: " . $user->name . " | Função: " . $user->funcao;
+});
+
 // Limpeza de cache (Essencial após mudar rotas ou subir no Render)
 Route::get('/limpar-rota', function() {
     Artisan::call('route:clear');
