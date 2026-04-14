@@ -27,7 +27,7 @@
     }" class="w-64 flex-shrink-0 bg-slate-900 h-screen text-slate-300 flex flex-col shadow-xl sticky top-0 z-20 transition-all duration-300 overflow-y-auto">
 
         <div class="p-6 text-white font-bold text-2xl border-b border-slate-800 flex items-center gap-2">
-            <i class="ph ph-package text-red-500"></i> Guia ADI
+            <i class="ph ph-package text-red-500"></i> AS - Sistema
         </div>
 
         <div class="flex-1 py-4 space-y-2">

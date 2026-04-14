@@ -19,6 +19,12 @@ return Application::configure(basePath: dirname(__DIR__))
             guests: '/login',      // Para onde vai quem NÃO está logado
             users: '/guia-adi'    // Para onde vai quem JÁ está logado e tenta ir pro login
         );
+
+        // 3. REGISTRO DO ALIAS (CORREÇÃO DO ERRO 'funcao')
+        // Isso vincula o nome 'funcao' usado nas rotas à classe do Middleware
+        $middleware->alias([
+            'funcao' => \App\Http\Middleware\CheckFuncao::class,
+        ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //
