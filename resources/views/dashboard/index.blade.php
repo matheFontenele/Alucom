@@ -8,9 +8,6 @@
     
     <div class="flex items-center justify-between border-b border-gray-200 pb-4">
         <h1 class="text-2xl font-bold text-slate-800">Dashboard</h1>
-        <div class="text-sm font-medium text-slate-500 bg-white px-4 py-2 rounded-lg shadow-sm border border-gray-100">
-            <span class="text-red-500">●</span> Status do Sistema: Online
-        </div>
     </div>
 
     {{-- Grid de Cards Estilo Alcom --}}
