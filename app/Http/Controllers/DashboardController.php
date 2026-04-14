@@ -13,7 +13,6 @@ class DashboardController extends Controller
     public function index()
     {
         // 1. MÉTRICAS DE EQUIPAMENTOS
-        // Contamos apenas onde o tipo é 'equipamento'
         $totalEquipamentos = Equipamento::where('tipo', 'equipamento')->count();
         
         // Filtros por Status
@@ -37,7 +36,7 @@ class DashboardController extends Controller
         // 4. LOCAIS DE ESTOQUE
         $totalLocaisEstoque = Estoque::count();
 
-        return view('dashboard', compact(
+        return view('dashboard.index', compact(
             'totalEquipamentos', 
             'equipamentosDisponiveis',
             'equipamentosAlugados',
