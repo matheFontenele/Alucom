@@ -77,6 +77,8 @@ Route::middleware(['auth'])->group(function () {
 
 });
 
+Route::get('/rotas/{id}/imprimir', [App\Http\Controllers\RotaController::class, 'imprimir'])->name('rotas.imprimir');
+
 // ---------------------------------------------------------
 // 3. MANUTENÇÃO (Comandos Artisan via URL)
 // ---------------------------------------------------------

@@ -68,12 +68,12 @@
                 <p class="text-[10px] font-black text-slate-400 uppercase mb-2">Resumo do Carregamento</p>
                 <div class="flex flex-wrap gap-2">
                     @foreach($rota->requisicoes->take(3) as $req)
-                        <span class="bg-white px-2 py-1 rounded-md border border-slate-200 text-[10px] font-bold text-slate-600">
-                            #{{ $req->id }} {{ Str::limit($req->cliente->nome, 10) }}
-                        </span>
+                    <span class="bg-white px-2 py-1 rounded-md border border-slate-200 text-[10px] font-bold text-slate-600">
+                        #{{ $req->id }} {{ Str::limit($req->cliente->nome, 10) }}
+                    </span>
                     @endforeach
                     @if($rota->requisicoes->count() > 3)
-                        <span class="text-[10px] font-bold text-slate-400 mt-1">+{{ $rota->requisicoes->count() - 3 }} outros</span>
+                    <span class="text-[10px] font-bold text-slate-400 mt-1">+{{ $rota->requisicoes->count() - 3 }} outros</span>
                     @endif
                 </div>
             </div>
@@ -84,9 +84,11 @@
                 <i class="ph ph-eye text-lg"></i> Detalhes da Carga
             </a>
             <div class="flex gap-2">
-                <button title="Imprimir Manifesto" class="p-2 bg-white border border-slate-200 rounded-lg text-slate-400 hover:text-slate-600 hover:shadow-sm transition">
+                <a href="{{ route('rotas.imprimir', $rota->id) }}" target="_blank"
+                    title="Imprimir Romaneio"
+                    class="p-2 bg-white border border-slate-200 rounded-lg text-slate-400 hover:text-slate-600 hover:shadow-sm transition">
                     <i class="ph ph-printer"></i>
-                </button>
+                </a>
                 <button title="Finalizar Entrega" class="p-2 bg-emerald-500 text-white rounded-lg hover:bg-emerald-600 shadow-sm transition">
                     <i class="ph ph-check-bold"></i>
                 </button>

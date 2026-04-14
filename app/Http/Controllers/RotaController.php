@@ -97,4 +97,9 @@ class RotaController extends Controller
 
         return view('rotas.show', compact('rota'));
     }
+
+    public function imprimir($id) {
+    $rota = Rota::with(['motorista', 'veiculo', 'requisicoes.cliente', 'requisicoes.catalogo'])->findOrFail($id);
+    return view('rotas.imprimir', compact('rota'));
+}
 }
