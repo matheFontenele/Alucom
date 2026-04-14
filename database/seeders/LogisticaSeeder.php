@@ -17,7 +17,7 @@ class LogisticaSeeder extends Seeder
                 'name' => 'Imna',
                 'email' => 'admin.admin@alucom.com',
                 'password' => Hash::make('admin123'),
-                'funcao' => 'Gerência',
+                'funcao' => 'Direção',
             ],
             [
                 'name' => 'Rogerio Nascimento',

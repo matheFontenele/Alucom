@@ -12,10 +12,22 @@
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 
     <style>
-        [x-cloak] { display: none !important; }
-        aside::-webkit-scrollbar { width: 4px; }
-        aside::-webkit-scrollbar-thumb { background: #334155; border-radius: 10px; }
-        .main-content { min-height: calc(100vh - 64px); }
+        [x-cloak] {
+            display: none !important;
+        }
+
+        aside::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        aside::-webkit-scrollbar-thumb {
+            background: #334155;
+            border-radius: 10px;
+        }
+
+        .main-content {
+            min-height: calc(100vh - 64px);
+        }
     </style>
 </head>
 
@@ -31,6 +43,13 @@
         </div>
 
         <div class="flex-1 py-4 space-y-2">
+            <div class="px-4 mb-4">
+                <a href="{{ route('dashboard') }}"
+                    class="flex items-center gap-3 p-3 rounded-lg transition group {{ request()->routeIs('dashboard') ? 'bg-red-600 text-white shadow-lg shadow-red-900/40' : 'hover:bg-slate-800 text-slate-300' }}">
+                    <i class="ph ph-house text-xl {{ request()->routeIs('dashboard') ? 'text-white' : 'text-red-500' }}"></i>
+                    <span class="text-sm font-bold uppercase tracking-wider">Início / Dashboard</span>
+                </a>
+            </div>
             {{-- Grupo: Operações (Visível para todos os logados) --}}
             <div class="px-4">
                 <button @click="openMenu = (openMenu === 'operacao' ? '' : 'operacao')"
@@ -122,9 +141,9 @@
                 <form id="logout-form" action="{{ route('logout') }}" method="POST" class="hidden">
                     @csrf
                 </form>
-                <button type="button" 
+                <button type="button"
                     onclick="event.preventDefault(); document.getElementById('logout-form').submit();"
-                    class="hover:text-red-600 transition-all duration-200 flex items-center group" 
+                    class="hover:text-red-600 transition-all duration-200 flex items-center group"
                     title="Sair do Sistema">
                     <i class="ph ph-sign-out text-2xl group-hover:translate-x-1 transition-transform"></i>
                 </button>
@@ -135,17 +154,17 @@
             <div class="max-w-7xl mx-auto">
                 {{-- Alertas de Sessão --}}
                 @if(session('success'))
-                    <div class="bg-emerald-500 text-white p-4 rounded-2xl mb-6 shadow-lg shadow-emerald-900/20 flex items-center gap-3">
-                        <i class="ph ph-check-circle text-2xl"></i>
-                        <span class="font-bold">{{ session('success') }}</span>
-                    </div>
+                <div class="bg-emerald-500 text-white p-4 rounded-2xl mb-6 shadow-lg shadow-emerald-900/20 flex items-center gap-3">
+                    <i class="ph ph-check-circle text-2xl"></i>
+                    <span class="font-bold">{{ session('success') }}</span>
+                </div>
                 @endif
 
                 @if(session('error'))
-                    <div class="bg-red-500 text-white p-4 rounded-2xl mb-6 shadow-lg shadow-red-900/20 flex items-center gap-3">
-                        <i class="ph ph-warning-circle text-2xl"></i>
-                        <span class="font-bold">{{ session('error') }}</span>
-                    </div>
+                <div class="bg-red-500 text-white p-4 rounded-2xl mb-6 shadow-lg shadow-red-900/20 flex items-center gap-3">
+                    <i class="ph ph-warning-circle text-2xl"></i>
+                    <span class="font-bold">{{ session('error') }}</span>
+                </div>
                 @endif
 
                 @yield('content')
@@ -156,4 +175,5 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     @yield('scripts')
 </body>
+
 </html>

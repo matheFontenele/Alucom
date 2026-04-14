@@ -17,25 +17,30 @@ use App\Http\Controllers\RequisicaoController;
 use App\Http\Controllers\RotaController;
 use App\Http\Controllers\VeiculoController;
 use App\Http\Controllers\UserController;
-use App\Http\Controllers\AuthController; // Adicionado
+use App\Http\Controllers\AuthController;
+use App\Http\Controllers\DashboardController;
 
 use App\Models\Subcategoria;
 
 // ---------------------------------------------------------
-// 1. AUTENTICAÇÃO (PÚBLICO)
+// 1. ROTAS PÚBLICAS
 // ---------------------------------------------------------
 Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
 Route::post('/login', [AuthController::class, 'login']);
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
+// Redireciona a raiz para o Dashboard (o middleware 'auth' cuidará de mandar pro login se não estiver logado)
 Route::get('/', function () {
-    return redirect()->route('login');
+    return redirect()->route('dashboard');
 });
 
 // ---------------------------------------------------------
 // 2. ÁREA RESTRITA (PRECISA ESTAR LOGADO)
 // ---------------------------------------------------------
 Route::middleware(['auth'])->group(function () {
+
+    // --- DASHBOARD PRINCIPAL ---
+    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
     // --- OPERAÇÕES (MENU 1) ---
     Route::resource('guia-adi', GuiaAdiController::class);
@@ -97,7 +102,7 @@ Route::get('/debug-seed', function () {
     }
 });
 
-// BUSCAR DADOS DE CADASTOS (OBS APENAS TESTE APAGAR DEPOIS)
+// BUSCAR DADOS DE CADASTOS (APENAS TESTE)
 Route::get('/check-user', function () {
     $user = \App\Models\User::where('email', 'admin@alucom.com')->first();
     if (!$user) {
