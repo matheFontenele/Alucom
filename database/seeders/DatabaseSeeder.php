@@ -15,7 +15,7 @@ class DatabaseSeeder extends Seeder
     {
         // 1. Criar Usuário Administrador
         // Verificamos se o usuário já existe para não dar erro ao rodar o seeder várias vezes
-        User::firstOrCreate(
+        User::updateOrCreate(
             ['email' => 'admin@alucom.com'], // Busca por este e-mail
             [
                 'name' => 'Admin Alucom',

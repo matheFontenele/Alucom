@@ -15,15 +15,9 @@ class LogisticaSeeder extends Seeder
         $usuarios = [
             [
                 'name' => 'D.Silvia',
-                'email' => 'admin@alucom.com',
+                'email' => 'silvia.admin@alucom.com', // E-mail único para ela
                 'password' => Hash::make('12345678'),
                 'funcao' => 'Gerência',
-            ],
-            [
-                'name' => 'D.Silvia',
-                'email' => 'admin@alucom.com',
-                'password' => Hash::make('12345678'),
-                'funcao' => 'Direção',
             ],
             [
                 'name' => 'Rogerio Nascimento',
@@ -45,7 +39,7 @@ class LogisticaSeeder extends Seeder
             ],
             [
                 'name' => 'Carlos Jr',
-                'email' => 'calors.motorista@alucom.com',
+                'email' => 'carlos.motorista@alucom.com',
                 'password' => Hash::make('12345678'),
                 'funcao' => 'Estoque',
             ],
