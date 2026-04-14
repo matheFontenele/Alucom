@@ -12,21 +12,40 @@ class DashboardController extends Controller
 {
     public function index()
     {
-        // Coletando os números principais
-        $totalEquipamentos = Equipamento::count();
+        // 1. MÉTRICAS DE EQUIPAMENTOS
+        // Contamos apenas onde o tipo é 'equipamento'
+        $totalEquipamentos = Equipamento::where('tipo', 'equipamento')->count();
+        
+        // Filtros por Status
+        $equipamentosDisponiveis = Equipamento::where('status', 'Disponivel')->count();
+        $equipamentosAlugados = Equipamento::where('status', 'Alugado')->count();
+        $equipamentosManutencao = Equipamento::where('status', 'Manutenção')->count();
+
+        // 2. MÉTRICAS DE INSUMOS E CLIENTES
         $totalClientes = Clientes::count();
         
-        // Exemplo: Peças com estoque baixo (menos de 5 unidades)
-        $estoqueBaixo = Estoque::where('quantidade', '<', 5)->count();
+        // Contamos itens marcados como 'insumo' (Toners, Tintas, etc)
+        $totalInsumos = Equipamento::where('tipo', 'insumo')->count();
         
-        // Exemplo: Requisições pendentes hoje
-        $requisicoesPendentes = Requisicao::where('status', 'pendente')->count();
+        // 3. LOGÍSTICA E REQUISIÇÕES
+        try {
+            $requisicoesPendentes = Requisicao::where('status', 'pendente')->count();
+        } catch (\Exception $e) {
+            $requisicoesPendentes = 0;
+        }
+
+        // 4. LOCAIS DE ESTOQUE
+        $totalLocaisEstoque = Estoque::count();
 
         return view('dashboard', compact(
             'totalEquipamentos', 
+            'equipamentosDisponiveis',
+            'equipamentosAlugados',
+            'equipamentosManutencao',
             'totalClientes', 
-            'estoqueBaixo', 
-            'requisicoesPendentes'
+            'totalInsumos',
+            'requisicoesPendentes',
+            'totalLocaisEstoque'
         ));
     }
 }
