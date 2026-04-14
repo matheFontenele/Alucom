@@ -11,11 +11,14 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware) {
+        // 1. Confia nos proxies do Render para que o HTTPS seja identificado corretamente
         $middleware->trustProxies(at: '*');
-    })
 
-    ->withMiddleware(function (Middleware $middleware): void {
-        //
+        // 2. Define os redirecionamentos padrão do sistema
+        $middleware->redirectTo(
+            guests: '/login',      // Para onde vai quem NÃO está logado
+            users: '/guia-adi'    // Para onde vai quem JÁ está logado e tenta ir pro login
+        );
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //
