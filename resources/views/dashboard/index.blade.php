@@ -14,16 +14,6 @@
 
     {{-- Linha 1: Status da Frota de Equipamentos --}}
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        
-        <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 flex items-center transition-transform hover:scale-[1.02]">
-            <div class="w-12 h-12 bg-slate-100 text-slate-600 rounded-xl flex items-center justify-center mr-4">
-                <i class="ph ph-hard-drives text-2xl"></i>
-            </div>
-            <div>
-                <p class="text-sm text-slate-500 font-medium">Frota Total</p>
-                <h3 class="text-2xl font-bold text-slate-800">{{ $totalEquipamentos }}</h3>
-            </div>
-        </div>
 
         <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 flex items-center transition-transform hover:scale-[1.02]">
             <div class="w-12 h-12 bg-emerald-100 text-emerald-600 rounded-xl flex items-center justify-center mr-4">
