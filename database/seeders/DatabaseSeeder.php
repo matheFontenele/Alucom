@@ -12,11 +12,16 @@ class DatabaseSeeder extends Seeder
 
     public function run(): void
     {
-        // 1. Usuário Admin
-        //User::factory()->create([
-          //  'name' => 'Admin Alucom',
-           // 'email' => 'admin@alucom.com',
-        //]);
+        // 1. Criar Usuário Administrador
+        // Verificamos se o usuário já existe para não dar erro ao rodar o seeder várias vezes
+        User::firstOrCreate(
+            ['email' => 'admin@alucom.com'], // Busca por este e-mail
+            [
+                'name' => 'Admin Alucom',
+                'password' => Hash::make('admin123'), // Define a senha padrão
+                'funcao' => 'Direção', // Garante que ele tenha acesso a tudo
+            ]
+        );
 
         // 2. Ordem Hierárquica (Pai -> Filho)
         $this->call([
