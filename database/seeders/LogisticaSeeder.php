@@ -14,9 +14,9 @@ class LogisticaSeeder extends Seeder
         // 1. Criando Usuários com Funções Diferentes
         $usuarios = [
             [
-                'name' => 'D.Silvia',
-                'email' => 'silvia.admin@alucom.com', // E-mail único para ela
-                'password' => Hash::make('12345678'),
+                'name' => 'Imna',
+                'email' => 'admin.admin@alucom.com',
+                'password' => Hash::make('admin123'),
                 'funcao' => 'Gerência',
             ],
             [
