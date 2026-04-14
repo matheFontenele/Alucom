@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login - Guia ADi</title>
+    <title>Login - AS - Sistemas</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
 </head>
@@ -14,8 +14,8 @@
                 <div class="inline-flex items-center justify-center w-16 h-16 bg-red-600 rounded-2xl shadow-lg mb-4">
                     <i class="ph ph-package text-white text-3xl"></i>
                 </div>
-                <h1 class="text-white text-2xl font-black tracking-tight">GUIA ADi</h1>
-                <p class="text-slate-400 text-sm mt-1 uppercase tracking-widest font-bold">Gestão de Inventário</p>
+                <h1 class="text-white text-2xl font-black tracking-tight">AS - Sistemas</h1>
+                <p class="text-slate-400 text-sm mt-1 uppercase tracking-widest font-bold">Gestão de equipamentos e processos</p>
             </div>
 
             <form action="{{ route('login') }}" method="POST" class="p-8 space-y-5">
