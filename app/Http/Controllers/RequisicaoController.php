@@ -30,7 +30,6 @@ class RequisicaoController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'status' => 'pendente',
             'cliente_id' => 'required',
             'catalogo_id' => 'required',
             'quantidade' => 'required|integer|min:1',
@@ -39,6 +38,7 @@ class RequisicaoController extends Controller
         ]);
 
         Requisicao::create([
+            'situacao' => 'Pendente',
             'oficio' => $request->oficio ?? 'Sem Oficio',
             'solicitante' => auth()->user() ? auth()->user()->name : 'Admin',
             'data_solicitacao' => now(),
@@ -82,7 +82,7 @@ class RequisicaoController extends Controller
 
         // 1. Atualiza a requisição
         $requisicao->update([
-            'status' => 'Finalizada',
+            'situacao' => 'Finalizada',
             'quantidade_separada' => $request->quantidade_separada,
             'data_separacao' => $request->data_separacao,
             'separado_por' => $request->separado_por,

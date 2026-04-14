@@ -28,7 +28,7 @@ class DashboardController extends Controller
         
         // 3. LOGÍSTICA E REQUISIÇÕES
         try {
-            $requisicoesPendentes = Requisicao::where('status', 'Pendente')->count();
+            $requisicoesPendentes = Requisicao::where('situacao', 'Pendente')->count();
         } catch (\Exception $e) {
             $requisicoesPendentes = 0;
         }
