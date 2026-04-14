@@ -98,6 +98,27 @@ class RotaController extends Controller
         return view('rotas.show', compact('rota'));
     }
 
+    public function update(Request $request, $id)
+{
+    $rota = Rota::findOrFail($id);
+
+    // Se o botão enviou o status (como no seu formulário que tem 'Entregue')
+    if ($request->has('status')) {
+        $rota->update([
+            'status' => $request->status
+        ]);
+
+        // Opcional: Se quiser atualizar as requisições vinculadas a essa rota também
+        if ($request->status == 'Entregue') {
+            foreach ($rota->requisicoes as $req) {
+                $req->update(['situacao' => 'Entregue']);
+            }
+        }
+    }
+
+    return redirect()->route('rotas.index')->with('success', 'Rota atualizada com sucesso!');
+}
+
     public function imprimir($id) {
     $rota = Rota::with(['motorista', 'veiculo', 'requisicoes.cliente', 'requisicoes.catalogo'])->findOrFail($id);
     return view('rotas.imprimir', compact('rota'));
