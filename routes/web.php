@@ -81,8 +81,17 @@ Route::get('/api/categorias/{categoria}/subcategorias', function ($categoriaId) 
     return Subcategoria::where('categoria_id', $categoriaId)->get();
 });
 
+
 // ---------------------------------------------------------
-// 6. MANUTENÇÃO (Comandos Artisan via URL)
+// 6. Comando para autentificação de usuarios
+// ---------------------------------------------------------
+Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
+Route::post('/login', [AuthController::class, 'login']);
+Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+
+
+// ---------------------------------------------------------
+// 7. MANUTENÇÃO (Comandos Artisan via URL)
 // ---------------------------------------------------------
 
 // Popula o banco sem resetar tudo
