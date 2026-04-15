@@ -41,4 +41,9 @@ class Movimentacao extends Model
     {
         return $this->belongsTo(Requisicao::class);
     }
+
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class);
+    }
 }
