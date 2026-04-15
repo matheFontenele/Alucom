@@ -132,27 +132,51 @@ class MovimentacaoController extends Controller
     }
 
     /**
-     * Gera o PDF do Protocolo com cores dinâmicas.
+     * Gera o PDF do Protocolo com Timbrado Automático.
      */
     public function emitirProtocolo($id)
     {
+        // Aumenta limite para evitar erro com imagens pesadas no Render
         ini_set('memory_limit', '512M');
 
-        $movimentacao = Movimentacao::with(['itens.equipamento', 'empresa'])->findOrFail($id);
+        // Carrega relações existentes no Model Movimentacao
+        $movimentacao = Movimentacao::with(['equipamento.catalogo', 'requisicao.cliente'])->findOrFail($id);
+        
+        // Como o Model Movimentacao representa 1 item, criamos a coleção para o loop do Blade
+        $itens = collect([$movimentacao]);
 
-        // Se a empresa tiver slug 'moreia', o Blade vai buscar 'moreia.png'
+        // Lógica de Seleção de Timbrado baseada na Etiqueta/Destino
+        $slug = 'alucom'; // Padrão
+        $nomeEmpresa = 'Alucom Ltda';
+        
+        $destinoLower = strtolower($movimentacao->destino);
+
+        if (str_contains($destinoLower, 'zaploc')) {
+            $slug = 'zaploc';
+            $nomeEmpresa = 'ZapLoc Soluções';
+        } elseif (str_contains($destinoLower, 'moreia')) {
+            $slug = 'moreia';
+            $nomeEmpresa = 'Moreia Equipamentos';
+        } elseif (str_contains($destinoLower, 'ip')) {
+            $slug = 'ip';
+            $nomeEmpresa = 'IP Tecnologia';
+        }
+
         $config = [
-            'slug' => $movimentacao->empresa->slug, // Ex: zaploc
-            'nome' => $movimentacao->empresa->nome,
-            'cor'  => $movimentacao->empresa->cor_principal
+            'slug' => $slug,
+            'nome' => $nomeEmpresa,
+            'cor'  => '#ed1c24',
+            'razao_social' => $nomeEmpresa . ' - CNPJ 01.628.251/0001-88',
+            'endereco' => 'Rua Riachuelo, 40 - Papicu - CEP: 60.175-205',
+            'contato' => 'Fortaleza - CE | (85) 3262-3191'
         ];
 
         $pdf = Pdf::loadView('pdf.protocolo', [
             'movimentacao' => $movimentacao,
-            'itens' => $movimentacao->itens,
+            'itens' => $itens,
             'config' => $config
         ]);
 
-        return $pdf->stream('protocolo.pdf');
+        return $pdf->stream("protocolo_{$slug}_{$movimentacao->id}.pdf");
     }
 }
