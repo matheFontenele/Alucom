@@ -136,80 +136,23 @@ class MovimentacaoController extends Controller
      */
     public function emitirProtocolo($id)
     {
-
-        // Aumenta o limite de memoria temporariamente para 256MB ou 512MB apenas para gerar este PDF
         ini_set('memory_limit', '512M');
-        // 1. Busca os dados
-        $movimentacao = Movimentacao::with(['requisicao.cliente', 'equipamento.catalogo'])->findOrFail($id);
 
-        // 2. Lógica de configuração de cores e dados da empresa (Define a variável $config)
-        $empresaKey = strtolower($movimentacao->origem);
+        $movimentacao = Movimentacao::with(['itens.equipamento', 'empresa'])->findOrFail($id);
 
-        $empresas = [
-            'alucom' => [
-                'nome' => 'Alucom',
-                'slug' => 'alucom',
-                'cor'  => '#D32F2F', // Vermelho
-                'razao_social' => 'ALUCOM LTDA - CNPJ 01.628.251/0001-88',
-                'endereco' => 'Rua Riachuelo, 40 - Papicu - CEP: 60.175-205',
-                'endereco_curto' => 'Rua Riachuelo, 40 - Papicu - Fortaleza/CE',
-                'contato' => 'Fortaleza - CE | (85) 3262-3191',
-                'contatos_footer' => '(85) 98814-6081 | 0800 166 1000 | comercial@alucom.com.br'
-            ],
-            'moreia' => [
-                'nome' => 'Moreia',
-                'slug' => 'moreia',
-                'cor'  => '#FF8C00', // Laranja
-                'razao_social' => 'MOREIA TECNOLOGIA LTDA',
-                'endereco' => 'Endereço da Moreia...',
-                'endereco_curto' => 'Cidade/UF',
-                'contato' => 'Telefone Moreia',
-                'contatos_footer' => 'contato@moreia.com.br'
-            ],
-            'ip' => [
-                'nome' => 'IP',
-                'slug' => 'ip',
-                'cor'  => '#0000FF', // Azul
-                'razao_social' => 'IP SOLUÇÕES TECNOLÓGICAS',
-                'endereco' => 'Endereço IP...',
-                'endereco_curto' => 'Cidade/UF',
-                'contato' => 'Telefone IP',
-                'contatos_footer' => 'contato@ip.com.br'
-            ],
-            'zaploc' => [
-                'nome' => 'ZapLoc',
-                'slug' => 'zaploc',
-                'cor'  => '#2E8B57', // Verde
-                'razao_social' => 'ZAPLOC LOCAÇÕES E SERVIÇOS',
-                'endereco' => 'Endereço ZapLoc...',
-                'endereco_curto' => 'Cidade/UF',
-                'contato' => 'Telefone ZapLoc',
-                'contatos_footer' => 'contato@zaploc.com.br'
-            ],
+        // Se a empresa tiver slug 'moreia', o Blade vai buscar 'moreia.png'
+        $config = [
+            'slug' => $movimentacao->empresa->slug, // Ex: zaploc
+            'nome' => $movimentacao->empresa->nome,
+            'cor'  => $movimentacao->empresa->cor_principal
         ];
 
-        // Se a origem não for uma das empresas acima, usa Alucom como padrão
-        $config = $empresas['alucom'];
-        foreach ($empresas as $key => $value) {
-            if (str_contains($empresaKey, $key)) {
-                $config = $value;
-                break;
-            }
-        }
+        $pdf = Pdf::loadView('pdf.protocolo', [
+            'movimentacao' => $movimentacao,
+            'itens' => $movimentacao->itens,
+            'config' => $config
+        ]);
 
-        // 3. Busca os itens
-        if ($movimentacao->requisicao_id) {
-            $itens = Movimentacao::with('equipamento.catalogo')
-                ->where('requisicao_id', $movimentacao->requisicao_id)
-                ->get();
-        } else {
-            $itens = collect([$movimentacao]);
-        }
-
-        // 4. Passa a variável $config para a view
-        $pdf = Pdf::loadView('pdf.protocolo', compact('movimentacao', 'itens', 'config'))
-            ->setPaper('a4', 'portrait');
-
-        return $pdf->stream("Protocolo_{$config['slug']}_MOV_{$movimentacao->id}.pdf");
+        return $pdf->stream('protocolo.pdf');
     }
 }
