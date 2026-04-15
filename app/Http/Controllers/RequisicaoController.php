@@ -29,8 +29,6 @@ class RequisicaoController extends Controller
     {
         $clientes = Clientes::orderBy('nome')->get();
         $estoques = Estoque::orderBy('nome')->get();
-
-        // O catálogo inicia vazio na View pois será preenchido via JS conforme o estoque
         $catalogo = [];
 
         return view('requisicoes.create', compact('clientes', 'estoques', 'catalogo'));
@@ -107,7 +105,6 @@ class RequisicaoController extends Controller
     {
         $requisicao = Requisicao::with(['cliente', 'item'])->findOrFail($id);
 
-        // Filtra os tombos disponíveis APENAS no estoque que foi selecionado na requisição
         $tombosDisponiveis = Equipamento::where('catalogo_id', $requisicao->catalogo_id)
             ->where('estoque_id', $requisicao->estoque_id)
             ->where('status', 'Disponivel')
@@ -118,16 +115,20 @@ class RequisicaoController extends Controller
     }
 
     /**
-     * Finaliza a separação e gera a movimentação
+     * Finaliza a separação e inicia o rastreio (Status: Separado)
      */
     public function separarUpdate(Request $request, $id)
     {
         $requisicao = Requisicao::with(['cliente', 'estoque'])->findOrFail($id);
 
         return DB::transaction(function () use ($request, $requisicao) {
-            // 1. Atualiza a Requisição
+            
+            // 1. Determina o Tipo de Movimentação para o Histórico
+            $tipoMov = ($requisicao->tipo_solicitacao === 'Substituição') ? 'Substituição' : 'Aluguel';
+
+            // 2. Atualiza os dados da Requisição
             $requisicao->update([
-                'situacao'             => 'Finalizada',
+                'situacao'             => 'Finalizada', // Indica que saiu da fila de pendentes
                 'quantidade_separada'  => $request->quantidade_separada,
                 'data_separacao'       => $request->data_separacao,
                 'separado_por'         => $request->separado_por,
@@ -136,36 +137,35 @@ class RequisicaoController extends Controller
                 'patrimonio_novo'      => $request->patrimonio_novo,
             ]);
 
-            // 2. Se marcou para dar baixa no sistema, atualizamos o Equipamento e criamos a Movimentação
+            // 3. Processa o Equipamento Físico e gera o primeiro marco de movimentação
             if ($request->baixa_sistema == '1') {
-                // Busca o equipamento pelo tombo/patrimônio informado
                 $equipamentoFisico = Equipamento::where('tombo', $request->patrimonio_novo)->first();
 
                 if ($equipamentoFisico) {
-                    // REGISTRA A MOVIMENTAÇÃO NO HISTÓRICO
+                    // CRIA O REGISTRO DE MOVIMENTAÇÃO QUE O ROTA-CONTROLLER VAI BUSCAR DEPOIS
                     Movimentacao::create([
                         'equipamento_id'    => $equipamentoFisico->id,
                         'requisicao_id'     => $requisicao->id,
-                        'tipo'              => 'Aluguel',
-                        'situacao'          => 'Aguardando Rota',
+                        'tipo'              => $tipoMov,
+                        'situacao'          => 'Separado', // REGRA DE OURO: Deve ser exatamente "Separado"
                         'origem'            => $requisicao->estoque->nome ?? 'Estoque Central',
-                        'destino'           => $requisicao->cliente->nome,
+                        'destino'           => 'Aguardando Rota',
                         'data_movimentacao' => now(),
-                        'observacao'        => "Saída automática via Req #{$requisicao->id}. Subst: {$requisicao->patrimonio_substituido}"
+                        'observacao'        => "Item separado. Aguardando transporte. Req #{$requisicao->id}."
                     ]);
 
-                    // ATUALIZA O ESTADO DO EQUIPAMENTO (Reflete na aba Equipamentos)
+                    // ATUALIZA O EQUIPAMENTO NO CADASTRO GERAL
                     $equipamentoFisico->update([
-                        'status'            => 'Alugado',            // Status Principal
-                        'situacao'          => 'Aguardando Rota',    // Substatus
-                        'cliente_id'        => $requisicao->cliente_id, // Vincula ao novo dono
-                        'estoque_id'        => null,                 // Remove do estoque atual
+                        'status'            => 'Alugado',
+                        'situacao'          => 'Separado', // Alinha o sub-status do equipamento
+                        'cliente_id'        => $requisicao->cliente_id,
+                        'estoque_id'        => null, // Sai do estoque e fica "na mão" do sistema
                         'data_movimentacao' => now(),
                     ]);
                 }
             }
 
-            return redirect()->route('requisicoes.index')->with('success', 'Separação concluída e equipamento atualizado!');
+            return redirect()->route('requisicoes.index')->with('success', 'Separação concluída! O item agora está disponível para ser incluído em uma rota.');
         });
     }
 }
