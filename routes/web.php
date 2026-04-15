@@ -34,6 +34,9 @@ Route::get('/', function () {
     return redirect()->route('dashboard');
 });
 
+// Rota para buscar itens filtrados por estoque via AJAX
+Route::get('/api/estoques/{estoque}/itens', [RequisicaoController::class, 'getItensPorEstoque']);
+
 // ---------------------------------------------------------
 // 2. ÁREA RESTRITA (PRECISA ESTAR LOGADO)
 // ---------------------------------------------------------

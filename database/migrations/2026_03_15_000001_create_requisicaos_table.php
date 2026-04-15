@@ -20,6 +20,7 @@ return new class extends Migration
             // Relacionamentos
             $table->foreignId('cliente_id')->constrained('clientes');
             $table->foreignId('catalogo_id')->constrained('catalogo'); 
+            $table->foreignId('estoque_id')->constrained('estoques');
 
             $table->string('estado');
             $table->string('cidade');

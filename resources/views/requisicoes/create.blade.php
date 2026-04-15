@@ -3,7 +3,6 @@
 @section('content')
 <div class="container mx-auto p-6">
     <div class="max-w-5xl mx-auto bg-white shadow-2xl rounded-2xl overflow-hidden border border-gray-200">
-        {{-- Cabeçalho --}}
         <div class="bg-blue-900 p-5 flex justify-between items-center">
             <h2 class="text-white text-xl font-bold flex items-center gap-3">
                 <i class="ph ph-file-plus text-2xl"></i> Nova Requisição de Material
@@ -40,7 +39,7 @@
                         <option value="{{ $cliente->id }}"
                             data-cidade="{{ $cliente->cidade }}"
                             data-estado="{{ $cliente->estado }}"
-                            data-etiqueta="{{ $cliente->contrato }}"> {{-- Mapeado para o campo 'contrato' --}}
+                            data-etiqueta="{{ $cliente->contrato }}">
                             {{ $cliente->nome }}
                         </option>
                         @endforeach
@@ -56,7 +55,35 @@
                 </div>
             </div>
 
-            {{-- Seção 3: Detalhes de Envio --}}
+            {{-- Seção 3: Seleção de Estoque de Origem --}}
+            <div class="grid grid-cols-1 gap-6 pt-4 border-t border-gray-100">
+                <div>
+                    <label class="block text-xs font-black uppercase text-blue-900 mb-1">Estoque de Origem (Onde os itens serão retirados)</label>
+                    <select name="estoque_id" id="estoque_select" class="w-full border-blue-200 bg-blue-50 rounded-xl focus:ring-2 focus:ring-blue-500" required>
+                        <option value="">Selecione primeiro o Estoque</option>
+                        @foreach($estoques as $estoque)
+                        <option value="{{ $estoque->id }}">{{ $estoque->nome }}</option>
+                        @endforeach
+                    </select>
+                </div>
+            </div>
+
+            {{-- Seção 4: Item e Quantidade --}}
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 pt-4 border-t border-gray-100">
+                <div class="md:col-span-2">
+                    <label class="block text-xs font-black uppercase text-gray-400 mb-1">Equipamento | Insumo (Filtro por Estoque)</label>
+                    <select name="catalogo_id" id="catalogo_select" class="w-full border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500" required disabled>
+                        <option value="">Aguardando seleção de estoque...</option>
+                    </select>
+                    <p id="aviso_estoque" class="text-red-500 text-xs mt-1 hidden">Não há itens disponíveis neste estoque.</p>
+                </div>
+                <div>
+                    <label class="block text-xs font-black uppercase text-gray-400 mb-1">Quantidade Solicitada</label>
+                    <input type="number" name="quantidade" min="1" placeholder="0" class="w-full border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500" required>
+                </div>
+            </div>
+
+            {{-- Seção 5: Detalhes de Envio --}}
             <div class="grid grid-cols-1 md:grid-cols-4 gap-6 pt-4 border-t border-gray-100">
                 <div>
                     <label class="block text-xs font-black uppercase text-gray-400 mb-1">Previsão de Envio</label>
@@ -85,30 +112,7 @@
                 </div>
             </div>
 
-            {{-- Seção 4: Item e Quantidade --}}
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 pt-4 border-t border-gray-100">
-                <div class="md:col-span-2">
-                    <label class="block text-xs font-black uppercase text-gray-400 mb-1">Equipamento | Insumo (Disponível em Estoque)</label>
-                    <select name="catalogo_id" class="w-full border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500" required>
-                        <option value="">Selecione o Item</option>
-                        @foreach($catalogo as $item)
-                        <option value="{{ $item->id }}" {{ $item->equipamentos_count <= 0 ? 'disabled' : '' }}>
-                            {{ $item->nome }} - {{ $item->fabricante }}
-                            ({{ $item->equipamentos_count }} unidades em estoque)
-                        </option>
-                        @endforeach
-                    </select>
-                    @if($catalogo->where('equipamentos_count', '>', 0)->count() == 0)
-                    <p class="text-red-500 text-xs mt-1">Aviso: Não há itens com estoque disponível.</p>
-                    @endif
-                </div>
-                <div>
-                    <label class="block text-xs font-black uppercase text-gray-400 mb-1">Quantidade Solicitada</label>
-                    <input type="number" name="quantidade" min="1" placeholder="0" class="w-full border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500" required>
-                </div>
-            </div>
-
-            {{-- Seção 5: Tipo de Solicitação e Patrimônio --}}
+            {{-- Seção 6: Tipo de Solicitação --}}
             <div class="p-6 bg-blue-50 rounded-2xl border border-blue-100 space-y-4">
                 <div>
                     <label class="block text-sm font-bold text-blue-900 mb-3">Tipo de Solicitação</label>
@@ -118,7 +122,7 @@
                             <span class="ml-3 text-gray-700 font-medium group-hover:text-blue-900 transition">Novo Item</span>
                         </label>
                         <label class="inline-flex items-center group cursor-pointer">
-                            <input type="radio" name="tipo_solicitacao" value="Substituição" id="radio_substituicao" class="w-5 h-5 text-blue-900 focus:ring-blue-900">
+                            <input type="radio" name="tipo_solicitacao" value="Substituição" class="w-5 h-5 text-blue-900 focus:ring-blue-900">
                             <span class="ml-3 text-gray-700 font-medium group-hover:text-blue-900 transition">Substituição</span>
                         </label>
                     </div>
@@ -130,7 +134,6 @@
                 </div>
             </div>
 
-            {{-- Ações --}}
             <div class="flex justify-end items-center gap-4 pt-8 border-t border-gray-100">
                 <a href="{{ route('requisicoes.index') }}" class="px-8 py-3 text-gray-400 font-bold hover:text-gray-600 transition">Cancelar</a>
                 <button type="submit" class="bg-blue-900 text-white px-12 py-3 rounded-xl font-black hover:bg-blue-800 transition transform hover:-translate-y-1 shadow-xl active:scale-95">
@@ -142,42 +145,65 @@
 </div>
 
 <script>
-    // 1. Atualização Automática de Cidade, Estado e Etiqueta (Contrato)
+    // 1. Filtro de Itens por Estoque (Dinâmico)
+    document.getElementById('estoque_select').addEventListener('change', function() {
+        const estoqueId = this.value;
+        const itemSelect = document.getElementById('catalogo_select');
+        const aviso = document.getElementById('aviso_estoque');
+
+        itemSelect.innerHTML = '<option value="">Carregando itens...</option>';
+        itemSelect.disabled = true;
+        aviso.classList.add('hidden');
+
+        if (!estoqueId) {
+            itemSelect.innerHTML = '<option value="">Selecione primeiro o estoque</option>';
+            return;
+        }
+
+        fetch(`/api/estoques/${estoqueId}/itens`)
+            .then(response => response.json())
+            .then(data => {
+                itemSelect.innerHTML = '<option value="">Selecione o Item</option>';
+                
+                if (data.length === 0) {
+                    itemSelect.innerHTML = '<option value="">Nenhum item disponível</option>';
+                    aviso.classList.remove('hidden');
+                } else {
+                    data.forEach(item => {
+                        const option = document.createElement('option');
+                        option.value = item.id;
+                        option.textContent = `${item.nome} - ${item.fabricante} (${item.equipamentos_count} disponíveis)`;
+                        itemSelect.appendChild(option);
+                    });
+                    itemSelect.disabled = false;
+                }
+            })
+            .catch(() => {
+                itemSelect.innerHTML = '<option value="">Erro ao carregar dados</option>';
+            });
+    });
+
+    // 2. Cidade, Estado e Etiqueta automática
     document.getElementById('cliente_select').addEventListener('change', function() {
         const option = this.options[this.selectedIndex];
-
-        // Preenche Cidade e Estado
         document.getElementById('cidade_input').value = option.getAttribute('data-cidade') || '';
         document.getElementById('estado_input').value = option.getAttribute('data-estado') || '';
 
-        // Preenche a Etiqueta com base no campo Contrato do cliente
-        const contratoSugerido = option.getAttribute('data-etiqueta');
+        const contrato = option.getAttribute('data-etiqueta');
         const selectEtiqueta = document.getElementById('etiqueta_select');
 
-        if (contratoSugerido) {
-            // Normaliza para comparação (remove espaços e ignora case)
-            const valorParaComparar = contratoSugerido.trim().toLowerCase();
-
-            let encontrou = false;
+        if (contrato) {
+            const valor = contrato.trim().toLowerCase();
             for (let i = 0; i < selectEtiqueta.options.length; i++) {
-                if (selectEtiqueta.options[i].value.toLowerCase() === valorParaComparar) {
+                if (selectEtiqueta.options[i].value.toLowerCase() === valor) {
                     selectEtiqueta.selectedIndex = i;
-                    encontrou = true;
                     break;
                 }
-            }
-
-            // Feedback visual se uma correspondência for encontrada
-            if (encontrou) {
-                selectEtiqueta.classList.add('ring-2', 'ring-blue-400', 'border-blue-400');
-                setTimeout(() => {
-                    selectEtiqueta.classList.remove('ring-2', 'ring-blue-400', 'border-blue-400');
-                }, 1000);
             }
         }
     });
 
-    // 2. Lógica Dinâmica para o Campo de Patrimônio
+    // 3. Campo de Patrimônio
     document.querySelectorAll('input[name="tipo_solicitacao"]').forEach(radio => {
         radio.addEventListener('change', function() {
             const divPatrimonio = document.getElementById('campo_patrimonio');
