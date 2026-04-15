@@ -13,8 +13,10 @@ return new class extends Migration
     {
         Schema::create('movimentacoes', function (Blueprint $table) {
             $table->id();
+            
             $table->foreignId('equipamento_id')->constrained('equipamentos');
-            $table->enum('tipo', ['Devolução', 'Aluguel', 'Manutenção', 'Liberação', 'Substituição', 'Reservado']);
+            $table->foreignId('requisicao_id')->nullable()->constrained('requisicoes')->nullOnDelete();
+            $table->string('tipo');    
             $table->string('situacao')->nullable();
             $table->string('origem');
             $table->string('destino');

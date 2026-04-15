@@ -11,74 +11,84 @@ use Illuminate\Support\Facades\DB;
 
 class MovimentacaoController extends Controller
 {
+    /**
+     * Lista o histórico de movimentações.
+     */
     public function index()
     {
-        $movimentacoes = Movimentacao::with(['equipamento'])
+        // Carrega também a requisição caso exista, para exibir na listagem
+        $movimentacoes = Movimentacao::with(['equipamento', 'requisicao'])
             ->orderBy('data_movimentacao', 'desc')
             ->paginate(20);
 
         return view('movimentacoes.index', compact('movimentacoes'));
     }
 
+    /**
+     * Formulário para criação de movimentação manual.
+     */
     public function create()
     {
         $equipamentos = Equipamento::orderBy('nome')->get();
-
-        $clientes = Clientes::with('parent')->orderBy('nome')->get();
-
+        $clientes = Clientes::orderBy('nome')->get();
         $estoques = Estoque::orderBy('nome')->get();
 
         return view('movimentacoes.create', compact('equipamentos', 'clientes', 'estoques'));
     }
 
+    /**
+     * Registra uma nova movimentação e atualiza o estado do equipamento.
+     */
     public function store(Request $request)
     {
         $request->validate([
-            'equipamento_id' => 'required|exists:equipamentos,id',
-            'tipo' => 'required',
-            'situacao' => 'required',
-            'origem' => 'required',
-            'destino' => 'required',
-            'data_movimentacao' => 'required',
+            'equipamento_id'    => 'required|exists:equipamentos,id',
+            'tipo'              => 'required|string', // Status Pai: Alugado, Devolução, Manutenção, etc.
+            'situacao'          => 'required|string', // Substatus: No Cliente, Em Estoque, etc.
+            'origem'            => 'required|string',
+            'destino'           => 'required|string',
+            'data_movimentacao' => 'required|date',
+            'requisicao_id'     => 'nullable|exists:requisicoes,id',
+            'observacao'        => 'nullable|string',
         ]);
 
         return DB::transaction(function () use ($request) {
             $equipamento = Equipamento::findOrFail($request->equipamento_id);
-            $tipo = $request->tipo;
-            $situacao = $request->situacao;
 
-            // Regra para Disponível
-            if ($tipo === 'Disponível') {
-                $equipamento->status = 'Disponivel';
-                $equipamento->cliente_id = null;
-                $estoque = Estoque::where('nome', $request->destino)->first();
-                $equipamento->estoque_id = $estoque->id ?? $equipamento->estoque_id;
-            }
-            // Regra para Devolução
-            elseif ($tipo === 'Devolução') {
-                $equipamento->status = 'Devolução';
-                if ($situacao === 'Recebido') {
-                    $equipamento->status = 'Disponivel';
-                    $equipamento->cliente_id = null;
-                    $estoque = Estoque::where('nome', $request->destino)->first();
-                    $equipamento->estoque_id = $estoque->id ?? $equipamento->estoque_id;
-                }
-            }
-            // Regra para Aluguel
-            elseif ($tipo === 'Aluguel') {
-                $equipamento->status = 'Alugado';
-                if ($situacao !== 'Aguardando Rota') {
-                    $equipamento->estoque_id = null;
-                    $cliente = Clientes::where('nome', $request->destino)->first();
-                    $equipamento->cliente_id = $cliente->id ?? $equipamento->cliente_id;
-                }
+            // 1. Atualiza o estado atual do Equipamento baseado na movimentação
+            $equipamento->status = $request->tipo;
+            $equipamento->situacao = $request->situacao;
+
+            // 2. Lógica de atribuição de Posse (Estoque vs Cliente)
+            switch ($request->tipo) {
+                case 'Liberado':
+                case 'Manutenção':
+                case 'Devolução':
+                    // Equipamento volta ou permanece na empresa
+                    if (str_contains($request->situacao, 'Estoque') || $request->situacao === 'Liberado') {
+                        $equipamento->cliente_id = null;
+                        $estoque = Estoque::where('nome', $request->destino)->first();
+                        $equipamento->estoque_id = $estoque->id ?? $equipamento->estoque_id;
+                    }
+                    break;
+
+                case 'Alugado':
+                case 'Reservado':
+                    // Equipamento vai ou permanece com cliente
+                    if ($request->situacao === 'No Cliente') {
+                        $equipamento->estoque_id = null;
+                        $cliente = Clientes::where('nome', $request->destino)->first();
+                        $equipamento->cliente_id = $cliente->id ?? $equipamento->cliente_id;
+                    }
+                    break;
             }
 
-            $equipamento->situacao = $situacao;
             $equipamento->save();
 
+            // 3. Cria o registro no histórico de movimentações
             Movimentacao::create($request->only([
                 'equipamento_id',
+                'requisicao_id',
                 'tipo',
                 'situacao',
                 'origem',
@@ -87,20 +97,26 @@ class MovimentacaoController extends Controller
                 'observacao'
             ]));
 
-            return redirect()->route('movimentacoes.index')->with('success', 'Movimentação registrada!');
+            return redirect()->route('movimentacoes.index')->with('success', 'Movimentação registrada com sucesso!');
         });
     }
 
+    /**
+     * Tela de edição (Geralmente para ajuste de observações ou substatus).
+     */
     public function edit($id)
     {
         $movimentacao = Movimentacao::findOrFail($id);
         return view('movimentacoes.edit', compact('movimentacao'));
     }
 
+    /**
+     * Atualiza o registro e sincroniza o estado do equipamento.
+     */
     public function update(Request $request, $id)
     {
         $request->validate([
-            'situacao' => 'required|string',
+            'situacao'   => 'required|string',
             'observacao' => 'nullable|string',
         ]);
 
@@ -108,26 +124,34 @@ class MovimentacaoController extends Controller
         $equipamento = $movimentacao->equipamento;
 
         return DB::transaction(function () use ($request, $movimentacao, $equipamento) {
+            // Atualiza o histórico
             $movimentacao->update($request->only(['situacao', 'observacao']));
 
-            // Se marcar como Disponível ou Recebido na edição, libera o equipamento
-            if ($request->situacao === 'Em Estoque' || $request->situacao === 'Recebido') {
-                $equipamento->status = 'Disponivel';
+            // Sincroniza o substatus no equipamento
+            $equipamento->situacao = $request->situacao;
+
+            // Se na edição mudar para um estado de posse em estoque, limpa cliente
+            if (in_array($request->situacao, ['Em Estoque', 'Recebido', 'Liberado'])) {
+                $equipamento->status = 'Liberado';
                 $equipamento->cliente_id = null;
                 $estoque = Estoque::where('nome', $movimentacao->destino)->first();
                 $equipamento->estoque_id = $estoque->id ?? $equipamento->estoque_id;
             }
 
-            $equipamento->situacao = $request->situacao;
             $equipamento->save();
 
-            return redirect()->route('movimentacoes.index')->with('success', 'Situação atualizada!');
+            return redirect()->route('movimentacoes.index')->with('success', 'Registro e estado do equipamento atualizados!');
         });
     }
 
+    /**
+     * Remove um registro de movimentação.
+     */
     public function destroy($id)
     {
-        Movimentacao::findOrFail($id)->delete();
-        return redirect()->back()->with('success', 'Registro removido!');
+        $movimentacao = Movimentacao::findOrFail($id);
+        $movimentacao->delete();
+
+        return redirect()->back()->with('success', 'Registro de movimentação removido!');
     }
 }

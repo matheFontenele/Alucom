@@ -13,6 +13,7 @@ class Movimentacao extends Model
     protected $table = 'movimentacoes';
 
     protected $fillable = [
+        'requisicao_id',
         'equipamento_id',
         'tipo',
         'situacao',
@@ -32,5 +33,12 @@ class Movimentacao extends Model
     public function equipamento(): BelongsTo
     {
         return $this->belongsTo(Equipamento::class);
+    }
+    /**
+     * Relacionamento com a Requisição responsavel pela movimnetação.
+     */
+    public function requisicao(): BelongsTo
+    {
+        return $this->belongsTo(Requisicao::class);
     }
 }
