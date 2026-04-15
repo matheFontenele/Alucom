@@ -61,7 +61,6 @@
             </div>
 
             {{-- Campo de Patrimônio Novo (Aparece apenas se for Substituição) --}}
-            @if($requisicao->tipo_solicitacao === 'Substituição')
             <div class="bg-blue-50 p-5 rounded-xl border-2 border-blue-200">
                 <label class="block text-sm font-bold text-blue-900 mb-2">
                     <i class="ph ph-barcode font-bold"></i> SELECIONE O TOMBO DO NOVO EQUIPAMENTO
@@ -78,7 +77,6 @@
                     * Exibindo apenas itens com status "Disponivel" vinculados a este modelo.
                 </p>
             </div>
-            @endif
 
             {{-- Baixa no Sistema --}}
             <div class="bg-amber-50 p-4 rounded-xl border border-amber-100">

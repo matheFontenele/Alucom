@@ -121,9 +121,13 @@ class RequisicaoController extends Controller
     {
         dd($request->all());
         $requisicao = Requisicao::with(['cliente', 'estoque'])->findOrFail($id);
+        
+        if ($request->baixa_sistema == '1' && !$request->patrimonio_novo) {
+            return back()->with('error', 'Você precisa selecionar um patrimônio para dar baixa no sistema!');
+        }
 
         return DB::transaction(function () use ($request, $requisicao) {
-            
+
             // 1. Determina o Tipo de Movimentação para o Histórico
             $tipoMov = ($requisicao->tipo_solicitacao === 'Substituição') ? 'Substituição' : 'Aluguel';
 
