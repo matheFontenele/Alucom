@@ -136,37 +136,38 @@ class MovimentacaoController extends Controller
      */
     public function emitirProtocolo($id)
     {
-        // Aumenta limite para evitar erro com imagens pesadas no Render
         ini_set('memory_limit', '512M');
 
-        // Carrega relações existentes no Model Movimentacao
+        // Carregamos a movimentação com a requisição (onde está a etiqueta)
         $movimentacao = Movimentacao::with(['equipamento.catalogo', 'requisicao.cliente'])->findOrFail($id);
-        
-        // Como o Model Movimentacao representa 1 item, criamos a coleção para o loop do Blade
         $itens = collect([$movimentacao]);
 
-        // Lógica de Seleção de Timbrado baseada na Etiqueta/Destino
-        $slug = 'alucom'; // Padrão
-        $nomeEmpresa = 'Alucom Ltda';
-        
-        $destinoLower = strtolower($movimentacao->destino);
+        // Pegamos a etiqueta da requisição. Se não existir, o padrão é 'alucom'
+        // Usamos strtolower para garantir que 'Moreia' vire 'moreia' e ache o arquivo .png
+        $slug = strtolower($movimentacao->requisicao->etiqueta ?? 'alucom');
 
-        if (str_contains($destinoLower, 'zaploc')) {
-            $slug = 'zaploc';
-            $nomeEmpresa = 'ZapLoc Soluções';
-        } elseif (str_contains($destinoLower, 'moreia')) {
-            $slug = 'moreia';
-            $nomeEmpresa = 'Moreia Equipamentos';
-        } elseif (str_contains($destinoLower, 'ip')) {
-            $slug = 'ip';
-            $nomeEmpresa = 'IP Tecnologia';
+        // Definição de nomes e cores por empresa
+        $empresas = [
+            'alucom' => ['nome' => 'Alucom Ltda', 'cor' => '#ed1c24'],
+            'moreia' => ['nome' => 'Moreia Equipamentos', 'cor' => '#005596'], // Exemplo de azul Moreia
+            'zaploc' => ['nome' => 'ZapLoc Soluções', 'cor' => '#000000'],
+            'ip'     => ['nome' => 'IP Tecnologia', 'cor' => '#333333'],
+        ];
+
+        // Se o slug da etiqueta não estiver no array acima, usa Alucom como reserva
+        $dadosEmpresa = $empresas[$slug] ?? $empresas['alucom'];
+
+        // Verificação de segurança para o arquivo físico
+        $path = public_path("images/logos/{$slug}.png");
+        if (!file_exists($path)) {
+            $slug = 'alucom';
         }
 
         $config = [
             'slug' => $slug,
-            'nome' => $nomeEmpresa,
-            'cor'  => '#ed1c24',
-            'razao_social' => $nomeEmpresa . ' - CNPJ 01.628.251/0001-88',
+            'nome' => $dadosEmpresa['nome'],
+            'cor'  => $dadosEmpresa['cor'],
+            'razao_social' => $dadosEmpresa['nome'] . ' - CNPJ 01.628.251/0001-88',
             'endereco' => 'Rua Riachuelo, 40 - Papicu - CEP: 60.175-205',
             'contato' => 'Fortaleza - CE | (85) 3262-3191'
         ];
