@@ -123,6 +123,18 @@ class MovimentacaoController extends Controller
         });
     }
 
+    public function show($id)
+    {
+        // Busca a movimentação com todas as relações necessárias para a visualização
+        $movimentacao = Movimentacao::with([
+            'equipamento.catalogo',
+            'requisicao.cliente',
+            'user'
+        ])->findOrFail($id);
+
+        return view('movimentacoes.show', compact('movimentacao'));
+    }
+
     public function destroy($id)
     {
         $movimentacao = Movimentacao::findOrFail($id);
