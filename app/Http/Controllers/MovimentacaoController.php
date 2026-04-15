@@ -192,4 +192,20 @@ class MovimentacaoController extends Controller
 
         return $pdf->stream("protocolo_{$slug}_{$movimentacao->id}.pdf");
     }
+
+    /**
+     * Gera o PDF de etiqueta
+     */
+    public function emitirEtiqueta($id)
+    {
+        $movimentacao = Movimentacao::with('equipamento')->findOrFail($id);
+
+        // O patrimônio que será exibido no centro da imagem
+        $patrimonio = $movimentacao->equipamento->patrimonio ?? 'S/P';
+
+        $pdf = Pdf::loadView('pdf.etiqueta', compact('patrimonio'))
+            ->setPaper([0, 0, 283.46, 141.73], 'landscape'); // Tamanho aprox. 10x5cm, ajuste conforme sua impressora
+
+        return $pdf->stream("etiqueta_{$patrimonio}.pdf");
+    }
 }

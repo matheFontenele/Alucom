@@ -7,9 +7,11 @@
     .table-container {
         overflow: visible !important;
     }
+
     table {
-        border-collapse: separate; 
+        border-collapse: separate;
     }
+
     td.acoes-cell {
         overflow: visible !important;
         position: relative;
@@ -48,13 +50,13 @@
             <tbody class="text-gray-700 divide-y divide-gray-100">
                 @forelse($movimentacoes as $mov)
                 @php
-                    // Lógica dinâmica de cores baseada na empresa/origem
-                    $empresaKey = strtolower($mov->origem);
-                    $corEmpresa = '#D32F2F'; // Padrão Alucom (Vermelho)
+                // Lógica dinâmica de cores baseada na empresa/origem
+                $empresaKey = strtolower($mov->origem);
+                $corEmpresa = '#D32F2F'; // Padrão Alucom (Vermelho)
 
-                    if (str_contains($empresaKey, 'moreia')) $corEmpresa = '#FF8C00'; // Laranja
-                    if (str_contains($empresaKey, 'ip')) $corEmpresa = '#0000FF';     // Azul
-                    if (str_contains($empresaKey, 'zaploc')) $corEmpresa = '#2E8B57'; // Verde
+                if (str_contains($empresaKey, 'moreia')) $corEmpresa = '#FF8C00'; // Laranja
+                if (str_contains($empresaKey, 'ip')) $corEmpresa = '#0000FF'; // Azul
+                if (str_contains($empresaKey, 'zaploc')) $corEmpresa = '#2E8B57'; // Verde
                 @endphp
 
                 <tr class="hover:bg-gray-50/50 transition">
@@ -85,19 +87,19 @@
                     <td class="py-4 px-6 text-sm text-gray-500">
                         {{ $mov->data_movimentacao->format('d/m/Y H:i') }}
                     </td>
-                    
-                    {{-- COLUNA DE AÇÕES COM DROPDOWN CORRIGIDO --}}
+
+                    {{-- COLUNA DE AÇÕES --}}
                     <td class="py-4 px-6 text-center acoes-cell" x-data="{ open: false }">
                         <button @click="open = !open" @click.away="open = false" class="p-2 rounded-full hover:bg-gray-100 transition text-gray-500">
                             <i class="ph ph-dots-three-outline-vertical text-xl"></i>
                         </button>
 
-                        <div x-show="open" 
-                             x-transition:enter="transition ease-out duration-100"
-                             x-transition:enter-start="transform opacity-0 scale-95"
-                             x-transition:enter-end="transform opacity-100 scale-100"
-                             class="absolute right-12 mt-2 w-48 rounded-lg shadow-xl bg-white ring-1 ring-black ring-opacity-5 z-[9999] overflow-hidden text-left"
-                             style="display: none; top: 10px;">
+                        <div x-show="open"
+                            x-transition:enter="transition ease-out duration-100"
+                            x-transition:enter-start="transform opacity-0 scale-95"
+                            x-transition:enter-end="transform opacity-100 scale-100"
+                            class="absolute right-12 mt-2 w-48 rounded-lg shadow-xl bg-white ring-1 ring-black ring-opacity-5 z-[9999] overflow-hidden text-left"
+                            style="display: none; top: 10px;">
                             <div class="py-1 bg-white">
                                 <a href="{{ route('movimentacoes.show', $mov->id) }}" class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 border-b border-gray-50">
                                     <i class="ph ph-eye mr-2 text-blue-500 text-lg"></i> Visualizar detalhes
@@ -108,6 +110,11 @@
                                 <a href="{{ route('movimentacoes.protocolo', $mov->id) }}" target="_blank" class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 border-b border-gray-50">
                                     <i class="ph ph-file-pdf mr-2 text-red-600 text-lg"></i> Emitir Protocolo
                                 </a>
+
+                                <a href="{{ route('movimentacoes.etiqueta', $mov->id) }}" target="_blank" class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 border-b border-gray-50">
+                                    <i class="ph ph-file-pdf mr-2 text-red-600 text-lg"></i> Gerar Etiqueta
+                                </a>
+
                                 <form action="{{ route('movimentacoes.destroy', $mov->id) }}" method="POST" onsubmit="return confirm('Tem certeza que deseja excluir?')">
                                     @csrf
                                     @method('DELETE')
