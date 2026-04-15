@@ -9,6 +9,7 @@ use App\Models\Estoque;
 use App\Models\Movimentacao;
 use App\Models\Equipamento;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class RequisicaoController extends Controller
 {
@@ -28,9 +29,9 @@ class RequisicaoController extends Controller
     {
         $clientes = Clientes::orderBy('nome')->get();
         $estoques = Estoque::orderBy('nome')->get();
-        
+
         // O catálogo inicia vazio na View pois será preenchido via JS conforme o estoque
-        $catalogo = []; 
+        $catalogo = [];
 
         return view('requisicoes.create', compact('clientes', 'estoques', 'catalogo'));
     }
@@ -40,16 +41,16 @@ class RequisicaoController extends Controller
      */
     public function getItensPorEstoque($estoqueId)
     {
-        $itens = Catalogo::whereHas('equipamentos', function($q) use ($estoqueId) {
+        $itens = Catalogo::whereHas('equipamentos', function ($q) use ($estoqueId) {
             $q->where('estoque_id', $estoqueId)
-              ->where('status', 'Disponivel');
+                ->where('status', 'Disponivel');
         })
-        ->withCount(['equipamentos' => function($q) use ($estoqueId) {
-            $q->where('estoque_id', $estoqueId)
-              ->where('status', 'Disponivel');
-        }])
-        ->orderBy('nome')
-        ->get();
+            ->withCount(['equipamentos' => function ($q) use ($estoqueId) {
+                $q->where('estoque_id', $estoqueId)
+                    ->where('status', 'Disponivel');
+            }])
+            ->orderBy('nome')
+            ->get();
 
         return response()->json($itens);
     }
@@ -121,36 +122,50 @@ class RequisicaoController extends Controller
      */
     public function separarUpdate(Request $request, $id)
     {
-        $requisicao = Requisicao::findOrFail($id);
+        $requisicao = Requisicao::with(['cliente', 'estoque'])->findOrFail($id);
 
-        $requisicao->update([
-            'situacao'             => 'Finalizada',
-            'quantidade_separada'  => $request->quantidade_separada,
-            'data_separacao'       => $request->data_separacao,
-            'separado_por'         => $request->separado_por,
-            'baixa_sistema'        => $request->baixa_sistema,
-            'observacao_separacao' => $request->observacao_separacao,
-            'patrimonio_novo'      => $request->patrimonio_novo,
-        ]);
+        return DB::transaction(function () use ($request, $requisicao) {
+            // 1. Atualiza a Requisição
+            $requisicao->update([
+                'situacao'             => 'Finalizada',
+                'quantidade_separada'  => $request->quantidade_separada,
+                'data_separacao'       => $request->data_separacao,
+                'separado_por'         => $request->separado_por,
+                'baixa_sistema'        => $request->baixa_sistema,
+                'observacao_separacao' => $request->observacao_separacao,
+                'patrimonio_novo'      => $request->patrimonio_novo,
+            ]);
 
-        if ($request->baixa_sistema == '1') {
-            $equipamentoFisico = Equipamento::where('tombo', $request->patrimonio_novo)->first();
+            // 2. Se marcou para dar baixa no sistema, atualizamos o Equipamento e criamos a Movimentação
+            if ($request->baixa_sistema == '1') {
+                // Busca o equipamento pelo tombo/patrimônio informado
+                $equipamentoFisico = Equipamento::where('tombo', $request->patrimonio_novo)->first();
 
-            if ($equipamentoFisico) {
-                Movimentacao::create([
-                    'equipamento_id'    => $equipamentoFisico->id,
-                    'tipo'              => 'Aluguel',
-                    'origem'            => $requisicao->estoque->nome ?? 'Estoque Central',
-                    'situacao'          => 'Aguardando Rota',
-                    'destino'           => $requisicao->cliente_id,
-                    'data_movimentacao' => now(),
-                    'detalhes'          => "Saída via Req #{$requisicao->id}. Substituindo: {$requisicao->patrimonio_substituido} por: {$request->patrimonio_novo}"
-                ]);
+                if ($equipamentoFisico) {
+                    // REGISTRA A MOVIMENTAÇÃO NO HISTÓRICO
+                    Movimentacao::create([
+                        'equipamento_id'    => $equipamentoFisico->id,
+                        'requisicao_id'     => $requisicao->id,
+                        'tipo'              => 'Aluguel',
+                        'situacao'          => 'Aguardando Rota',
+                        'origem'            => $requisicao->estoque->nome ?? 'Estoque Central',
+                        'destino'           => $requisicao->cliente->nome,
+                        'data_movimentacao' => now(),
+                        'observacao'        => "Saída automática via Req #{$requisicao->id}. Subst: {$requisicao->patrimonio_substituido}"
+                    ]);
 
-                $equipamentoFisico->update(['status' => 'Alugado']);
+                    // ATUALIZA O ESTADO DO EQUIPAMENTO (Reflete na aba Equipamentos)
+                    $equipamentoFisico->update([
+                        'status'            => 'Alugado',            // Status Principal
+                        'situacao'          => 'Aguardando Rota',    // Substatus
+                        'cliente_id'        => $requisicao->cliente_id, // Vincula ao novo dono
+                        'estoque_id'        => null,                 // Remove do estoque atual
+                        'data_movimentacao' => now(),
+                    ]);
+                }
             }
-        }
 
-        return redirect()->route('requisicoes.index')->with('success', 'Separação concluída!');
+            return redirect()->route('requisicoes.index')->with('success', 'Separação concluída e equipamento atualizado!');
+        });
     }
 }

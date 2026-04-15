@@ -97,8 +97,7 @@
                         @endif
                     </td>
                     <td class="py-4 px-6 text-xs text-gray-400">
-                        {{-- Usa a data de criação do registro no sistema --}}
-                        {{ $equip->created_at->format('d/m/Y') }}
+                        {{ $equip->updated_at->format('d/m/Y') }}
                     </td>
                     {{-- Coluna de Ações Estilizada --}}
                     <td class="py-4 px-6 text-center">
