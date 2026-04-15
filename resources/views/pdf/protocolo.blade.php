@@ -6,7 +6,7 @@
     <title>Protocolo de Entrega - {{ $config['nome'] }}</title>
     <style>
         @page {
-            margin: 0.5cm;
+            margin: 1cm;
         }
 
         body {
@@ -14,32 +14,33 @@
             color: #333;
             line-height: 1.4;
             margin: 0;
-            padding: 20px;
+            padding: 0;
         }
 
-        /* Cabeçalho com Cor Dinâmica */
+        /* Cabeçalho */
         .header {
             width: 100%;
-
-            border-bottom: 3px solid {
-                    {
-                    $config['cor']
-                }
-            }
-
-            ;
+            border-bottom: 3px solid {{ $config['cor'] }};
             padding-bottom: 10px;
             margin-bottom: 20px;
         }
 
+        .header-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
         .logo {
-            height: 60px;
+            /* Tamanho ideal para uma logo em PDF A4 */
+            width: 180px; 
+            height: auto;
         }
 
         .company-data {
             text-align: right;
-            font-size: 9px;
-            color: #555;
+            font-size: 10px;
+            color: #333;
+            vertical-align: middle;
         }
 
         .doc-title {
@@ -47,10 +48,11 @@
             text-transform: uppercase;
             font-weight: bold;
             font-size: 16px;
-            margin: 20px 0;
+            margin: 25px 0;
             color: #000;
         }
 
+        /* Tabelas de Informação */
         .info-table {
             width: 100%;
             border-collapse: collapse;
@@ -93,40 +95,35 @@
             font-size: 10px;
             margin-top: 30px;
             text-align: justify;
+            line-height: 1.6;
         }
 
+        /* Assinaturas */
         .signatures {
-            margin-top: 60px;
+            margin-top: 80px;
             width: 100%;
         }
 
         .sig-box {
-            width: 45%;
+            width: 40%;
             border-top: 1px solid #000;
             text-align: center;
             font-size: 10px;
             padding-top: 5px;
-            display: inline-block;
         }
 
-        /* Rodapé com Cor Dinâmica */
+        /* Rodapé Fixo */
         .footer {
             position: fixed;
-            bottom: 30px;
+            bottom: 0;
             left: 0;
             right: 0;
             text-align: center;
             font-size: 9px;
-
-            color: {
-                    {
-                    $config['cor']
-                }
-            }
-
-            ;
+            color: #777;
             border-top: 1px solid #eee;
-            padding-top: 10px;
+            padding-top: 5px;
+            padding-bottom: 10px;
         }
     </style>
 </head>
@@ -134,13 +131,13 @@
 <body>
 
     <div class="header">
-        <table width="100%">
+        <table class="header-table">
             <tr>
-                <td>
+                <td width="50%">
                     <img src="data:image/png;base64,{{ base64_encode(file_get_contents(public_path('images/logos/' . $config['slug'] . '.png'))) }}" class="logo">
                 </td>
                 <td class="company-data">
-                    <strong>{{ $config['razao_social'] }}</strong><br>
+                    <strong style="font-size: 12px; color: #000;">{{ $config['razao_social'] }}</strong><br>
                     {{ $config['endereco'] }}<br>
                     {{ $config['contato'] }}
                 </td>
@@ -183,21 +180,26 @@
     </table>
 
     <div class="terms">
-        Atesto que recebi e conferi os equipamentos acima citados. A responsabilidade por qualquer falta e/ou avaria será conforme as condições previstas no processo licitatório e no contrato firmado, exceto pelos desgastes naturais decorrentes do uso regular. [cite: 1]
+        Atesto que recebi e conferi os equipamentos acima citados. A responsabilidade por qualquer falta e/ou avaria será conforme as condições previstas no processo licitatório e no contrato firmado, exceto pelos desgastes naturais decorrentes do uso regular.
     </div>
 
-    <div class="signatures">
-        <div class="sig-box" style="float: left;">
-            {{ strtoupper($config['nome']) }}
-        </div>
-        <div class="sig-box" style="float: right;">
-            CLIENTE (RECEBEDOR)
-        </div>
-    </div>
+    <table class="signatures">
+        <tr>
+            <td class="sig-box" style="border: none;"></td> <td width="20%" style="border: none;"></td> <td class="sig-box" style="border: none;"></td> </tr>
+        <tr>
+            <td class="sig-box">
+                {{ strtoupper($config['nome']) }}
+            </td>
+            <td></td>
+            <td class="sig-box">
+                CLIENTE (RECEBEDOR)
+            </td>
+        </tr>
+    </table>
 
     <div class="footer">
-        {{ $config['razao_social'] }} - {{ $config['endereco_curto'] }}<br>
-        {{ $config['contatos_footer'] }}
+        {{ $config['razao_social'] }} - {{ $config['endereco_curto'] ?? $config['endereco'] }}<br>
+        {{ $config['contatos_footer'] ?? $config['contato'] }}
     </div>
 
 </body>
