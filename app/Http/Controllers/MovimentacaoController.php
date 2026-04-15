@@ -43,8 +43,8 @@ class MovimentacaoController extends Controller
     {
         $request->validate([
             'equipamento_id'    => 'required|exists:equipamentos,id',
-            'tipo'              => 'required|string', 
-            'situacao'          => 'required|string', 
+            'tipo'              => 'required|string',
+            'situacao'          => 'required|string',
             'origem'            => 'required|string',
             'destino'           => 'required|string',
             'data_movimentacao' => 'required|date',
@@ -108,14 +108,14 @@ class MovimentacaoController extends Controller
 
             if ($equipamento) {
                 $equipamento->situacao = $request->situacao;
-                
+
                 if (in_array($request->situacao, ['Em Estoque', 'Liberado'])) {
                     $equipamento->status = 'Liberado';
                     $equipamento->cliente_id = null;
                     $estoque = Estoque::where('nome', $movimentacao->destino)->first();
                     $equipamento->estoque_id = $estoque->id ?? $equipamento->estoque_id;
                 }
-                
+
                 $equipamento->save();
             }
 
@@ -136,6 +136,9 @@ class MovimentacaoController extends Controller
      */
     public function emitirProtocolo($id)
     {
+
+        // Aumenta o limite de memoria temporariamente para 256MB ou 512MB apenas para gerar este PDF
+        ini_set('memory_limit', '512M');
         // 1. Busca os dados
         $movimentacao = Movimentacao::with(['requisicao.cliente', 'equipamento.catalogo'])->findOrFail($id);
 
