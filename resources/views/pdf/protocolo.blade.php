@@ -1,13 +1,17 @@
 <!DOCTYPE html>
 <html lang="pt-br">
+
 <head>
     <meta charset="UTF-8">
     <title>Protocolo de Entrega - {{ $config['nome'] }}</title>
     <style>
-        @page { margin: 0.5cm; }
-        body { 
-            font-family: 'Helvetica', sans-serif; 
-            color: #333; 
+        @page {
+            margin: 0.5cm;
+        }
+
+        body {
+            font-family: 'Helvetica', sans-serif;
+            color: #333;
             line-height: 1.4;
             margin: 0;
             padding: 20px;
@@ -16,12 +20,27 @@
         /* Cabeçalho com Cor Dinâmica */
         .header {
             width: 100%;
-            border-bottom: 3px solid {{ $config['cor'] }};
+
+            border-bottom: 3px solid {
+                    {
+                    $config['cor']
+                }
+            }
+
+            ;
             padding-bottom: 10px;
             margin-bottom: 20px;
         }
-        .logo { height: 60px; }
-        .company-data { text-align: right; font-size: 9px; color: #555; }
+
+        .logo {
+            height: 60px;
+        }
+
+        .company-data {
+            text-align: right;
+            font-size: 9px;
+            color: #555;
+        }
 
         .doc-title {
             text-align: center;
@@ -37,18 +56,25 @@
             border-collapse: collapse;
             margin-bottom: 20px;
         }
+
         .info-table td {
             border: 1px solid #000;
             padding: 8px;
             font-size: 11px;
         }
-        .bg-gray { background-color: #f2f2f2; font-weight: bold; width: 120px; }
+
+        .bg-gray {
+            background-color: #f2f2f2;
+            font-weight: bold;
+            width: 120px;
+        }
 
         .items-table {
             width: 100%;
             border-collapse: collapse;
             margin-top: 10px;
         }
+
         .items-table th {
             background-color: #f2f2f2;
             border: 1px solid #000;
@@ -56,6 +82,7 @@
             font-size: 11px;
             text-align: left;
         }
+
         .items-table td {
             border: 1px solid #000;
             padding: 8px;
@@ -67,10 +94,12 @@
             margin-top: 30px;
             text-align: justify;
         }
+
         .signatures {
             margin-top: 60px;
             width: 100%;
         }
+
         .sig-box {
             width: 45%;
             border-top: 1px solid #000;
@@ -88,20 +117,27 @@
             right: 0;
             text-align: center;
             font-size: 9px;
-            color: {{ $config['cor'] }};
+
+            color: {
+                    {
+                    $config['cor']
+                }
+            }
+
+            ;
             border-top: 1px solid #eee;
             padding-top: 10px;
         }
     </style>
 </head>
+
 <body>
 
     <div class="header">
         <table width="100%">
             <tr>
                 <td>
-                    {{-- O arquivo da logo deve seguir o nome da empresa em minusculo (ex: alucom.png) --}}
-                    <img src="{{ public_path('images/logos/' . $config['slug'] . '.png') }}" class="logo">
+                    <img src="data:image/png;base64,{{ base64_encode(file_get_contents(public_path('images/logos/' . $config['slug'] . '.png'))) }}" class="logo">
                 </td>
                 <td class="company-data">
                     <strong>{{ $config['razao_social'] }}</strong><br>
@@ -165,4 +201,5 @@
     </div>
 
 </body>
+
 </html>
