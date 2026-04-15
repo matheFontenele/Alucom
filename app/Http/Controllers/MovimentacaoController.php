@@ -17,7 +17,6 @@ class MovimentacaoController extends Controller
      */
     public function index()
     {
-        // Carrega os relacionamentos necessários para evitar múltiplas consultas
         $movimentacoes = Movimentacao::with(['equipamento', 'requisicao.cliente'])
             ->orderBy('data_movimentacao', 'desc')
             ->paginate(20);
@@ -56,11 +55,9 @@ class MovimentacaoController extends Controller
         return DB::transaction(function () use ($request) {
             $equipamento = Equipamento::findOrFail($request->equipamento_id);
 
-            // 1. Atualiza o estado do Equipamento
             $equipamento->status = $request->tipo;
             $equipamento->situacao = $request->situacao;
 
-            // 2. Lógica de Posse (Estoque vs Cliente)
             switch ($request->tipo) {
                 case 'Liberado':
                 case 'Manutenção':
@@ -84,26 +81,18 @@ class MovimentacaoController extends Controller
             }
 
             $equipamento->save();
-
-            // 3. Cria o registro no histórico
             Movimentacao::create($request->all());
 
             return redirect()->route('movimentacoes.index')->with('success', 'Movimentação registrada com sucesso!');
         });
     }
 
-    /**
-     * Tela de edição de registro de movimentação.
-     */
     public function edit($id)
     {
         $movimentacao = Movimentacao::findOrFail($id);
         return view('movimentacoes.edit', compact('movimentacao'));
     }
 
-    /**
-     * Atualiza o registro e sincroniza o substatus no equipamento.
-     */
     public function update(Request $request, $id)
     {
         $request->validate([
@@ -115,14 +104,11 @@ class MovimentacaoController extends Controller
         $equipamento = $movimentacao->equipamento;
 
         return DB::transaction(function () use ($request, $movimentacao, $equipamento) {
-            // Atualiza o histórico
             $movimentacao->update($request->only(['situacao', 'observacao']));
 
-            // Sincroniza o substatus no equipamento vinculado
             if ($equipamento) {
                 $equipamento->situacao = $request->situacao;
                 
-                // Se na edição for definido como disponível no estoque
                 if (in_array($request->situacao, ['Em Estoque', 'Liberado'])) {
                     $equipamento->status = 'Liberado';
                     $equipamento->cliente_id = null;
@@ -137,9 +123,6 @@ class MovimentacaoController extends Controller
         });
     }
 
-    /**
-     * Remove um registro de movimentação do histórico.
-     */
     public function destroy($id)
     {
         $movimentacao = Movimentacao::findOrFail($id);
@@ -149,28 +132,81 @@ class MovimentacaoController extends Controller
     }
 
     /**
-     * Gera o PDF do Protocolo de Entrega/Movimentação.
+     * Gera o PDF do Protocolo com cores dinâmicas.
      */
     public function emitirProtocolo($id)
     {
-        // Carrega a movimentação com todos os dados necessários para o layout do PDF
+        // 1. Busca os dados
         $movimentacao = Movimentacao::with(['requisicao.cliente', 'equipamento.catalogo'])->findOrFail($id);
 
-        // Se houver uma requisição vinculada, listamos todos os itens que foram separados nela
+        // 2. Lógica de configuração de cores e dados da empresa (Define a variável $config)
+        $empresaKey = strtolower($movimentacao->origem);
+
+        $empresas = [
+            'alucom' => [
+                'nome' => 'Alucom',
+                'slug' => 'alucom',
+                'cor'  => '#D32F2F', // Vermelho
+                'razao_social' => 'ALUCOM LTDA - CNPJ 01.628.251/0001-88',
+                'endereco' => 'Rua Riachuelo, 40 - Papicu - CEP: 60.175-205',
+                'endereco_curto' => 'Rua Riachuelo, 40 - Papicu - Fortaleza/CE',
+                'contato' => 'Fortaleza - CE | (85) 3262-3191',
+                'contatos_footer' => '(85) 98814-6081 | 0800 166 1000 | comercial@alucom.com.br'
+            ],
+            'moreia' => [
+                'nome' => 'Moreia',
+                'slug' => 'moreia',
+                'cor'  => '#FF8C00', // Laranja
+                'razao_social' => 'MOREIA TECNOLOGIA LTDA',
+                'endereco' => 'Endereço da Moreia...',
+                'endereco_curto' => 'Cidade/UF',
+                'contato' => 'Telefone Moreia',
+                'contatos_footer' => 'contato@moreia.com.br'
+            ],
+            'ip' => [
+                'nome' => 'IP',
+                'slug' => 'ip',
+                'cor'  => '#0000FF', // Azul
+                'razao_social' => 'IP SOLUÇÕES TECNOLÓGICAS',
+                'endereco' => 'Endereço IP...',
+                'endereco_curto' => 'Cidade/UF',
+                'contato' => 'Telefone IP',
+                'contatos_footer' => 'contato@ip.com.br'
+            ],
+            'zaploc' => [
+                'nome' => 'ZapLoc',
+                'slug' => 'zaploc',
+                'cor'  => '#2E8B57', // Verde
+                'razao_social' => 'ZAPLOC LOCAÇÕES E SERVIÇOS',
+                'endereco' => 'Endereço ZapLoc...',
+                'endereco_curto' => 'Cidade/UF',
+                'contato' => 'Telefone ZapLoc',
+                'contatos_footer' => 'contato@zaploc.com.br'
+            ],
+        ];
+
+        // Se a origem não for uma das empresas acima, usa Alucom como padrão
+        $config = $empresas['alucom'];
+        foreach ($empresas as $key => $value) {
+            if (str_contains($empresaKey, $key)) {
+                $config = $value;
+                break;
+            }
+        }
+
+        // 3. Busca os itens
         if ($movimentacao->requisicao_id) {
             $itens = Movimentacao::with('equipamento.catalogo')
                 ->where('requisicao_id', $movimentacao->requisicao_id)
                 ->get();
         } else {
-            // Se for movimentação manual, o protocolo contém apenas o item selecionado
             $itens = collect([$movimentacao]);
         }
 
-        // Gera o PDF usando a view específica (que deve estar em resources/views/pdf/protocolo.blade.php)
-        $pdf = Pdf::loadView('pdf.protocolo', compact('movimentacao', 'itens'))
+        // 4. Passa a variável $config para a view
+        $pdf = Pdf::loadView('pdf.protocolo', compact('movimentacao', 'itens', 'config'))
             ->setPaper('a4', 'portrait');
 
-        // Retorna o PDF para abrir em nova aba
-        return $pdf->stream("Protocolo_REQ_{$movimentacao->requisicao_id}_MOV_{$movimentacao->id}.pdf");
+        return $pdf->stream("Protocolo_{$config['slug']}_MOV_{$movimentacao->id}.pdf");
     }
 }
