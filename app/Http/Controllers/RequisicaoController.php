@@ -119,9 +119,8 @@ class RequisicaoController extends Controller
      */
     public function separarUpdate(Request $request, $id)
     {
-        dd($request->all());
         $requisicao = Requisicao::with(['cliente', 'estoque'])->findOrFail($id);
-        
+
         if ($request->baixa_sistema == '1' && !$request->patrimonio_novo) {
             return back()->with('error', 'Você precisa selecionar um patrimônio para dar baixa no sistema!');
         }
