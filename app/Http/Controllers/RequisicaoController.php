@@ -119,6 +119,7 @@ class RequisicaoController extends Controller
      */
     public function separarUpdate(Request $request, $id)
     {
+        dd($request->all());
         $requisicao = Requisicao::with(['cliente', 'estoque'])->findOrFail($id);
 
         return DB::transaction(function () use ($request, $requisicao) {
