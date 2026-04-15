@@ -19,6 +19,7 @@ class Requisicao extends Model
         'nfe',
         'cliente_id',
         'catalogo_id',
+        'estoque_id',
         'estado',
         'cidade',
         'etiqueta',
@@ -34,6 +35,11 @@ class Requisicao extends Model
         'situacao',
         'rota_id'
     ];
+
+    public function estoque(): BelongsTo
+    {
+        return $this->belongsTo(Estoque::class, 'estoque_id');
+    }
 
     public function catalogo(): BelongsTo
     {
