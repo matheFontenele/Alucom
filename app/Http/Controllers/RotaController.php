@@ -65,20 +65,47 @@ class RotaController extends Controller
                 'observacoes' => $request->observacoes,
             ]);
 
+            // Captura o nome do estoque para o histórico
+            $estoqueOrigem = Estoque::find($request->estoque_origem_id)->nome ?? 'Estoque Origem';
+
             // 2. Vincular na tabela pivô (rota_requisicao)
             $rota->requisicoes()->attach($request->requisicoes);
 
-            // 3. Atualizar cada requisição individualmente para evitar bloqueio de fillable
+            // 3. Atualizar requisições e movimentar equipamentos
             foreach ($request->requisicoes as $id) {
                 $req = Requisicao::find($id);
                 if ($req) {
                     $req->situacao = 'Em Rota';
                     $req->save();
+
+                    // Pega os IDs únicos dos equipamentos que já foram separados para esta requisição
+                    $equipamentosIds = \App\Models\Movimentacao::where('requisicao_id', $req->id)
+                        ->pluck('equipamento_id')
+                        ->unique();
+
+                    $equipamentos = \App\Models\Equipamento::whereIn('id', $equipamentosIds)->get();
+
+                    foreach ($equipamentos as $equip) {
+                        // Atualiza status do equipamento na listagem
+                        $equip->update(['situacao' => 'Em Rota']);
+
+                        // Registra a saída do estoque para o caminhão/veículo
+                        \App\Models\Movimentacao::create([
+                            'equipamento_id'    => $equip->id,
+                            'requisicao_id'     => $req->id,
+                            'tipo'              => 'Aluguel',
+                            'situacao'          => 'Em Rota',
+                            'origem'            => $estoqueOrigem,
+                            'destino'           => "Veículo Rota #{$rota->id}",
+                            'data_movimentacao' => now(),
+                            'observacao'        => "Despachado na Rota #{$rota->id}"
+                        ]);
+                    }
                 }
             }
 
             DB::commit();
-            return redirect()->route('rotas.index')->with('success', 'Rota despachada com sucesso!');
+            return redirect()->route('rotas.index')->with('success', 'Rota despachada com sucesso e equipamentos em trânsito!');
         } catch (\Exception $e) {
             DB::rollBack();
             return back()->withInput()->with('error', 'Erro técnico: ' . $e->getMessage());
@@ -99,28 +126,63 @@ class RotaController extends Controller
     }
 
     public function update(Request $request, $id)
-{
-    $rota = Rota::findOrFail($id);
+    {
+        $rota = Rota::with(['requisicoes.cliente'])->findOrFail($id);
 
-    // Se o botão enviou o status (como no seu formulário que tem 'Entregue')
-    if ($request->has('status')) {
-        $rota->update([
-            'status' => $request->status
-        ]);
+        if ($request->has('status')) {
 
-        // Opcional: Se quiser atualizar as requisições vinculadas a essa rota também
-        if ($request->status == 'Entregue') {
-            foreach ($rota->requisicoes as $req) {
-                $req->update(['situacao' => 'Entregue']);
+            try {
+                DB::beginTransaction();
+
+                $rota->update([
+                    'status' => $request->status
+                ]);
+
+                // Se a rota foi concluída, entregamos os equipamentos
+                if ($request->status == 'Entregue') {
+                    foreach ($rota->requisicoes as $req) {
+                        $req->update(['situacao' => 'Entregue']);
+
+                        // Busca novamente os equipamentos desta requisição
+                        $equipamentosIds = \App\Models\Movimentacao::where('requisicao_id', $req->id)
+                            ->pluck('equipamento_id')
+                            ->unique();
+
+                        $equipamentos = \App\Models\Equipamento::whereIn('id', $equipamentosIds)->get();
+
+                        foreach ($equipamentos as $equip) {
+                            // Atualiza o sub-status do equipamento para finalizado
+                            $equip->update(['situacao' => 'No Cliente']);
+
+                            // Registra a chegada no destino final
+                            \App\Models\Movimentacao::create([
+                                'equipamento_id'    => $equip->id,
+                                'requisicao_id'     => $req->id,
+                                'tipo'              => 'Aluguel',
+                                'situacao'          => 'No Cliente',
+                                'origem'            => "Veículo Rota #{$rota->id}",
+                                'destino'           => $req->cliente->nome ?? 'Cliente',
+                                'data_movimentacao' => now(),
+                                'observacao'        => "Entregue via Rota #{$rota->id}"
+                            ]);
+                        }
+                    }
+                }
+
+                DB::commit();
+                return redirect()->route('rotas.index')->with('success', 'Rota atualizada com sucesso!');
+            } catch (\Exception $e) {
+                DB::rollBack();
+                return redirect()->back()->with('error', 'Erro ao finalizar rota: ' . $e->getMessage());
             }
         }
+
+        return redirect()->route('rotas.index');
     }
 
-    return redirect()->route('rotas.index')->with('success', 'Rota atualizada com sucesso!');
-}
-
-    public function imprimir($id) {
-    $rota = Rota::with(['motorista', 'veiculo', 'requisicoes.cliente', 'requisicoes.catalogo'])->findOrFail($id);
-    return view('rotas.imprimir', compact('rota'));
-}
+    public function imprimir($id)
+    {
+        $rota = Rota::with(['motorista', 'veiculo', 'requisicoes.cliente', 'requisicoes.catalogo'])->findOrFail($id);
+        return view('rotas.imprimir', compact('rota'));
+    }
 }
