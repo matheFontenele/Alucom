@@ -8,16 +8,17 @@ use App\Models\Clientes;
 use App\Models\Estoque;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class MovimentacaoController extends Controller
 {
     /**
-     * Lista o histórico de movimentações.
+     * Lista o histórico de movimentações com paginação.
      */
     public function index()
     {
-        // Carrega também a requisição caso exista, para exibir na listagem
-        $movimentacoes = Movimentacao::with(['equipamento', 'requisicao'])
+        // Carrega os relacionamentos necessários para evitar múltiplas consultas
+        $movimentacoes = Movimentacao::with(['equipamento', 'requisicao.cliente'])
             ->orderBy('data_movimentacao', 'desc')
             ->paginate(20);
 
@@ -37,14 +38,14 @@ class MovimentacaoController extends Controller
     }
 
     /**
-     * Registra uma nova movimentação e atualiza o estado do equipamento.
+     * Registra uma nova movimentação e sincroniza o estado do equipamento.
      */
     public function store(Request $request)
     {
         $request->validate([
             'equipamento_id'    => 'required|exists:equipamentos,id',
-            'tipo'              => 'required|string', // Status Pai: Alugado, Devolução, Manutenção, etc.
-            'situacao'          => 'required|string', // Substatus: No Cliente, Em Estoque, etc.
+            'tipo'              => 'required|string', 
+            'situacao'          => 'required|string', 
             'origem'            => 'required|string',
             'destino'           => 'required|string',
             'data_movimentacao' => 'required|date',
@@ -55,16 +56,15 @@ class MovimentacaoController extends Controller
         return DB::transaction(function () use ($request) {
             $equipamento = Equipamento::findOrFail($request->equipamento_id);
 
-            // 1. Atualiza o estado atual do Equipamento baseado na movimentação
+            // 1. Atualiza o estado do Equipamento
             $equipamento->status = $request->tipo;
             $equipamento->situacao = $request->situacao;
 
-            // 2. Lógica de atribuição de Posse (Estoque vs Cliente)
+            // 2. Lógica de Posse (Estoque vs Cliente)
             switch ($request->tipo) {
                 case 'Liberado':
                 case 'Manutenção':
                 case 'Devolução':
-                    // Equipamento volta ou permanece na empresa
                     if (str_contains($request->situacao, 'Estoque') || $request->situacao === 'Liberado') {
                         $equipamento->cliente_id = null;
                         $estoque = Estoque::where('nome', $request->destino)->first();
@@ -72,10 +72,10 @@ class MovimentacaoController extends Controller
                     }
                     break;
 
-                case 'Alugado':
+                case 'Aluguel':
                 case 'Reservado':
-                    // Equipamento vai ou permanece com cliente
-                    if ($request->situacao === 'No Cliente') {
+                case 'Substituição':
+                    if ($request->situacao === 'No Cliente' || $request->situacao === 'Separado') {
                         $equipamento->estoque_id = null;
                         $cliente = Clientes::where('nome', $request->destino)->first();
                         $equipamento->cliente_id = $cliente->id ?? $equipamento->cliente_id;
@@ -85,24 +85,15 @@ class MovimentacaoController extends Controller
 
             $equipamento->save();
 
-            // 3. Cria o registro no histórico de movimentações
-            Movimentacao::create($request->only([
-                'equipamento_id',
-                'requisicao_id',
-                'tipo',
-                'situacao',
-                'origem',
-                'destino',
-                'data_movimentacao',
-                'observacao'
-            ]));
+            // 3. Cria o registro no histórico
+            Movimentacao::create($request->all());
 
             return redirect()->route('movimentacoes.index')->with('success', 'Movimentação registrada com sucesso!');
         });
     }
 
     /**
-     * Tela de edição (Geralmente para ajuste de observações ou substatus).
+     * Tela de edição de registro de movimentação.
      */
     public function edit($id)
     {
@@ -111,7 +102,7 @@ class MovimentacaoController extends Controller
     }
 
     /**
-     * Atualiza o registro e sincroniza o estado do equipamento.
+     * Atualiza o registro e sincroniza o substatus no equipamento.
      */
     public function update(Request $request, $id)
     {
@@ -127,31 +118,59 @@ class MovimentacaoController extends Controller
             // Atualiza o histórico
             $movimentacao->update($request->only(['situacao', 'observacao']));
 
-            // Sincroniza o substatus no equipamento
-            $equipamento->situacao = $request->situacao;
-
-            // Se na edição mudar para um estado de posse em estoque, limpa cliente
-            if (in_array($request->situacao, ['Em Estoque', 'Recebido', 'Liberado'])) {
-                $equipamento->status = 'Liberado';
-                $equipamento->cliente_id = null;
-                $estoque = Estoque::where('nome', $movimentacao->destino)->first();
-                $equipamento->estoque_id = $estoque->id ?? $equipamento->estoque_id;
+            // Sincroniza o substatus no equipamento vinculado
+            if ($equipamento) {
+                $equipamento->situacao = $request->situacao;
+                
+                // Se na edição for definido como disponível no estoque
+                if (in_array($request->situacao, ['Em Estoque', 'Liberado'])) {
+                    $equipamento->status = 'Liberado';
+                    $equipamento->cliente_id = null;
+                    $estoque = Estoque::where('nome', $movimentacao->destino)->first();
+                    $equipamento->estoque_id = $estoque->id ?? $equipamento->estoque_id;
+                }
+                
+                $equipamento->save();
             }
 
-            $equipamento->save();
-
-            return redirect()->route('movimentacoes.index')->with('success', 'Registro e estado do equipamento atualizados!');
+            return redirect()->route('movimentacoes.index')->with('success', 'Registro atualizado com sucesso!');
         });
     }
 
     /**
-     * Remove um registro de movimentação.
+     * Remove um registro de movimentação do histórico.
      */
     public function destroy($id)
     {
         $movimentacao = Movimentacao::findOrFail($id);
         $movimentacao->delete();
 
-        return redirect()->back()->with('success', 'Registro de movimentação removido!');
+        return redirect()->back()->with('success', 'Registro removido do histórico!');
+    }
+
+    /**
+     * Gera o PDF do Protocolo de Entrega/Movimentação.
+     */
+    public function emitirProtocolo($id)
+    {
+        // Carrega a movimentação com todos os dados necessários para o layout do PDF
+        $movimentacao = Movimentacao::with(['requisicao.cliente', 'equipamento.catalogo'])->findOrFail($id);
+
+        // Se houver uma requisição vinculada, listamos todos os itens que foram separados nela
+        if ($movimentacao->requisicao_id) {
+            $itens = Movimentacao::with('equipamento.catalogo')
+                ->where('requisicao_id', $movimentacao->requisicao_id)
+                ->get();
+        } else {
+            // Se for movimentação manual, o protocolo contém apenas o item selecionado
+            $itens = collect([$movimentacao]);
+        }
+
+        // Gera o PDF usando a view específica (que deve estar em resources/views/pdf/protocolo.blade.php)
+        $pdf = Pdf::loadView('pdf.protocolo', compact('movimentacao', 'itens'))
+            ->setPaper('a4', 'portrait');
+
+        // Retorna o PDF para abrir em nova aba
+        return $pdf->stream("Protocolo_REQ_{$movimentacao->requisicao_id}_MOV_{$movimentacao->id}.pdf");
     }
 }

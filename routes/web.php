@@ -59,7 +59,7 @@ Route::middleware(['auth'])->group(function () {
     // --- LOGÍSTICA (MENU 2) ---
     Route::get('/requisicoes/{id}/separacao', [RequisicaoController::class, 'separacao'])->name('requisicoes.separacao');
     Route::put('/requisicoes/{id}/separar', [RequisicaoController::class, 'separarUpdate'])->name('requisicoes.separar.update');
-
+Route::get('/movimentacoes/{id}/protocolo', [MovimentacaoController::class, 'emitirProtocolo'])->name('movimentacoes.protocolo');
     Route::resource('requisicoes', RequisicaoController::class);
     Route::resource('rotas', RotaController::class);
     Route::resource('movimentacoes', MovimentacaoController::class);

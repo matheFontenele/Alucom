@@ -1,6 +1,8 @@
 @extends('layouts.app')
 
 @section('content')
+<script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+
 <div class="container mx-auto p-6">
     <div class="flex justify-between items-center mb-6">
         <h1 class="text-2xl font-bold text-slate-800">Histórico de Movimentações</h1>
@@ -14,12 +16,6 @@
     @if(session('success'))
     <div class="mb-4 p-4 bg-emerald-100 text-emerald-700 rounded-lg shadow-sm border-l-4 border-emerald-500">
         {{ session('success') }}
-    </div>
-    @endif
-
-    @if(session('error'))
-    <div class="mb-4 p-4 bg-red-100 text-red-700 rounded-lg shadow-sm border-l-4 border-red-500">
-        {{ session('error') }}
     </div>
     @endif
 
@@ -61,18 +57,38 @@
                     <td class="py-4 px-6 text-sm text-gray-500">
                         {{ $mov->data_movimentacao->format('d/m/Y H:i') }}
                     </td>
-                    <td class="py-4 px-6 text-center">
-                        <a href="{{ route('movimentacoes.edit', $mov->id) }}" class="text-blue-600 hover:text-blue-900 p-2">
-                            <i class="ph ph-pencil-simple text-lg"></i>
-                        </a>
-                        <form action="{{ route('movimentacoes.destroy', $mov->id) }}" method="POST"
-                            onsubmit="return confirm('Tem certeza que deseja excluir este registro do histórico?')">
-                            @csrf
-                            @method('DELETE')
-                            <button type="submit" class="text-gray-400 hover:text-red-600 transition p-2">
-                                <i class="ph ph-trash text-lg"></i>
-                            </button>
-                        </form>
+                    
+                    {{-- COLUNA DE AÇÕES COM DROPDOWN --}}
+                    <td class="py-4 px-6 text-center relative" x-data="{ open: false }">
+                        <button @click="open = !open" @click.away="open = false" class="p-2 rounded-full hover:bg-gray-100 transition text-gray-500">
+                            <i class="ph ph-dots-three-outline-vertical text-xl"></i>
+                        </button>
+
+                        <div x-show="open" 
+                             x-transition:enter="transition ease-out duration-100"
+                             x-transition:enter-start="transform opacity-0 scale-95"
+                             x-transition:enter-end="transform opacity-100 scale-100"
+                             class="absolute right-10 mt-2 w-48 rounded-lg shadow-xl bg-white ring-1 ring-black ring-opacity-5 z-50 overflow-hidden text-left"
+                             style="display: none;">
+                            <div class="py-1">
+                                <a href="{{ route('movimentacoes.show', $mov->id) }}" class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 border-b border-gray-50">
+                                    <i class="ph ph-eye mr-2 text-blue-500 text-lg"></i> Visualizar detalhes
+                                </a>
+                                <a href="{{ route('movimentacoes.edit', $mov->id) }}" class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 border-b border-gray-50">
+                                    <i class="ph ph-pencil-simple mr-2 text-amber-500 text-lg"></i> Editar
+                                </a>
+                                <a href="{{ route('movimentacoes.protocolo', $mov->id) }}" target="_blank" class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 border-b border-gray-50">
+                                    <i class="ph ph-file-pdf mr-2 text-red-600 text-lg"></i> Emitir Protocolo
+                                </a>
+                                <form action="{{ route('movimentacoes.destroy', $mov->id) }}" method="POST" onsubmit="return confirm('Tem certeza que deseja excluir?')">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit" class="w-full flex items-center px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition">
+                                        <i class="ph ph-trash mr-2 text-lg"></i> Deletar
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
                     </td>
                 </tr>
                 @empty
