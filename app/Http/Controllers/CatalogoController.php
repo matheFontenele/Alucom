@@ -36,8 +36,7 @@ class CatalogoController extends Controller
 
         $categorias = Categoria::orderBy('nome')->get();
 
-        // Certifique-se que o nome da pasta é 'catalogos' (plural) conforme seu arquivo blade
-        return view('catalogos.index', compact('itens', 'categorias'));
+        return view('catalogo.index', compact('itens', 'categorias'));
     }
 
     /**
