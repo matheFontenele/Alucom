@@ -46,8 +46,7 @@ class CatalogoController extends Controller
     {
         $categorias = Categoria::orderBy('nome')->get();
 
-        // Retorna a view 'catalogos/create.blade.php'
-        return view('catalogos.create', compact('categorias'));
+        return view('catalogo.create', compact('categorias'));
     }
 
     /**
@@ -72,7 +71,7 @@ class CatalogoController extends Controller
 
         Catalogo::create($data);
 
-        return redirect()->route('catalogos.index')
+        return redirect()->route('catalogo.index')
             ->with('success', 'Novo modelo adicionado ao catálogo com sucesso!');
     }
 
