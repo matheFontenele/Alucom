@@ -16,7 +16,6 @@ class DatabaseSeeder extends Seeder
         $this->call([
             ClientesSeeder::class,             // 1º Clientes
             EstoqueSeeder::class,              // 2º Estoques
-            CategoriaEquipamentoSeeder::class,  // 3º Categorias e Subs
             TecnicosSeeder::class,             // 4º Técnicos
             CatalogoSeeder::class,             // 5º Catálogo (Base para Equipamentos)
             CadastroEquipamentosSeeder::class, // 6º Itens manuais
