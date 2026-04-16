@@ -48,13 +48,18 @@ class EquipamentoController extends Controller
         $estoque_id = $request->estoque_id;
         $tipo = 'equipamento';
 
-        // Alterado de $modelos para $modelosCatalogo para corrigir o erro na View
         $modelosCatalogo = Catalogo::where('tipo', 'equipamento')
             ->with('categoria')
             ->orderBy('nome')
             ->get();
 
-        return view('equipamentos.create_mass_equipamentos', compact('modelosCatalogo', 'estoque_id', 'tipo'));
+        // Enviamos das duas formas para evitar erro em qualquer versão do Blade
+        return view('equipamentos.create_mass_equipamentos', [
+            'modelosCatalogo' => $modelosCatalogo,
+            'modelos'         => $modelosCatalogo,
+            'estoque_id'      => $estoque_id,
+            'tipo'            => $tipo
+        ]);
     }
 
     /**
@@ -65,13 +70,18 @@ class EquipamentoController extends Controller
         $estoque_id = $request->estoque_id;
         $tipo = 'insumo';
 
-        // Consertado aqui também para manter o padrão
         $modelosCatalogo = Catalogo::where('tipo', 'insumo')
             ->with('categoria')
             ->orderBy('nome')
             ->get();
 
-        return view('equipamentos.create_mass_insumos', compact('modelosCatalogo', 'estoque_id', 'tipo'));
+        // Enviamos das duas formas aqui também para corrigir o erro da linha 44
+        return view('equipamentos.create_mass_insumos', [
+            'modelosCatalogo' => $modelosCatalogo,
+            'modelos'         => $modelosCatalogo,
+            'estoque_id'      => $estoque_id,
+            'tipo'            => $tipo
+        ]);
     }
 
     /**
