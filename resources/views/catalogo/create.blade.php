@@ -4,9 +4,10 @@
 <div class="container mx-auto p-6 max-w-3xl">
     {{-- Header de Navegação --}}
     <div class="mb-8">
-        <a href="{{ route('catalogos.index') }}" class="text-slate-400 hover:text-blue-600 ..."> <i class="ph ph-caret-left"></i> Voltar ao Catálogo
+        <a href="{{ route('catalogos.index') }}" class="text-slate-400 hover:text-blue-600 transition-colors flex items-center gap-2 font-bold"> 
+            <i class="ph ph-caret-left"></i> Voltar ao Catálogo
         </a>
-        <h1 class="text-4xl font-black text-slate-900 tracking-tight">Novo Ativo</h1>
+        <h1 class="text-4xl font-black text-slate-900 tracking-tight mt-2">Novo Ativo</h1>
         <p class="text-slate-500 font-medium">Cadastre as especificações técnicas do novo modelo.</p>
     </div>
 
@@ -53,7 +54,6 @@
                 <label class="text-[11px] font-black text-slate-400 uppercase mb-2 block tracking-widest">Subcategoria</label>
                 <select name="subcategoria" id="select-subcategoria"
                     class="w-full bg-slate-50 border-slate-200 rounded-2xl focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none p-4 text-sm font-bold transition-all appearance-none">
-                    {{-- Populado via JS --}}
                 </select>
             </div>
 
@@ -98,6 +98,7 @@
                                 <option value="">Tipo de Impressão...</option>
                                 <option value="Mono">Monocromática (P&B)</option>
                                 <option value="Color">Colorida</option>
+                                <option value="Outro">Outro</option>
                             </select>
                             <input type="text" name="tipo_papel" placeholder="Papel Suportado (ex: A4, A3, Térmico)" class="bg-white border-slate-200 rounded-xl p-4 text-sm font-bold outline-none focus:border-indigo-500">
                         </div>
@@ -145,7 +146,6 @@
                                 <option value="Magenta">Magenta</option>
                                 <option value="Amarelo">Amarelo (Yellow)</option>
                                 <option value="Mono">Mono</option>
-                                <option value="Não se aplica">Não se aplica</option>
                             </select>
                             <select name="tipo_insumo" class="bg-white border-slate-200 rounded-xl p-4 text-sm font-bold outline-none">
                                 <option value="Original">Original</option>
@@ -156,8 +156,6 @@
                     </div>
                 </div>
             </div>
-
-            <input type="hidden" name="tipo" id="input-tipo" value="equipamento">
 
             <div class="flex flex-col md:flex-row gap-4 pt-6">
                 <button type="submit" class="flex-1 bg-blue-600 text-white font-black uppercase text-xs tracking-[0.2em] py-5 rounded-2xl shadow-xl shadow-blue-200 hover:bg-blue-700 hover:-translate-y-1 transition-all">
@@ -181,7 +179,6 @@
 
     document.getElementById('select-categoria').addEventListener('change', function() {
         const catNome = this.options[this.selectedIndex].getAttribute('data-nome') || '';
-        const tipoHidden = document.getElementById('input-tipo');
         const placeholder = document.getElementById('placeholder-text');
         const subDiv = document.getElementById('container-subcategoria');
         const subSelect = document.getElementById('select-subcategoria');
@@ -210,21 +207,18 @@
         }
 
         // Lógica de Exibição de Atributos Técnicos
-        if (catNome.includes('Computador') || catNome.includes('Notebook')) {
+        const nomeLowerCase = catNome.toLowerCase();
+        
+        if (nomeLowerCase.includes('computador') || nomeLowerCase.includes('notebook')) {
             document.getElementById('div-computador').classList.remove('hidden');
-            tipoHidden.value = 'equipamento';
-        } else if (catNome.includes('Impressora')) {
+        } else if (nomeLowerCase.includes('impressora')) {
             document.getElementById('div-impressora').classList.remove('hidden');
-            tipoHidden.value = 'equipamento';
-        } else if (catNome.includes('Energia') || catNome.includes('Nobreak')) {
+        } else if (nomeLowerCase.includes('energia') || nomeLowerCase.includes('nobreak')) {
             document.getElementById('div-energia').classList.remove('hidden');
-            tipoHidden.value = 'equipamento';
-        } else if (catNome.includes('Monitor')) {
+        } else if (nomeLowerCase.includes('monitor')) {
             document.getElementById('div-monitor').classList.remove('hidden');
-            tipoHidden.value = 'equipamento';
-        } else if (catNome.includes('Toner') || catNome.includes('Insumo') || catNome.includes('Suprimento')) {
+        } else if (nomeLowerCase.includes('toner') || nomeLowerCase.includes('insumo') || nomeLowerCase.includes('suprimento')) {
             document.getElementById('div-insumo').classList.remove('hidden');
-            tipoHidden.value = 'insumo';
         }
     });
 </script>

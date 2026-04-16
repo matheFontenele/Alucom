@@ -15,7 +15,7 @@ class CatalogoController extends Controller
         if ($request->filled('search')) {
             $query->where(function ($q) use ($request) {
                 $q->where('nome', 'ilike', '%' . $request->search . '%')
-                  ->orWhere('fabricante', 'ilike', '%' . $request->search . '%');
+                    ->orWhere('fabricante', 'ilike', '%' . $request->search . '%');
             });
         }
 
@@ -46,21 +46,17 @@ class CatalogoController extends Controller
             'fabricante' => 'required',
             'categoria_id' => 'required|exists:categorias,id',
             'subcategoria' => 'nullable',
-            'tipo_papel' => 'nullable',
-            'tipo_impressora' => 'nullable', // Sincronizado com o Blade
-            'voltagem' => 'nullable',
-            'processador' => 'nullable',
-            'geracao' => 'nullable',
-            'memoria' => 'nullable',
-            'polegadas' => 'nullable',
-            'cor' => 'nullable',
-            'tipo_insumo' => 'nullable',
             'descricao' => 'nullable',
+            'tipo_papel' => 'nullable',    // A4, A3, etc
+            'tipo_impressao' => 'nullable', // Mono, Color
+            'voltagem' => 'nullable',      // Para Nobreaks/Energia
+            'polegadas' => 'nullable',     // Para Monitores
+            'cor_insumo' => 'nullable',    // Ciano, Magenta, etc
+            'procedencia_insumo' => 'nullable', // Compatível ou Original
         ]);
 
         Catalogo::create($data);
 
-        // Corrigido para plural para bater com o web.php
-        return redirect()->route('catalogos.index')->with('success', 'Item cadastrado!');
+        return redirect()->route('catalogos.index')->with('success', 'Item cadastrado com sucesso!');
     }
 }
