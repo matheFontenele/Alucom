@@ -130,31 +130,6 @@
                         </div>
                     </div>
                 </div>
-
-                {{-- Atributos: Insumos --}}
-                <div id="div-insumo" class="hidden animate-in fade-in slide-in-from-top-2 duration-300">
-                    <div class="bg-amber-50/50 p-6 rounded-3xl border border-amber-100 space-y-4">
-                        <div class="flex items-center gap-2 mb-2">
-                            <i class="ph ph-drop text-amber-600 font-bold"></i>
-                            <span class="text-[11px] font-black text-amber-600 uppercase tracking-widest">Detalhes do Suprimento</span>
-                        </div>
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <select name="cor" class="bg-white border-slate-200 rounded-xl p-4 text-sm font-bold outline-none">
-                                <option value="Não se aplica">Selecione a Cor...</option>
-                                <option value="Preto">Preto (Black)</option>
-                                <option value="Ciano">Ciano (Cyan)</option>
-                                <option value="Magenta">Magenta</option>
-                                <option value="Amarelo">Amarelo (Yellow)</option>
-                                <option value="Mono">Mono</option>
-                            </select>
-                            <select name="tipo_insumo" class="bg-white border-slate-200 rounded-xl p-4 text-sm font-bold outline-none">
-                                <option value="Original">Original</option>
-                                <option value="Compativel">Compatível</option>
-                                <option value="Recondicionado">Recondicionado</option>
-                            </select>
-                        </div>
-                    </div>
-                </div>
             </div>
 
             <div class="flex flex-col md:flex-row gap-4 pt-6">
@@ -183,9 +158,10 @@
         const subDiv = document.getElementById('container-subcategoria');
         const subSelect = document.getElementById('select-subcategoria');
 
-        // Resetar campos
-        const divs = ['div-computador', 'div-impressora', 'div-insumo', 'div-energia', 'div-monitor'];
+        // IDs das divs dinâmicas (Removido div-insumo daqui)
+        const divs = ['div-computador', 'div-impressora', 'div-energia', 'div-monitor'];
         divs.forEach(id => document.getElementById(id).classList.add('hidden'));
+        
         placeholder.classList.remove('hidden');
         subDiv.classList.add('hidden');
         subSelect.innerHTML = '';
@@ -217,9 +193,8 @@
             document.getElementById('div-energia').classList.remove('hidden');
         } else if (nomeLowerCase.includes('monitor')) {
             document.getElementById('div-monitor').classList.remove('hidden');
-        } else if (nomeLowerCase.includes('toner') || nomeLowerCase.includes('insumo') || nomeLowerCase.includes('suprimento')) {
-            document.getElementById('div-insumo').classList.remove('hidden');
         }
+        // Insumos agora não exibem campos de atributos técnicos no catálogo
     });
 </script>
 @endsection
