@@ -111,22 +111,14 @@ Route::get('/popular-banco', function () {
 Route::get('/debug-seed', function () {
     try {
         Artisan::call('optimize:clear');
-
         Artisan::call('migrate:fresh', ['--force' => true]);
-        $output = "Migrations executadas (Banco Resetado).<br>";
-
-        $seederPath = database_path('seeders/CatalogoSeeder.php');
-
-        if (file_exists($seederPath)) {
-            Artisan::call('db:seed', ['--class' => 'CatalogoSeeder', '--force' => true]);
-            $output .= "CatalogoSeeder executado com sucesso!<br>";
-        } else {
-        return "Erro: Arquivo não encontrado em " . $seederPath;
-        }
-
-        return $output . "<br><pre>" . Artisan::output() . "</pre>";
+        
+        // Em vez de chamar um arquivo específico, chamamos o DatabaseSeeder principal
+        Artisan::call('db:seed', ['--force' => true]);
+        
+        return "Banco resetado e TODOS os seeders (incluindo usuários) foram executados!";
     } catch (\Exception $e) {
-        return "Erro: " . $e->getMessage() . "<br>Linha: " . $e->getLine();
+        return "Erro: " . $e->getMessage();
     }
 });
 
