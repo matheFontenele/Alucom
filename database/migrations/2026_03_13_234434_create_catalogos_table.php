@@ -13,22 +13,23 @@ return new class extends Migration
     {
         Schema::create('catalogo', function (Blueprint $table) {
             $table->id();
-            $table->string('nome');
+            $table->string('nome'); // Modelo
             $table->string('fabricante');
-            $table->string('tipo')->default('equipamento'); // equipamento ou insumo
-            $table->foreignId('categoria_id')->constrained('categorias')->onDelete('cascade');
-            $table->foreignId('subcategoria_id')->nullable()->constrained('subcategorias')->onDelete('set null');
-
-            // Atributos técnicos dinâmicos
-            $table->string('processador')->nullable(); // Computadores
-            $table->string('memoria')->nullable();     // Computadores
-            $table->string('geracao')->nullable();     // Computadores
-            $table->string('voltagem')->nullable();    // Nobreaks
-            $table->string('tipo_impressora')->nullable(); // Mono/Color
-            $table->string('situacao_insumo')->nullable(); // Original/Compatível/Recondicionado
-            $table->string('tipo_papel')->nullable();
-            $table->string('cor')->nullable();
             $table->text('descricao')->nullable();
+            $table->foreignId('categoria_id')->constrained('categorias');
+            $table->string('subcategoria')->nullable();
+
+            // Atributos Específicos
+            $table->string('tipo_papel')->nullable(); // A3, A4...
+            $table->string('tipo_impressao')->nullable(); // Mono, Color
+            $table->string('voltagem')->nullable();
+            $table->string('processador')->nullable();
+            $table->string('geracao')->nullable();
+            $table->string('memoria')->nullable();
+            $table->string('polegadas')->nullable();
+            $table->string('cor')->nullable(); // Ciano, Magenta...
+            $table->string('tipo_insumo')->nullable(); // Original, Compatível...
+
             $table->timestamps();
         });
     }

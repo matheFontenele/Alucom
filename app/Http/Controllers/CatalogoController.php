@@ -55,24 +55,25 @@ class CatalogoController extends Controller
     public function store(Request $request)
     {
         $data = $request->validate([
-            'nome'         => 'required|string|max:255',
-            'fabricante'   => 'required|string|max:255',
+            'nome' => 'required',
+            'fabricante' => 'required',
             'categoria_id' => 'required|exists:categorias,id',
-            'tipo'         => 'required|string', // 'equipamento' ou 'insumo'
-            'processador'  => 'nullable|string',
-            'memoria'      => 'nullable|string',
-            'geracao'      => 'nullable|string',
-            'voltagem'     => 'nullable|string',
-            'tipo_impressora' => 'nullable|string',
-            'cor'          => 'nullable|string',
-            'tipo_papel'   => 'nullable|string',
-            'descricao'    => 'nullable|string',
+            'subcategoria' => 'nullable',
+            'tipo_papel' => 'nullable',
+            'tipo_impressao' => 'nullable',
+            'voltagem' => 'nullable',
+            'processador' => 'nullable',
+            'geracao' => 'nullable',
+            'memoria' => 'nullable',
+            'polegadas' => 'nullable',
+            'cor' => 'nullable',
+            'tipo_insumo' => 'nullable',
+            'descricao' => 'nullable',
         ]);
 
         Catalogo::create($data);
 
-        return redirect()->route('catalogo.index')
-            ->with('success', 'Novo modelo adicionado ao catálogo com sucesso!');
+        return redirect()->route('catalogo.index')->with('success', 'Item cadastrado!');
     }
 
     /**
