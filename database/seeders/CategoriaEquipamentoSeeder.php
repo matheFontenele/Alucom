@@ -1,33 +1,57 @@
 <?php
 
-namespace Database\Seeders;
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
 
-use App\Models\Categoria;
-use App\Models\Subcategoria;
-use Illuminate\Database\Seeder;
-
-class CategoriaEquipamentoSeeder extends Seeder
+return new class extends Migration
 {
-    public function run(): void
+    /**
+     * Run the migrations.
+     */
+    public function up(): void
     {
-        $estrutura = [
-            'Computadores'       => ['Micro', 'Notebook', 'Thinkcentre'],
-            'Impressoras'        => ['Multifuncionais', 'Térmicas'], // Sincronizado
-            'Nobreaks'           => ['Estabilizadores', 'Transformadores'], // Sincronizado
-            'Periféricos'        => ['Scanners', 'Leitores', 'Switches'], // Com acento
-            'Suprimentos'        => ['Toners', 'Tintas', 'Cilindros'], // Sincronizado
-            'Outros'             => [],
-        ];
+        Schema::create('catalogo', function (Blueprint $table) {
+            $table->id();
+            $table->string('nome');
+            $table->string('fabricante');
+            
+            // Define se é 'equipamento' ou 'insumo'
+            $table->string('tipo')->default('equipamento');
 
-        foreach ($estrutura as $nomeCategoria => $subcategorias) {
-            $categoria = Categoria::firstOrCreate(['nome' => $nomeCategoria]);
+            // Relacionamento com Categorias e Subcategorias
+            $table->foreignId('categoria_id')->constrained('categorias')->onDelete('cascade');
+            // Recomendo adicionar subcategoria_id se você for usar a estrutura do seu Seeder
+            $table->foreignId('subcategoria_id')->nullable()->constrained('subcategorias')->onDelete('set null');
 
-            foreach ($subcategorias as $nomeSub) {
-                Subcategoria::firstOrCreate([
-                    'categoria_id' => $categoria->id,
-                    'nome' => $nomeSub
-                ]);
-            }
-        }
+            // --- Atributos Condicionais ---
+            
+            // Para Computadores (Micro, Notebook, Thinkcentre)
+            $table->string('processador')->nullable();
+            $table->string('memoria')->nullable();
+            $table->string('geracao')->nullable();
+
+            // Para Nobreaks (Estabilizadores, Transformadores)
+            $table->string('voltagem')->nullable();
+
+            // Para Impressoras (Multifuncionais, Térmicas, etc.)
+            // Sugestão: 'Mono' ou 'Color'
+            $table->string('tipo_impressora')->nullable(); 
+
+            // --- Campos Gerais ---
+            $table->string('tipo_papel')->nullable();
+            $table->string('cor')->nullable();
+            $table->text('descricao')->nullable();
+            
+            $table->timestamps();
+        });
     }
-}
+
+    /**
+     * Reverse the migrations.
+     */
+    public function down(): void
+    {
+        Schema::dropIfExists('catalogo');
+    }
+};

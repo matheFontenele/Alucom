@@ -77,55 +77,41 @@ class EquipamentoController extends Controller
      */
     public function storeMass(Request $request)
     {
-        $tipoEntrada = $request->input('tipo_entrada');
-
-        $regras = [
+        // 1. Validação rigorosa
+        $validated = $request->validate([
             'estoque_id' => 'required|exists:estoques,id',
-            'itens' => 'required|array|min:1',
-            'itens.*.catalogo_id' => 'required|exists:catalogo,id',
-        ];
-
-        if ($tipoEntrada === 'equipamento') {
-            $regras['itens.*.tombo'] = 'required|digits:5|unique:equipamentos,tombo';
-            $regras['itens.*.serial'] = 'required|string|unique:equipamentos,serial';
-        } else {
-            $regras['itens.*.quantidade'] = 'required|integer|min:1';
-        }
-
-        $request->validate($regras);
+            'equipamentos' => 'required|array|min:1',
+            'equipamentos.*.catalogo_id' => 'required|exists:catalogo,id',
+            'equipamentos.*.tombo' => 'required|size:5|distinct|unique:equipamentos,tombo',
+            'equipamentos.*.serial' => 'required|distinct|unique:equipamentos,serial',
+            'equipamentos.*.status' => 'required|string',
+            'equipamentos.*.situacao' => 'required|string',
+        ], [
+            'equipamentos.*.tombo.unique' => 'Um dos números de tombo já existe no banco.',
+            'equipamentos.*.tombo.distinct' => 'Você digitou tombos duplicados na mesma lista.',
+            'equipamentos.*.serial.unique' => 'Um dos números de série já existe no banco.',
+        ]);
 
         try {
-            DB::transaction(function () use ($request, $tipoEntrada) {
-                foreach ($request->itens as $item) {
-                    $itemCatalogo = Catalogo::findOrFail($item['catalogo_id']);
+            DB::beginTransaction();
 
-                    // Se for insumo, repete o insert baseado na quantidade informada
-                    $loops = ($tipoEntrada === 'insumo') ? (int)($item['quantidade'] ?? 1) : 1;
+            foreach ($request->equipamentos as $item) {
+                Equipamento::create([
+                    'catalogo_id' => $item['catalogo_id'],
+                    'estoque_id'  => $request->estoque_id,
+                    'tombo'       => $item['tombo'],
+                    'serial'      => $item['serial'],
+                    'status'      => $item['status'],
+                    'situacao'    => $item['situacao'],
+                ]);
+            }
 
-                    for ($i = 0; $i < $loops; $i++) {
-                        Equipamento::create([
-                            'tipo'              => $tipoEntrada,
-                            'catalogo_id'       => $itemCatalogo->id,
-                            'categoria_id'      => $itemCatalogo->categoria_id,
-                            'nome'              => $itemCatalogo->nome,
-                            'tombo'             => $item['tombo'] ?? null,
-                            'serial'            => $item['serial'] ?? null,
-                            'status'            => 'Liberado',
-                            'situacao'          => $item['situacao'] ?? 'Novo',
-                            'estoque_id'        => $request->estoque_id,
-                            'cor'               => $item['cor'] ?? ($itemCatalogo->cor ?? 'Não se Aplica'),
-                            'data_movimentacao' => now(),
-                        ]);
-                    }
-                }
-            });
-
+            DB::commit();
             return redirect()->route('estoques.show', $request->estoque_id)
-                ->with('success', 'Entrada em massa processada com sucesso!');
+                ->with('success', count($request->equipamentos) . ' itens registrados com sucesso!');
         } catch (\Exception $e) {
-            return redirect()->back()
-                ->withErrors(['erro' => 'Erro no processamento: ' . $e->getMessage()])
-                ->withInput();
+            DB::rollBack();
+            return back()->withErrors('Falha ao processar entrada: ' . $e->getMessage())->withInput();
         }
     }
 

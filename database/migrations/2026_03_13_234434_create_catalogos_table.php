@@ -15,6 +15,9 @@ return new class extends Migration
             $table->id();
             $table->string('nome');
             $table->string('fabricante');
+            
+            // Nova coluna para diferenciar Equipamento de Insumo
+            $table->string('tipo')->default('equipamento'); 
 
             $table->foreignId('categoria_id')->constrained('categorias')->onDelete('cascade');
             $table->string('tipo_papel')->nullable();
