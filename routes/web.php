@@ -46,7 +46,7 @@ Route::middleware(['auth'])->group(function () {
     Route::resource('clientes', ClientesController::class);
     Route::resource('tecnicos', TecnicosController::class);
     Route::resource('estoques', EstoqueController::class);
-    
+
     /**
      * Catálogo de Ativos
      * O resource gerencia: index, create, store, show, edit, update, destroy
@@ -67,7 +67,7 @@ Route::middleware(['auth'])->group(function () {
     // --- LOGÍSTICA (MENU 2) ---
     Route::get('/requisicoes/{id}/separacao', [RequisicaoController::class, 'separacao'])->name('requisicoes.separacao');
     Route::put('/requisicoes/{id}/separar', [RequisicaoController::class, 'separarUpdate'])->name('requisicoes.separar.update');
-    
+
     Route::get('/movimentacoes/{id}/protocolo', [MovimentacaoController::class, 'emitirProtocolo'])->name('movimentacoes.protocolo');
     Route::get('/movimentacoes/{id}/etiqueta', [MovimentacaoController::class, 'emitirEtiqueta'])->name('movimentacoes.etiqueta');
 
@@ -111,16 +111,17 @@ Route::get('/popular-banco', function () {
 Route::get('/debug-seed', function () {
     try {
         Artisan::call('optimize:clear');
-        Artisan::call('migrate:fresh', ['--force' => true]);
-        $output = "Migrations executadas.<br>";
 
-        $seederPath = database_path('seeders/CategoriaEquipamentoSeeder.php');
+        Artisan::call('migrate:fresh', ['--force' => true]);
+        $output = "Migrations executadas (Banco Resetado).<br>";
+
+        $seederPath = database_path('seeders/CatalogoSeeder.php');
+
         if (file_exists($seederPath)) {
-            require_once $seederPath;
-            Artisan::call('db:seed', ['--force' => true]);
-            $output .= "Seeder executado com sucesso!<br>";
+            Artisan::call('db:seed', ['--class' => 'CatalogoSeeder', '--force' => true]);
+            $output .= "CatalogoSeeder executado com sucesso!<br>";
         } else {
-            return "Erro: Arquivo não encontrado em " . $seederPath;
+        return "Erro: Arquivo não encontrado em " . $seederPath;
         }
 
         return $output . "<br><pre>" . Artisan::output() . "</pre>";

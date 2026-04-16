@@ -13,22 +13,21 @@ return new class extends Migration
     {
         Schema::create('catalogo', function (Blueprint $table) {
             $table->id();
-            $table->string('nome'); // Modelo
+            $table->string('nome');
             $table->string('fabricante');
             $table->text('descricao')->nullable();
             $table->foreignId('categoria_id')->constrained('categorias');
+            $table->string('tipo')->nullable();
             $table->string('subcategoria')->nullable();
-
-            // Atributos Específicos
-            $table->string('tipo_papel')->nullable(); // A3, A4...
-            $table->string('tipo_impressao')->nullable(); // Mono, Color
-            $table->string('voltagem')->nullable();
             $table->string('processador')->nullable();
-            $table->string('geracao')->nullable();
             $table->string('memoria')->nullable();
+            $table->string('geracao')->nullable();
+            $table->string('tipo_impressora')->nullable();
+            $table->string('tipo_papel')->nullable();
+            $table->string('voltagem')->nullable();
             $table->string('polegadas')->nullable();
-            $table->string('cor')->nullable(); // Ciano, Magenta...
-            $table->string('tipo_insumo')->nullable(); // Original, Compatível...
+            $table->string('cor')->nullable();
+            $table->string('tipo_insumo')->nullable();
 
             $table->timestamps();
         });
