@@ -115,7 +115,6 @@ Route::get('/debug-seed', function () {
 
         return "Comandos executados com sucesso!<br><pre>" . Artisan::output() . "</pre>";
     } catch (\Exception $e) {
-        // Isso vai imprimir o erro detalhado na tela para nós
         return "Erro: " . $e->getMessage() . "<br>Linha: " . $e->getLine();
     }
 });
