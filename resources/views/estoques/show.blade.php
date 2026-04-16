@@ -45,16 +45,30 @@
                     <i class="ph ph-map-pin-line text-blue-500"></i> {{ $estoque->localizacao }}
                 </p>
 
-                <div class="flex gap-3 mt-6">
-                    <button onclick="document.getElementById('modal-equipamento').classList.remove('hidden')"
-                        class="bg-slate-900 hover:bg-slate-800 text-white text-xs px-5 py-3 rounded-xl font-bold flex items-center gap-2 transition shadow-lg">
-                        <i class="ph ph-plus-circle text-lg text-blue-400"></i> Novo Equipamento
-                    </button>
+                <div class="flex flex-wrap gap-3 mt-6">
+                    {{-- Equipamentos --}}
+                    <div class="flex flex-col gap-2">
+                        <button onclick="document.getElementById('modal-equipamento').classList.remove('hidden')"
+                            class="bg-slate-900 hover:bg-slate-800 text-white text-[10px] px-5 py-3 rounded-xl font-bold flex items-center gap-2 transition shadow-lg">
+                            <i class="ph ph-plus-circle text-lg text-blue-400"></i> Novo Equipamento
+                        </button>
+                        <a href="{{ route('equipamentos.mass_entry', ['estoque_id' => $estoque->id]) }}"
+                            class="text-blue-600 hover:text-blue-800 text-[10px] font-black uppercase tracking-tighter flex items-center gap-1 px-1">
+                            <i class="ph ph-table"></i> Entrada em Massa (Equip.)
+                        </a>
+                    </div>
 
-                    <button onclick="document.getElementById('modal-insumo').classList.remove('hidden')"
-                        class="bg-blue-600 hover:bg-blue-700 text-white text-xs px-5 py-3 rounded-xl font-bold flex items-center gap-2 transition shadow-lg shadow-blue-100">
-                        <i class="ph ph-drop text-lg"></i> Novo Insumo
-                    </button>
+                    {{-- Insumos --}}
+                    <div class="flex flex-col gap-2">
+                        <button onclick="document.getElementById('modal-insumo').classList.remove('hidden')"
+                            class="bg-emerald-600 hover:bg-emerald-700 text-white text-[10px] px-5 py-3 rounded-xl font-bold flex items-center gap-2 transition shadow-lg shadow-emerald-100">
+                            <i class="ph ph-drop text-lg"></i> Novo Insumo
+                        </button>
+                        <a href="{{ route('insumos.mass_entry', ['estoque_id' => $estoque->id]) }}"
+                            class="text-emerald-600 hover:text-emerald-800 text-[10px] font-black uppercase tracking-tighter flex items-center gap-1 px-1">
+                            <i class="ph ph-table"></i> Entrada em Massa (Insumos)
+                        </a>
+                    </div>
                 </div>
             </div>
 
@@ -228,8 +242,8 @@
                     @if($modelo->ehInsumo())
                     <option value="{{ $modelo->id }}">
                         {{-- Exibe a cor se houver, para diferenciar os toners --}}
-                        {{ $modelo->nome }} 
-                        @if($modelo->cor) - {{ strtoupper($modelo->cor) }} @endif 
+                        {{ $modelo->nome }}
+                        @if($modelo->cor) - {{ strtoupper($modelo->cor) }} @endif
                         ({{ $modelo->categoria->nome ?? 'S/Cat' }})
                     </option>
                     @endif

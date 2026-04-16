@@ -50,8 +50,12 @@ Route::middleware(['auth'])->group(function () {
     Route::resource('tecnicos', TecnicosController::class);
     Route::resource('estoques', EstoqueController::class);
     
-    // Rotas de Equipamentos
+    // --- EQUIPAMENTOS E ENTRADA EM MASSA ---
+    // Rotas específicas de Massa (Devem vir antes do resource para não dar conflito de ID)
+    Route::get('/equipamentos/mass-entry', [EquipamentoController::class, 'massEntry'])->name('equipamentos.mass_entry');
+    Route::get('/insumos/mass-entry', [EquipamentoController::class, 'massEntryInsumo'])->name('insumos.mass_entry');
     Route::post('/equipamentos/store-mass', [EquipamentoController::class, 'storeMass'])->name('equipamentos.store_mass');
+    
     Route::resource('equipamentos', EquipamentoController::class);
 
     Route::get('/estoques/{estoque}/detalhes/{nome}', [EstoqueController::class, 'detalhesItem'])

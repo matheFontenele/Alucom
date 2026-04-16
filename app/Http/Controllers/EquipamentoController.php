@@ -13,7 +13,7 @@ use Illuminate\Support\Facades\DB;
 class EquipamentoController extends Controller
 {
     /**
-     * Lista todos los equipamentos e categorias.
+     * Lista todos os equipamentos e categorias com busca e filtros.
      */
     public function index(Request $request)
     {
@@ -22,7 +22,6 @@ class EquipamentoController extends Controller
         if ($request->filled('search')) {
             $search = $request->search;
             $query->where(function ($q) use ($search) {
-                // Prefixar com 'equipamentos.' evita erros de ambiguidade em Joins futuros
                 $q->where('equipamentos.tombo', 'like', "%{$search}%")
                     ->orWhere('equipamentos.serial', 'like', "%{$search}%")
                     ->orWhere('equipamentos.nome', 'like', "%{$search}%");
@@ -42,25 +41,39 @@ class EquipamentoController extends Controller
     }
 
     /**
-     * Carrega a página de criação em massa (Híbrida)
+     * Tela de Entrada em Massa - Equipamentos
      */
-    public function create(Request $request)
+    public function massEntry(Request $request)
     {
         $estoque_id = $request->estoque_id;
-        $tipo = $request->tipo;
+        $tipo = 'equipamento';
 
-        $modelos = Catalogo::with('categoria')->get()->filter(function ($item) use ($tipo) {
-            // Garante que o método ehInsumo() existe no Model Catalogo
-            return $tipo === 'insumo' ? $item->ehInsumo() : !$item->ehInsumo();
-        });
+        $modelos = Catalogo::where('tipo', 'equipamento')
+            ->with('categoria')
+            ->orderBy('nome')
+            ->get();
 
-        $view = $tipo === 'insumo' ? 'equipamentos.create_mass_insumos' : 'equipamentos.create_mass_equipamentos';
-
-        return view($view, compact('modelos', 'estoque_id', 'tipo'));
+        return view('equipamentos.create_mass_equipamentos', compact('modelos', 'estoque_id', 'tipo'));
     }
 
     /**
-     * Processamento em Massa Unificado (Equipamentos e Insumos)
+     * Tela de Entrada em Massa - Insumos
+     */
+    public function massEntryInsumo(Request $request)
+    {
+        $estoque_id = $request->estoque_id;
+        $tipo = 'insumo';
+
+        $modelos = Catalogo::where('tipo', 'insumo')
+            ->with('categoria')
+            ->orderBy('nome')
+            ->get();
+
+        return view('equipamentos.create_mass_insumos', compact('modelos', 'estoque_id', 'tipo'));
+    }
+
+    /**
+     * Processamento em Massa Unificado
      */
     public function storeMass(Request $request)
     {
@@ -86,7 +99,7 @@ class EquipamentoController extends Controller
                 foreach ($request->itens as $item) {
                     $itemCatalogo = Catalogo::findOrFail($item['catalogo_id']);
 
-                    // Fallback para garantir que sempre haja ao menos 1 loop
+                    // Se for insumo, repete o insert baseado na quantidade informada
                     $loops = ($tipoEntrada === 'insumo') ? (int)($item['quantidade'] ?? 1) : 1;
 
                     for ($i = 0; $i < $loops; $i++) {
@@ -108,7 +121,7 @@ class EquipamentoController extends Controller
             });
 
             return redirect()->route('estoques.show', $request->estoque_id)
-                ->with('success', 'Entrada processada com sucesso!');
+                ->with('success', 'Entrada em massa processada com sucesso!');
         } catch (\Exception $e) {
             return redirect()->back()
                 ->withErrors(['erro' => 'Erro no processamento: ' . $e->getMessage()])
@@ -117,7 +130,7 @@ class EquipamentoController extends Controller
     }
 
     /**
-     * Salva um único item (via Modal/Individual)
+     * Salva um único item (Modal ou Individual)
      */
     public function store(Request $request)
     {
@@ -134,7 +147,6 @@ class EquipamentoController extends Controller
         $data = $request->validate($regras);
         $itemCatalogo = Catalogo::findOrFail($data['catalogo_id']);
 
-        // Define se vai para cliente ou para estoque
         $cliente_id = in_array($request->status, ['Alugado', 'Reservado']) ? $request->cliente_id : null;
         $estoque_id = !$cliente_id ? $request->estoque_id : null;
 
@@ -160,7 +172,7 @@ class EquipamentoController extends Controller
 
             return redirect()->back()->with('success', 'Cadastro realizado!');
         } catch (\Exception $e) {
-            return redirect()->back()->withErrors(['erro' => 'Erro ao salvar.'])->withInput();
+            return redirect()->back()->withErrors(['erro' => 'Erro ao salvar: ' . $e->getMessage()])->withInput();
         }
     }
 
