@@ -49,13 +49,13 @@ Route::middleware(['auth'])->group(function () {
     Route::resource('catalogos', CatalogoController::class);
     Route::resource('tecnicos', TecnicosController::class);
     Route::resource('estoques', EstoqueController::class);
-    
+
     // --- EQUIPAMENTOS E ENTRADA EM MASSA ---
     // Rotas específicas de Massa (Devem vir antes do resource para não dar conflito de ID)
     Route::get('/equipamentos/mass-entry', [EquipamentoController::class, 'massEntry'])->name('equipamentos.mass_entry');
     Route::get('/insumos/mass-entry', [EquipamentoController::class, 'massEntryInsumo'])->name('insumos.mass_entry');
     Route::post('/equipamentos/store-mass', [EquipamentoController::class, 'storeMass'])->name('equipamentos.store_mass');
-    
+
     Route::resource('equipamentos', EquipamentoController::class);
 
     Route::get('/estoques/{estoque}/detalhes/{nome}', [EstoqueController::class, 'detalhesItem'])
@@ -66,7 +66,7 @@ Route::middleware(['auth'])->group(function () {
     Route::put('/requisicoes/{id}/separar', [RequisicaoController::class, 'separarUpdate'])->name('requisicoes.separar.update');
     Route::get('/movimentacoes/{id}/protocolo', [MovimentacaoController::class, 'emitirProtocolo'])->name('movimentacoes.protocolo');
     Route::get('/movimentacoes/{id}/etiqueta', [MovimentacaoController::class, 'emitirEtiqueta'])->name('movimentacoes.etiqueta');
-    
+
     Route::resource('requisicoes', RequisicaoController::class);
     Route::resource('rotas', RotaController::class);
     Route::resource('movimentacoes', MovimentacaoController::class);
@@ -86,7 +86,6 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/api/categorias/{categoria}/subcategorias', function ($categoriaId) {
         return Subcategoria::where('categoria_id', $categoriaId)->get();
     });
-
 });
 
 // ---------------------------------------------------------
@@ -104,15 +103,24 @@ Route::get('/popular-banco', function () {
 
 Route::get('/debug-seed', function () {
     try {
-        Artisan::call('migrate:fresh', ['--force' => true]);
+        // Passo 1: Limpar caches que podem estar travando a leitura de novos arquivos
+        Artisan::call('optimize:clear');
+
+        // Passo 2: Executar a migration (caso a coluna 'tipo' ainda não exista lá)
+        Artisan::call('migrate', ['--force' => true]);
+
+        // Passo 3: Tentar rodar o Seeder especificando o caminho completo ou chamando o DatabaseSeeder
+        // Se o CategoriaEquipamentoSeeder individual falhar, tente rodar o principal:
         Artisan::call('db:seed', ['--force' => true]);
-        return "O banco foi resetado e os dados iniciais foram carregados!";
+
+        return "Comandos executados com sucesso!<br><pre>" . Artisan::output() . "</pre>";
     } catch (\Exception $e) {
-        return "Erro: " . $e->getMessage();
+        // Isso vai imprimir o erro detalhado na tela para nós
+        return "Erro: " . $e->getMessage() . "<br>Linha: " . $e->getLine();
     }
 });
 
-Route::get('/limpar-rota', function() {
+Route::get('/limpar-rota', function () {
     Artisan::call('route:clear');
     Artisan::call('config:clear');
     Artisan::call('view:clear');
