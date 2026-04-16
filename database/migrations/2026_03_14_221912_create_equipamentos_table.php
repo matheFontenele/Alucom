@@ -22,7 +22,7 @@ return new class extends Migration
             // Identificadores
             $table->string('tipo')->default('equipamento'); // equipamento ou insumo
             $table->string('nome');
-            $table->string('tombo')->nullable();
+            $table->string('tombo')->unique()->nullable();
             $table->string('serial')->unique()->nullable();
 
             // Status e Rastreio

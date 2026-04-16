@@ -29,6 +29,22 @@ class Equipamento extends Model
     ];
 
     /**
+     * Descobre automaticamente onde o equipamento está com base no status
+     */
+    public function getLocalAtualAttribute()
+    {
+        if (in_array($this->status, ['Alugado', 'Reservado']) && $this->cliente_id) {
+            return $this->cliente->nome; // Se seu model cliente usar razao_social, troque aqui
+        }
+
+        if ($this->estoque_id) {
+            return $this->estoque->nome;
+        }
+
+        return 'Local Indefinido';
+    }
+
+    /**
      * Relação com o item original do Catálogo
      */
     public function catalogo(): BelongsTo
@@ -49,13 +65,28 @@ class Equipamento extends Model
             'Branco'  => '#FFFFFF',
         ];
 
-        return $cores[$this->cor] ?? '#cbd5e1'; 
+        return $cores[$this->cor] ?? '#cbd5e1';
     }
 
     // --- Outros Relacionamentos ---
-    public function categoria() { return $this->belongsTo(Categoria::class); }
-    public function subcategoria() { return $this->belongsTo(Subcategoria::class); }
-    public function cliente() { return $this->belongsTo(Clientes::class, 'cliente_id'); }
-    public function estoque() { return $this->belongsTo(Estoque::class); }
-    public function movimentacoes() { return $this->hasMany(Movimentacao::class); }
+    public function categoria()
+    {
+        return $this->belongsTo(Categoria::class);
+    }
+    public function subcategoria()
+    {
+        return $this->belongsTo(Subcategoria::class);
+    }
+    public function cliente()
+    {
+        return $this->belongsTo(Clientes::class, 'cliente_id');
+    }
+    public function estoque()
+    {
+        return $this->belongsTo(Estoque::class);
+    }
+    public function movimentacoes()
+    {
+        return $this->hasMany(Movimentacao::class);
+    }
 }
