@@ -21,13 +21,15 @@
                 </div>
             </div>
 
-            {{-- Filtro Status --}}
+            {{-- Filtro Status - Corrigido para 'Disponivel' --}}
             <div class="flex flex-col gap-1">
                 <label class="text-xs font-bold text-gray-500 uppercase ml-1">Status</label>
                 <select name="status" class="w-full border border-gray-300 rounded-xl px-4 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none font-medium appearance-none bg-white">
                     <option value="">Todos os Status</option>
-                    @foreach(['Alugado', 'Reservado', 'Devolução', 'Liberado', 'Manutenção'] as $st)
-                        <option value="{{ $st }}" {{ request('status') == $st ? 'selected' : '' }}>{{ $st }}</option>
+                    @foreach(['Alugado', 'Reservado', 'Devolução', 'Disponivel', 'Manutenção'] as $st)
+                        <option value="{{ $st }}" {{ request('status') == $st ? 'selected' : '' }}>
+                            {{ $st == 'Disponivel' ? 'Disponível' : $st }}
+                        </option>
                     @endforeach
                 </select>
             </div>
@@ -95,13 +97,14 @@
 
                     <td class="py-4 px-6">
                         <div class="flex flex-col gap-1">
+                            {{-- Badge de Status Atualizada --}}
                             <span class="px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wide w-fit
-                                {{ $equip->status == 'Liberado' || $equip->status == 'Disponivel' ? 'bg-emerald-100 text-emerald-700' : '' }}
+                                {{ $equip->status == 'Disponivel' || $equip->status == 'Liberado' ? 'bg-emerald-100 text-emerald-700' : '' }}
                                 {{ $equip->status == 'Alugado' ? 'bg-blue-100 text-blue-700' : '' }}
                                 {{ $equip->status == 'Manutenção' ? 'bg-red-100 text-red-700' : '' }}
                                 {{ $equip->status == 'Reservado' ? 'bg-purple-100 text-purple-700' : '' }}
                                 {{ $equip->status == 'Devolução' ? 'bg-amber-100 text-amber-700' : '' }}">
-                                {{ $equip->status }}
+                                {{ $equip->status == 'Disponivel' ? 'Disponível' : $equip->status }}
                             </span>
                             @if($equip->situacao)
                                 <span class="text-[10px] text-slate-400 font-medium ml-1">
