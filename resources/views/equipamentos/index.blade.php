@@ -4,11 +4,9 @@
 <div class="container mx-auto p-6">
     <div class="flex justify-between items-center mb-6">
         <h1 class="text-2xl font-bold text-slate-800">Gestão de Equipamentos - Alucom</h1>
-        <div class="flex gap-2">
-            </div>
     </div>
 
-    {{-- Barra de Filtros Reformulada --}}
+    {{-- Barra de Filtros --}}
     <div class="bg-white p-4 rounded-xl shadow-sm mb-6 border border-gray-200">
         <form action="{{ route('equipamentos.index') }}" method="GET" class="grid grid-cols-1 md:grid-cols-4 lg:grid-cols-5 gap-4 items-end">
             
@@ -26,10 +24,10 @@
             {{-- Filtro Status --}}
             <div class="flex flex-col gap-1">
                 <label class="text-xs font-bold text-gray-500 uppercase ml-1">Status</label>
-                <select name="status" class="w-full border border-gray-300 rounded-xl px-4 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none font-medium appearance-none">
+                <select name="status" class="w-full border border-gray-300 rounded-xl px-4 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none font-medium appearance-none bg-white">
                     <option value="">Todos os Status</option>
-                    @foreach(['Alugado', 'Reservado', 'Devolução', 'Liberado', 'Manutenção'] as $status)
-                        <option value="{{ $status }}" {{ request('status') == $status ? 'selected' : '' }}>{{ $status }}</option>
+                    @foreach(['Alugado', 'Reservado', 'Devolução', 'Liberado', 'Manutenção'] as $st)
+                        <option value="{{ $st }}" {{ request('status') == $st ? 'selected' : '' }}>{{ $st }}</option>
                     @endforeach
                 </select>
             </div>
@@ -37,11 +35,11 @@
             {{-- Filtro Situação --}}
             <div class="flex flex-col gap-1">
                 <label class="text-xs font-bold text-gray-500 uppercase ml-1">Situação</label>
-                <select name="situacao" class="w-full border border-gray-300 rounded-xl px-4 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none font-medium appearance-none">
+                <select name="situacao" class="w-full border border-gray-300 rounded-xl px-4 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none font-medium appearance-none bg-white">
                     <option value="">Todas</option>
-                    <option value="Novo" {{ request('situacao') == 'Novo' ? 'selected' : '' }}>Novo</option>
-                    <option value="Revisado" {{ request('situacao') == 'Revisado' ? 'selected' : '' }}>Revisado</option>
-                    <option value="Sucata" {{ request('situacao') == 'Sucata' ? 'selected' : '' }}>Sucata</option>
+                    @foreach(['Novo', 'Revisado', 'Sucata'] as $sit)
+                        <option value="{{ $sit }}" {{ request('situacao') == $sit ? 'selected' : '' }}>{{ $sit }}</option>
+                    @endforeach
                 </select>
             </div>
 
@@ -59,6 +57,7 @@
         </form>
     </div>
 
+    {{-- Tabela de Resultados --}}
     <div class="bg-white shadow-xl rounded-2xl overflow-hidden border border-gray-100">
         <table class="min-w-full leading-normal">
             <thead>
@@ -74,34 +73,30 @@
             <tbody class="text-gray-700">
                 @forelse($equipamentos as $equip)
                 <tr class="border-b border-gray-50 hover:bg-blue-50/30 transition-colors">
-                    {{-- Tombo com destaque --}}
                     <td class="py-4 px-6">
                         <span class="bg-slate-100 text-slate-700 font-mono font-bold px-2 py-1 rounded border border-slate-200 text-sm">
                             {{ $equip->tombo ?? '---' }}
                         </span>
                     </td>
                     
-                    {{-- Nome e Categoria --}}
                     <td class="py-4 px-6">
                         <div class="flex flex-col">
                             <span class="font-bold text-slate-800">{{ $equip->nome }}</span>
                             <span class="text-[10px] text-gray-400 uppercase tracking-tighter">
-                                {{ $equip->categoria->nome }} 
+                                {{ $equip->categoria->nome ?? 'S/ Cat' }} 
                                 @if($equip->subcategoria) / {{ $equip->subcategoria->nome }} @endif
                             </span>
                         </div>
                     </td>
 
-                    {{-- Serial --}}
                     <td class="py-4 px-6 font-mono text-xs text-gray-500">
                         {{ $equip->serial ?? 'N/A' }}
                     </td>
 
-                    {{-- Status / Situação --}}
                     <td class="py-4 px-6">
                         <div class="flex flex-col gap-1">
                             <span class="px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wide w-fit
-                                {{ $equip->status == 'Liberado' ? 'bg-emerald-100 text-emerald-700' : '' }}
+                                {{ $equip->status == 'Liberado' || $equip->status == 'Disponivel' ? 'bg-emerald-100 text-emerald-700' : '' }}
                                 {{ $equip->status == 'Alugado' ? 'bg-blue-100 text-blue-700' : '' }}
                                 {{ $equip->status == 'Manutenção' ? 'bg-red-100 text-red-700' : '' }}
                                 {{ $equip->status == 'Reservado' ? 'bg-purple-100 text-purple-700' : '' }}
@@ -116,7 +111,6 @@
                         </div>
                     </td>
 
-                    {{-- Localização Dinâmica --}}
                     <td class="py-4 px-6">
                         @if(in_array($equip->status, ['Alugado', 'Reservado']) && $equip->cliente)
                             <div class="flex flex-col">
@@ -137,19 +131,18 @@
                         @endif
                     </td>
 
-                    {{-- Ações --}}
                     <td class="py-4 px-6">
                         <div class="flex justify-center items-center gap-2">
-                            <a href="{{ route('equipamentos.show', $equip->id) }}" class="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition" title="Ver">
+                            <a href="{{ route('equipamentos.show', $equip->id) }}" class="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition">
                                 <i class="ph ph-eye text-lg"></i>
                             </a>
-                            <a href="{{ route('equipamentos.edit', $equip->id) }}" class="p-2 text-gray-400 hover:text-amber-500 hover:bg-amber-50 rounded-lg transition" title="Editar">
+                            <a href="{{ route('equipamentos.edit', $equip->id) }}" class="p-2 text-gray-400 hover:text-amber-500 hover:bg-amber-50 rounded-lg transition">
                                 <i class="ph ph-pencil-line text-lg"></i>
                             </a>
                             <form action="{{ route('equipamentos.destroy', $equip->id) }}" method="POST" class="form-delete inline">
                                 @csrf
                                 @method('DELETE')
-                                <button type="button" class="btn-delete p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition" title="Excluir">
+                                <button type="button" class="btn-delete p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition">
                                     <i class="ph ph-trash text-lg"></i>
                                 </button>
                             </form>
@@ -166,16 +159,21 @@
             </tbody>
         </table>
     </div>
+
+    {{-- Paginação --}}
+    <div class="mt-6">
+        {{ $equipamentos->links() }}
+    </div>
 </div>
 
-{{-- Script de Alertas e Confirmações --}}
 <script>
+    // Confirmação de exclusão
     document.querySelectorAll('.btn-delete').forEach(button => {
         button.addEventListener('click', function() {
             const form = this.closest('.form-delete');
             Swal.fire({
                 title: 'Excluir Equipamento?',
-                text: "Esta ação removerá o item permanentemente do sistema.",
+                text: "Esta ação não pode ser desfeita.",
                 icon: 'warning',
                 showCancelButton: true,
                 confirmButtonColor: '#1e3a8a',
@@ -190,7 +188,7 @@
     });
 
     @if(session('success'))
-        Swal.fire({ icon: 'success', title: 'Pronto!', text: "{{ session('success') }}", timer: 2500, showConfirmButton: false });
+        Swal.fire({ icon: 'success', title: 'Sucesso!', text: "{{ session('success') }}", timer: 2500, showConfirmButton: false });
     @endif
 </script>
 @endsection

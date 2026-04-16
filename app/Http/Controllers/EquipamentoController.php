@@ -14,12 +14,35 @@ class EquipamentoController extends Controller
     /**
      * Lista todos os equipamentos e categorias.
      */
-    public function index()
+    public function index(Request $request)
     {
-        $equipamentos = Equipamento::with(['catalogo.categoria'])->latest()->get();
-        $categorias = Categoria::with('subcategorias')->get();
+        // Inicia a query com os relacionamentos necessários para evitar o problema N+1
+        $query = Equipamento::with(['categoria', 'subcategoria', 'cliente', 'estoque']);
 
-        return view('equipamentos.index', compact('equipamentos', 'categorias'));
+        // 1. Filtro de Busca (Tombo, Serial ou Nome)
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function ($q) use ($search) {
+                $q->where('tombo', 'like', "%{$search}%")
+                    ->orWhere('serial', 'like', "%{$search}%")
+                    ->orWhere('nome', 'like', "%{$search}%");
+            });
+        }
+
+        // 2. Filtro de Status
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
+        }
+
+        // 3. Filtro de Situação (Novo, Revisado, Sucata)
+        if ($request->filled('situacao') && $request->situacao !== 'Todas') {
+            $query->where('situacao', $request->situacao);
+        }
+
+        // Ordena pelos mais recentes e mantém os filtros na paginação
+        $equipamentos = $query->latest()->paginate(15)->withQueryString();
+
+        return view('equipamentos.index', compact('equipamentos'));
     }
 
     /**
