@@ -41,7 +41,7 @@ Route::get('/api/estoques/{estoque}/itens', [RequisicaoController::class, 'getIt
 Route::middleware(['auth'])->group(function () {
 
     // --- DASHBOARD PRINCIPAL ---
-    @get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
     // --- OPERAÇÕES (MENU 1) ---
     Route::resource('guia-adi', GuiaAdiController::class);
