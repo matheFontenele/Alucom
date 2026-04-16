@@ -4,8 +4,7 @@
 <div class="container mx-auto p-6 max-w-3xl">
     {{-- Header de Navegação --}}
     <div class="mb-8">
-        <a href="{{ route('catalogo.index') }}" class="text-slate-400 hover:text-blue-600 font-bold text-sm flex items-center gap-2 transition-colors mb-4">
-            <i class="ph ph-caret-left"></i> Voltar ao Catálogo
+        <a href="{{ route('catalogos.index') }}" class="text-slate-400 hover:text-blue-600 ..."> <i class="ph ph-caret-left"></i> Voltar ao Catálogo
         </a>
         <h1 class="text-4xl font-black text-slate-900 tracking-tight">Novo Ativo</h1>
         <p class="text-slate-500 font-medium">Cadastre as especificações técnicas do novo modelo.</p>
@@ -23,28 +22,28 @@
 
         <form action="{{ route('catalogos.store') }}" method="POST" class="p-10 space-y-8">
             @csrf
-            
+
             {{-- Informações Básicas --}}
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div class="md:col-span-2">
                     <label class="text-[11px] font-black text-slate-400 uppercase mb-2 block tracking-widest">Nome do Modelo</label>
-                    <input type="text" name="nome" required placeholder="Ex: Ecosys M3655idn ou ThinkCentre M70q" 
+                    <input type="text" name="nome" required placeholder="Ex: Ecosys M3655idn ou ThinkCentre M70q"
                         class="w-full bg-slate-50 border-slate-200 rounded-2xl focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none p-4 text-sm font-bold transition-all">
                 </div>
-                
+
                 <div>
                     <label class="text-[11px] font-black text-slate-400 uppercase mb-2 block tracking-widest">Fabricante</label>
-                    <input type="text" name="fabricante" required placeholder="Ex: Kyocera, Dell, HP..." 
+                    <input type="text" name="fabricante" required placeholder="Ex: Kyocera, Dell, HP..."
                         class="w-full bg-slate-50 border-slate-200 rounded-2xl focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none p-4 text-sm font-bold transition-all">
                 </div>
 
                 <div>
                     <label class="text-[11px] font-black text-slate-400 uppercase mb-2 block tracking-widest">Categoria</label>
-                    <select name="categoria_id" id="select-categoria" required 
+                    <select name="categoria_id" id="select-categoria" required
                         class="w-full bg-slate-50 border-slate-200 rounded-2xl focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none p-4 text-sm font-bold transition-all appearance-none">
                         <option value="">Selecione uma categoria...</option>
                         @foreach($categorias as $cat)
-                            <option value="{{ $cat->id }}" data-nome="{{ $cat->nome }}">{{ $cat->nome }}</option>
+                        <option value="{{ $cat->id }}" data-nome="{{ $cat->nome }}">{{ $cat->nome }}</option>
                         @endforeach
                     </select>
                 </div>
@@ -60,7 +59,7 @@
 
             <div>
                 <label class="text-[11px] font-black text-slate-400 uppercase mb-2 block tracking-widest">Descrição (Opcional)</label>
-                <textarea name="descricao" rows="2" placeholder="Notas adicionais sobre o modelo..." 
+                <textarea name="descricao" rows="2" placeholder="Notas adicionais sobre o modelo..."
                     class="w-full bg-slate-50 border-slate-200 rounded-2xl focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none p-4 text-sm font-bold transition-all"></textarea>
             </div>
 
@@ -186,7 +185,7 @@
         const placeholder = document.getElementById('placeholder-text');
         const subDiv = document.getElementById('container-subcategoria');
         const subSelect = document.getElementById('select-subcategoria');
-        
+
         // Resetar campos
         const divs = ['div-computador', 'div-impressora', 'div-insumo', 'div-energia', 'div-monitor'];
         divs.forEach(id => document.getElementById(id).classList.add('hidden'));
@@ -214,20 +213,16 @@
         if (catNome.includes('Computador') || catNome.includes('Notebook')) {
             document.getElementById('div-computador').classList.remove('hidden');
             tipoHidden.value = 'equipamento';
-        } 
-        else if (catNome.includes('Impressora')) {
+        } else if (catNome.includes('Impressora')) {
             document.getElementById('div-impressora').classList.remove('hidden');
             tipoHidden.value = 'equipamento';
-        }
-        else if (catNome.includes('Energia') || catNome.includes('Nobreak')) {
+        } else if (catNome.includes('Energia') || catNome.includes('Nobreak')) {
             document.getElementById('div-energia').classList.remove('hidden');
             tipoHidden.value = 'equipamento';
-        }
-        else if (catNome.includes('Monitor')) {
+        } else if (catNome.includes('Monitor')) {
             document.getElementById('div-monitor').classList.remove('hidden');
             tipoHidden.value = 'equipamento';
-        }
-        else if (catNome.includes('Toner') || catNome.includes('Insumo') || catNome.includes('Suprimento')) {
+        } else if (catNome.includes('Toner') || catNome.includes('Insumo') || catNome.includes('Suprimento')) {
             document.getElementById('div-insumo').classList.remove('hidden');
             tipoHidden.value = 'insumo';
         }
