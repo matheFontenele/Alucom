@@ -19,7 +19,7 @@
 
         <form action="{{ route('equipamentos.store_mass') }}" method="POST" class="p-6">
             @csrf
-            
+
             {{-- Campos de Controle --}}
             <input type="hidden" name="tipo_entrada" value="insumo">
             <input type="hidden" name="estoque_id" value="{{ $estoque_id }}">
@@ -39,12 +39,12 @@
                         {{-- Linha Protótipo --}}
                         <tr class="entry-row hover:bg-slate-50/50 transition-colors">
                             <td class="p-2">
-                                <select name="itens[0][catalogo_id]" class="w-full border-none bg-transparent font-bold text-sm focus:ring-0" required>
+                                <select name="itens[0][catalogo_id]" required>
                                     <option value="">Selecione o item...</option>
-                                    @foreach($modelos as $modelo)
-                                        <option value="{{ $modelo->id }}">
-                                            [{{ $modelo->categoria->nome }}] {{ $modelo->nome }}
-                                        </option>
+                                    @foreach($modelosCatalogo as $modelo)
+                                    <option value="{{ $modelo->id }}">
+                                        {{ $modelo->nome }} ({{ $modelo->categoria->nome ?? 'Sem Categoria' }})
+                                    </option>
                                     @endforeach
                                 </select>
                             </td>
@@ -59,13 +59,14 @@
                                 </select>
                             </td>
                             <td class="p-2">
-                                <input type="number" name="itens[0][quantidade]" min="1" value="1" required 
+                                <input type="number" name="itens[0][quantidade]" min="1" value="1" required
                                     class="w-full border-none bg-transparent font-bold text-sm focus:ring-0 text-blue-600">
                             </td>
                             <td class="p-2">
-                                <select name="itens[0][situacao]" class="w-full border-none bg-transparent font-bold text-sm focus:ring-0">
-                                    <option value="Novo">Novo</option>
-                                    <option value="Revisado">Revisado</option>
+                                <select name="itens[0][situacao]" required class="...">
+                                    <option value="Original">Original</option>
+                                    <option value="Compativel">Compatível</option>
+                                    <option value="Recondicionado">Recondicionado</option>
                                 </select>
                             </td>
                             <td class="p-2 text-center">
@@ -109,7 +110,7 @@
         newRow.querySelectorAll('input, select').forEach(el => {
             el.name = el.name.replace('[0]', `[${rowCount}]`);
             // Reseta a quantidade para 1 em novas linhas
-            if(el.type === 'number') el.value = 1;
+            if (el.type === 'number') el.value = 1;
         });
 
         tbody.appendChild(newRow);
@@ -128,11 +129,14 @@
 
 <style>
     /* Estilo Planilha */
-    input:focus, select:focus {
+    input:focus,
+    select:focus {
         outline: none !important;
         box-shadow: none !important;
     }
-    .entry-row input, .entry-row select {
+
+    .entry-row input,
+    .entry-row select {
         padding: 0.5rem;
     }
 </style>

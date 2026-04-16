@@ -15,19 +15,23 @@ return new class extends Migration
             $table->id();
             $table->string('nome');
             $table->string('fabricante');
-            
-            // Nova coluna para diferenciar Equipamento de Insumo
-            $table->string('tipo')->default('equipamento'); 
-
+            $table->string('tipo')->default('equipamento'); // equipamento ou insumo
             $table->foreignId('categoria_id')->constrained('categorias')->onDelete('cascade');
+            $table->foreignId('subcategoria_id')->nullable()->constrained('subcategorias')->onDelete('set null');
+
+            // Atributos técnicos dinâmicos
+            $table->string('processador')->nullable(); // Computadores
+            $table->string('memoria')->nullable();     // Computadores
+            $table->string('geracao')->nullable();     // Computadores
+            $table->string('voltagem')->nullable();    // Nobreaks
+            $table->string('tipo_impressora')->nullable(); // Mono/Color
+            $table->string('situacao_insumo')->nullable(); // Original/Compatível/Recondicionado
             $table->string('tipo_papel')->nullable();
-            $table->string('voltagem')->nullable();
             $table->string('cor')->nullable();
-            $table->string('descricao')->nullable();
+            $table->text('descricao')->nullable();
             $table->timestamps();
         });
     }
-
     /**
      * Reverse the migrations.
      */

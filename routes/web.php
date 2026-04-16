@@ -33,8 +33,6 @@ Route::get('/', function () {
     return redirect()->route('dashboard');
 });
 
-Route::get('/api/estoques/{estoque}/itens', [RequisicaoController::class, 'getItensPorEstoque']);
-
 // ---------------------------------------------------------
 // 2. ÁREA RESTRITA (PRECISA ESTAR LOGADO)
 // ---------------------------------------------------------
@@ -46,12 +44,17 @@ Route::middleware(['auth'])->group(function () {
     // --- OPERAÇÕES (MENU 1) ---
     Route::resource('guia-adi', GuiaAdiController::class);
     Route::resource('clientes', ClientesController::class);
-    Route::resource('catalogos', CatalogoController::class);
     Route::resource('tecnicos', TecnicosController::class);
     Route::resource('estoques', EstoqueController::class);
+    
+    /**
+     * Catálogo de Ativos
+     * O resource gerencia: index, create, store, show, edit, update, destroy
+     */
+    Route::resource('catalogos', CatalogoController::class);
 
     // --- EQUIPAMENTOS E ENTRADA EM MASSA ---
-    // Rotas específicas de Massa (Devem vir antes do resource para não dar conflito de ID)
+    // Importante: Rotas específicas de Massa devem vir ANTES do resource
     Route::get('/equipamentos/mass-entry', [EquipamentoController::class, 'massEntry'])->name('equipamentos.mass_entry');
     Route::get('/insumos/mass-entry', [EquipamentoController::class, 'massEntryInsumo'])->name('insumos.mass_entry');
     Route::post('/equipamentos/store-mass', [EquipamentoController::class, 'storeMass'])->name('equipamentos.store_mass');
@@ -64,6 +67,7 @@ Route::middleware(['auth'])->group(function () {
     // --- LOGÍSTICA (MENU 2) ---
     Route::get('/requisicoes/{id}/separacao', [RequisicaoController::class, 'separacao'])->name('requisicoes.separacao');
     Route::put('/requisicoes/{id}/separar', [RequisicaoController::class, 'separarUpdate'])->name('requisicoes.separar.update');
+    
     Route::get('/movimentacoes/{id}/protocolo', [MovimentacaoController::class, 'emitirProtocolo'])->name('movimentacoes.protocolo');
     Route::get('/movimentacoes/{id}/etiqueta', [MovimentacaoController::class, 'emitirEtiqueta'])->name('movimentacoes.etiqueta');
 
@@ -82,9 +86,12 @@ Route::middleware(['auth'])->group(function () {
         ]);
     });
 
-    // --- APIs ---
-    Route::get('/api/categorias/{categoria}/subcategorias', function ($categoriaId) {
-        return Subcategoria::where('categoria_id', $categoriaId)->get();
+    // --- APIs INTERNAS ---
+    Route::prefix('api')->group(function () {
+        Route::get('/estoques/{estoque}/itens', [RequisicaoController::class, 'getItensPorEstoque']);
+        Route::get('/categorias/{categoria}/subcategorias', function ($categoriaId) {
+            return Subcategoria::where('categoria_id', $categoriaId)->get();
+        });
     });
 });
 
@@ -103,19 +110,13 @@ Route::get('/popular-banco', function () {
 
 Route::get('/debug-seed', function () {
     try {
-        // 1. Limpa o cache de classes do Laravel
         Artisan::call('optimize:clear');
-
-        // 2. Tenta rodar a migration fresca (CUIDADO: isso apaga dados da tabela catalogo)
         Artisan::call('migrate:fresh', ['--force' => true]);
         $output = "Migrations executadas.<br>";
 
-        // 3. Registro manual: Se o autoload falhar, incluímos o arquivo no braço
         $seederPath = database_path('seeders/CategoriaEquipamentoSeeder.php');
         if (file_exists($seederPath)) {
             require_once $seederPath;
-
-            // Tenta rodar o seeder principal que deve chamar os outros
             Artisan::call('db:seed', ['--force' => true]);
             $output .= "Seeder executado com sucesso!<br>";
         } else {

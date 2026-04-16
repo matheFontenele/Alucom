@@ -75,7 +75,6 @@ class EquipamentoController extends Controller
             ->orderBy('nome')
             ->get();
 
-        // Enviamos das duas formas aqui também para corrigir o erro da linha 44
         return view('equipamentos.create_mass_insumos', [
             'modelosCatalogo' => $modelosCatalogo,
             'modelos'         => $modelosCatalogo,

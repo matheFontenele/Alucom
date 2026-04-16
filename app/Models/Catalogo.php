@@ -9,18 +9,19 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 class Catalogo extends Model
 {
     protected $table = 'catalogo';
-    
+
     protected $fillable = [
         'nome',
         'fabricante',
-        'tipo',             // 'equipamento' ou 'insumo'
+        'tipo',
         'categoria_id',
-        'subcategoria_id',  // Nova relação adicionada
-        'processador',      // Específico para Computadores
-        'memoria',          // Específico para Computadores
-        'geracao',          // Específico para Computadores
-        'voltagem',         // Específico para Nobreaks/Eletrônicos
-        'tipo_impressora',  // Específico para Impressoras (Mono/Color)
+        'subcategoria_id',
+        'processador',
+        'memoria',
+        'geracao',
+        'voltagem',
+        'tipo_impressora',
+        'situacao_insumo',
         'tipo_papel',
         'cor',
         'descricao'
@@ -56,14 +57,15 @@ class Catalogo extends Model
     public function getCorHexAttribute()
     {
         $cores = [
-            'Preto'   => '#000000',
-            'Ciano'   => '#00FFFF',
-            'Magenta' => '#FF00FF',
-            'Amarelo' => '#FFFF00',
-            'Branco'  => '#FFFFFF',
+            'Preto'   => '#1e293b',
+            'Ciano'   => '#06b6d4',
+            'Magenta' => '#d946ef',
+            'Amarelo' => '#eab308',
+            'Mono'    => '#64748b',
+            'Branco'  => '#f8fafc',
         ];
 
-        return $cores[$this->cor] ?? '#cbd5e1'; // Cinza padrão
+        return $cores[$this->cor] ?? '#cbd5e1';
     }
 
     /**
