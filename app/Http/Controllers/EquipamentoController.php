@@ -48,12 +48,13 @@ class EquipamentoController extends Controller
         $estoque_id = $request->estoque_id;
         $tipo = 'equipamento';
 
-        $modelos = Catalogo::where('tipo', 'equipamento')
+        // Alterado de $modelos para $modelosCatalogo para corrigir o erro na View
+        $modelosCatalogo = Catalogo::where('tipo', 'equipamento')
             ->with('categoria')
             ->orderBy('nome')
             ->get();
 
-        return view('equipamentos.create_mass_equipamentos', compact('modelos', 'estoque_id', 'tipo'));
+        return view('equipamentos.create_mass_equipamentos', compact('modelosCatalogo', 'estoque_id', 'tipo'));
     }
 
     /**
@@ -64,12 +65,13 @@ class EquipamentoController extends Controller
         $estoque_id = $request->estoque_id;
         $tipo = 'insumo';
 
-        $modelos = Catalogo::where('tipo', 'insumo')
+        // Consertado aqui também para manter o padrão
+        $modelosCatalogo = Catalogo::where('tipo', 'insumo')
             ->with('categoria')
             ->orderBy('nome')
             ->get();
 
-        return view('equipamentos.create_mass_insumos', compact('modelos', 'estoque_id', 'tipo'));
+        return view('equipamentos.create_mass_insumos', compact('modelosCatalogo', 'estoque_id', 'tipo'));
     }
 
     /**
@@ -77,7 +79,6 @@ class EquipamentoController extends Controller
      */
     public function storeMass(Request $request)
     {
-        // 1. Validação rigorosa
         $validated = $request->validate([
             'estoque_id' => 'required|exists:estoques,id',
             'equipamentos' => 'required|array|min:1',
