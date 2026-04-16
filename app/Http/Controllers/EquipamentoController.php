@@ -8,6 +8,7 @@ use App\Models\Catalogo;
 use App\Models\Estoque;
 use App\Models\Clientes;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class EquipamentoController extends Controller
 {
@@ -16,8 +17,7 @@ class EquipamentoController extends Controller
      */
     public function index(Request $request)
     {
-        // Inicia a query com os relacionamentos necessários para evitar o problema N+1
-        $query = Equipamento::with(['categoria', 'subcategoria', 'cliente', 'estoque']);
+        $query = Equipamento::with(['categoria', 'subcategoria', 'cliente', 'estoque', 'catalogo']);
 
         // 1. Filtro de Busca (Tombo, Serial ou Nome)
         if ($request->filled('search')) {
@@ -34,65 +34,84 @@ class EquipamentoController extends Controller
             $query->where('status', $request->status);
         }
 
-        // 3. Filtro de Situação (Novo, Revisado, Sucata)
+        // 3. Filtro de Situação
         if ($request->filled('situacao') && $request->situacao !== 'Todas') {
             $query->where('situacao', $request->situacao);
         }
 
-        // Ordena pelos mais recentes e mantém os filtros na paginação
         $equipamentos = $query->latest()->paginate(15)->withQueryString();
 
         return view('equipamentos.index', compact('equipamentos'));
     }
 
     /**
-     * Formulário de criação (Caso use página separada).
+     * Método para Processamento em Massa (Estilo Planilha)
      */
-    public function create()
+    public function storeMass(Request $request)
     {
-        $categorias = Categoria::orderBy('nome')->get();
-        $clientes = Clientes::whereNull('parent_id')->orderBy('nome')->get();
-        $estoques = Estoque::orderBy('nome')->get();
+        // Validação do array de equipamentos
+        $request->validate([
+            'estoque_id' => 'required|exists:estoques,id',
+            'equipamentos' => 'required|array|min:1',
+            'equipamentos.*.catalogo_id' => 'required|exists:catalogo,id',
+            'equipamentos.*.tombo' => 'required|digits:5|unique:equipamentos,tombo',
+            'equipamentos.*.serial' => 'required|string|unique:equipamentos,serial',
+            'equipamentos.*.status' => 'required|in:Alugado,Reservado,Devolução,Liberado,Manutenção',
+            'equipamentos.*.situacao' => 'required|in:Novo,Revisado,Sucata',
+        ]);
 
-        return view('equipamentos.create', compact('categorias', 'clientes', 'estoques'));
+        try {
+            DB::transaction(function () use ($request) {
+                foreach ($request->equipamentos as $item) {
+                    $itemCatalogo = Catalogo::findOrFail($item['catalogo_id']);
+
+                    Equipamento::create([
+                        'tipo'              => 'equipamento',
+                        'catalogo_id'       => $itemCatalogo->id,
+                        'categoria_id'      => $itemCatalogo->categoria_id,
+                        'nome'              => $itemCatalogo->nome,
+                        'tombo'             => $item['tombo'],
+                        'serial'            => $item['serial'],
+                        'status'            => $item['status'],
+                        'situacao'          => $item['situacao'],
+                        'estoque_id'        => $request->estoque_id,
+                        'cor'               => $itemCatalogo->cor,
+                        'data_movimentacao' => now(),
+                    ]);
+                }
+            });
+
+            return redirect()->route('equipamentos.index')
+                ->with('success', count($request->equipamentos) . ' equipamentos cadastrados com sucesso!');
+
+        } catch (\Exception $e) {
+            return redirect()->back()
+                ->withErrors(['erro' => 'Erro ao processar lote: ' . $e->getMessage()])
+                ->withInput();
+        }
     }
 
     /**
-     * Salva o equipamento ou insumo vindo dos modais.
+     * Salva um único equipamento ou insumo (Modais individuais).
      */
     public function store(Request $request)
     {
-        // 1. REGRAS DE VALIDAÇÃO RESTRITAS
         $regras = [
             'tipo'            => 'required|in:equipamento,insumo',
             'catalogo_id'     => 'required|exists:catalogo,id',
             'status'          => 'required|in:Alugado,Reservado,Devolução,Liberado,Manutenção',
             'situacao'        => 'nullable|in:Novo,Revisado,Sucata',
-            'subcategoria_id' => 'nullable|exists:subcategorias,id',
             'quantidade'      => 'nullable|integer|min:1',
-
-            // Tombo: Obrigatório se for equipamento, exatamente 5 dígitos e único
-            'tombo' => $request->tipo === 'equipamento'
-                ? 'required|digits:5|unique:equipamentos,tombo'
-                : 'nullable',
-
-            // Serial: Obrigatório se for equipamento e único
-            'serial' => $request->tipo === 'equipamento'
-                ? 'required|string|unique:equipamentos,serial'
-                : 'nullable',
+            'tombo'           => $request->tipo === 'equipamento' ? 'required|digits:5|unique:equipamentos,tombo' : 'nullable',
+            'serial'          => $request->tipo === 'equipamento' ? 'required|string|unique:equipamentos,serial' : 'nullable',
         ];
 
-        // 2. LÓGICA DE LOCAL (CLIENTE VS ESTOQUE)
-        if (in_array($request->status, ['Alugado', 'Reservado'])) {
-            $regras['cliente_id'] = 'required|exists:clientes,id';
-            $estoque_id = null; // Tira do estoque
-            $cliente_id = $request->cliente_id;
-        } else {
-            // Liberado, Manutenção, Devolução
-            $regras['estoque_id'] = 'required|exists:estoques,id';
-            $cliente_id = null; // Tira do cliente
-            $estoque_id = $request->estoque_id;
-        }
+        // Lógica de destino (Cliente vs Estoque)
+        $cliente_id = in_array($request->status, ['Alugado', 'Reservado']) ? $request->cliente_id : null;
+        $estoque_id = !$cliente_id ? $request->estoque_id : null;
+
+        if ($cliente_id) $regras['cliente_id'] = 'required|exists:clientes,id';
+        else $regras['estoque_id'] = 'required|exists:estoques,id';
 
         $data = $request->validate($regras);
         $itemCatalogo = Catalogo::findOrFail($data['catalogo_id']);
@@ -102,34 +121,32 @@ class EquipamentoController extends Controller
                 $qtd = $request->input('quantidade', 1);
                 for ($i = 0; $i < $qtd; $i++) {
                     Equipamento::create([
-                        'tipo'              => 'insumo',
-                        'catalogo_id'       => $itemCatalogo->id,
-                        'categoria_id'      => $itemCatalogo->categoria_id,
-                        'subcategoria_id'   => $request->subcategoria_id,
-                        'nome'              => $itemCatalogo->nome,
-                        'status'            => $request->status,
-                        'situacao'          => $request->situacao,
-                        'estoque_id'        => $estoque_id,
-                        'cliente_id'        => $cliente_id,
-                        'cor'               => $itemCatalogo->cor,
+                        'tipo' => 'insumo',
+                        'catalogo_id' => $itemCatalogo->id,
+                        'categoria_id' => $itemCatalogo->categoria_id,
+                        'nome' => $itemCatalogo->nome,
+                        'status' => $request->status,
+                        'situacao' => $request->situacao,
+                        'estoque_id' => $estoque_id,
+                        'cliente_id' => $cliente_id,
+                        'cor' => $itemCatalogo->cor,
                         'data_movimentacao' => now(),
                     ]);
                 }
                 $mensagem = "{$qtd} unidades de \"{$itemCatalogo->nome}\" adicionadas!";
             } else {
                 Equipamento::create([
-                    'tipo'              => 'equipamento',
-                    'catalogo_id'       => $itemCatalogo->id,
-                    'categoria_id'      => $itemCatalogo->categoria_id,
-                    'subcategoria_id'   => $request->subcategoria_id,
-                    'nome'              => $itemCatalogo->nome,
-                    'tombo'             => $data['tombo'],
-                    'serial'            => $data['serial'],
-                    'status'            => $request->status,
-                    'situacao'          => $request->situacao,
-                    'estoque_id'        => $estoque_id,
-                    'cliente_id'        => $cliente_id,
-                    'cor'               => $itemCatalogo->cor,
+                    'tipo' => 'equipamento',
+                    'catalogo_id' => $itemCatalogo->id,
+                    'categoria_id' => $itemCatalogo->categoria_id,
+                    'nome' => $itemCatalogo->nome,
+                    'tombo' => $data['tombo'],
+                    'serial' => $data['serial'],
+                    'status' => $request->status,
+                    'situacao' => $request->situacao,
+                    'estoque_id' => $estoque_id,
+                    'cliente_id' => $cliente_id,
+                    'cor' => $itemCatalogo->cor,
                     'data_movimentacao' => now(),
                 ]);
                 $mensagem = "Equipamento cadastrado com sucesso!";
@@ -137,77 +154,52 @@ class EquipamentoController extends Controller
 
             return redirect()->back()->with('success', $mensagem);
         } catch (\Exception $e) {
-            return redirect()->back()->withErrors(['erro' => 'Erro ao salvar. Verifique os dados.'])->withInput();
+            return redirect()->back()->withErrors(['erro' => 'Erro ao salvar.'])->withInput();
         }
     }
 
-    /**
-     * Exibe os detalhes de um equipamento específico.
-     */
     public function show($id)
     {
-        // Busca o equipamento e trás junto as informações do catálogo, estoque e categoria
-        $equipamento = Equipamento::with(['catalogo', 'estoque', 'categoria'])->findOrFail($id);
-
-        // Retorna a view de detalhes passando o equipamento
+        $equipamento = Equipamento::with(['catalogo', 'estoque', 'categoria', 'cliente'])->findOrFail($id);
         return view('equipamentos.show', compact('equipamento'));
     }
 
-    /**
-     * Formulário de edição.
-     */
     public function edit(Equipamento $equipamento)
     {
         $categorias = Categoria::orderBy('nome')->get();
         $clientes   = Clientes::whereNull('parent_id')->orderBy('nome')->get();
         $estoques   = Estoque::orderBy('nome')->get();
+        $catalogos  = Catalogo::orderBy('nome')->get();
 
-        return view('equipamentos.edit', compact('equipamento', 'categorias', 'clientes', 'estoques'));
+        return view('equipamentos.edit', compact('equipamento', 'categorias', 'clientes', 'estoques', 'catalogos'));
     }
 
-    /**
-     * Atualiza o cadastro de um item.
-     */
     public function update(Request $request, Equipamento $equipamento)
     {
         $regras = [
-            'status'          => 'required|in:Alugado,Reservado,Devolução,Liberado,Manutenção',
-            'situacao'        => 'nullable|in:Novo,Revisado,Sucata',
-            'subcategoria_id' => 'nullable|exists:subcategorias,id',
-            'tombo' => $equipamento->tipo === 'equipamento'
-                ? 'required|digits:5|unique:equipamentos,tombo,' . $equipamento->id
-                : 'nullable',
-            'serial' => $equipamento->tipo === 'equipamento'
-                ? 'required|string|unique:equipamentos,serial,' . $equipamento->id
-                : 'nullable',
+            'status'   => 'required|in:Alugado,Reservado,Devolução,Liberado,Manutenção',
+            'situacao' => 'nullable|in:Novo,Revisado,Sucata',
+            'tombo'    => $equipamento->tipo === 'equipamento' ? 'required|digits:5|unique:equipamentos,tombo,' . $equipamento->id : 'nullable',
+            'serial'   => $equipamento->tipo === 'equipamento' ? 'required|string|unique:equipamentos,serial,' . $equipamento->id : 'nullable',
         ];
 
-        // Aplica a mesma lógica de local na edição
+        $data = $request->validate($regras);
+
         if (in_array($request->status, ['Alugado', 'Reservado'])) {
-            $regras['cliente_id'] = 'required|exists:clientes,id';
-            $data['estoque_id'] = null;
             $data['cliente_id'] = $request->cliente_id;
+            $data['estoque_id'] = null;
         } else {
-            $regras['estoque_id'] = 'required|exists:estoques,id';
             $data['cliente_id'] = null;
             $data['estoque_id'] = $request->estoque_id;
         }
 
-        $data = array_merge($request->validate($regras), $data);
-
         $equipamento->update($data);
-
-        return redirect()->back()->with('success', 'Cadastro atualizado com sucesso!');
+        return redirect()->back()->with('success', 'Cadastro atualizado!');
     }
 
-    /**
-     * Remove um item do sistema.
-     */
     public function destroy(Equipamento $equipamento)
     {
-        $estoqueId = $equipamento->estoque_id;
         $equipamento->delete();
-
-        return redirect()->back()->with('success', 'Item removido do estoque!');
+        return redirect()->back()->with('success', 'Item removido!');
     }
 }
