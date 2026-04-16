@@ -15,15 +15,14 @@ class Catalogo extends Model
         'fabricante',
         'tipo',
         'categoria_id',
-        'subcategoria_id',
+        'subcategoria',
         'processador',
         'memoria',
         'geracao',
         'voltagem',
-        'tipo_impressora',
-        'situacao_insumo',
-        'tipo_papel',
+        'polegadas',
         'cor',
+        'tipo_insumo',
         'descricao'
     ];
 
