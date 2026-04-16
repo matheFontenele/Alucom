@@ -103,17 +103,26 @@ Route::get('/popular-banco', function () {
 
 Route::get('/debug-seed', function () {
     try {
-        // Passo 1: Limpar caches que podem estar travando a leitura de novos arquivos
+        // 1. Limpa o cache de classes do Laravel
         Artisan::call('optimize:clear');
 
-        // Passo 2: Executar a migration (caso a coluna 'tipo' ainda não exista lá)
-        Artisan::call('migrate', ['--force' => true]);
+        // 2. Tenta rodar a migration fresca (CUIDADO: isso apaga dados da tabela catalogo)
+        Artisan::call('migrate:fresh', ['--force' => true]);
+        $output = "Migrations executadas.<br>";
 
-        // Passo 3: Tentar rodar o Seeder especificando o caminho completo ou chamando o DatabaseSeeder
-        // Se o CategoriaEquipamentoSeeder individual falhar, tente rodar o principal:
-        Artisan::call('db:seed', ['--force' => true]);
+        // 3. Registro manual: Se o autoload falhar, incluímos o arquivo no braço
+        $seederPath = database_path('seeders/CategoriaEquipamentoSeeder.php');
+        if (file_exists($seederPath)) {
+            require_once $seederPath;
 
-        return "Comandos executados com sucesso!<br><pre>" . Artisan::output() . "</pre>";
+            // Tenta rodar o seeder principal que deve chamar os outros
+            Artisan::call('db:seed', ['--force' => true]);
+            $output .= "Seeder executado com sucesso!<br>";
+        } else {
+            return "Erro: Arquivo não encontrado em " . $seederPath;
+        }
+
+        return $output . "<br><pre>" . Artisan::output() . "</pre>";
     } catch (\Exception $e) {
         return "Erro: " . $e->getMessage() . "<br>Linha: " . $e->getLine();
     }
