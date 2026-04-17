@@ -53,7 +53,6 @@ class EquipamentoController extends Controller
             ->orderBy('nome')
             ->get();
 
-        // Enviamos das duas formas para evitar erro em qualquer versão do Blade
         return view('equipamentos.create_mass_equipamentos', [
             'modelosCatalogo' => $modelosCatalogo,
             'modelos'         => $modelosCatalogo,
@@ -84,7 +83,7 @@ class EquipamentoController extends Controller
     }
 
     /**
-     * Processamento em Massa Unificado
+     * Processamento em Massa Unificado (CORRIGIDO)
      */
     public function storeMass(Request $request)
     {
@@ -106,13 +105,20 @@ class EquipamentoController extends Controller
             DB::beginTransaction();
 
             foreach ($request->equipamentos as $item) {
+                // Buscamos o item no catálogo para herdar os campos obrigatórios
+                $itemCatalogo = Catalogo::findOrFail($item['catalogo_id']);
+
                 Equipamento::create([
-                    'catalogo_id' => $item['catalogo_id'],
-                    'estoque_id'  => $request->estoque_id,
-                    'tombo'       => $item['tombo'],
-                    'serial'      => $item['serial'],
-                    'status'      => $item['status'],
-                    'situacao'    => $item['situacao'],
+                    'tipo'         => 'equipamento',
+                    'catalogo_id'  => $itemCatalogo->id,
+                    'categoria_id' => $itemCatalogo->categoria_id, // Campo obrigatório na migration
+                    'nome'         => $itemCatalogo->nome,         // Campo obrigatório na migration
+                    'estoque_id'   => $request->estoque_id,
+                    'tombo'        => $item['tombo'],
+                    'serial'       => $item['serial'],
+                    'status'       => $item['status'],
+                    'situacao'     => $item['situacao'],
+                    'data_movimentacao' => now(),
                 ]);
             }
 
