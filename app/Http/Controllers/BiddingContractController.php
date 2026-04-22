@@ -29,13 +29,14 @@ class BiddingContractController extends Controller
             'validity_months'   => 'nullable|integer',
         ]);
 
-        // O checkbox no HTML envia valor se marcado, tratamos aqui:
+        // Se validity_months for nulo, define 12 como padrão para não quebrar o banco
+        $data['validity_months'] = $request->input('validity_months', 12);
+
         $data['accepts_used'] = $request->has('accepts_used');
         $data['requires_office'] = $request->has('requires_office');
 
         $licitacao = BiddingContract::create($data);
 
-        // Redireciona para o 'show' para o usuário começar a inserir os itens de hardware
         return redirect()->route('licitacoes.show', $licitacao->id)
             ->with('success', 'Edital criado! Agora adicione os itens técnicos.');
     }
