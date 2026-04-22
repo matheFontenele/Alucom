@@ -15,6 +15,11 @@ class BiddingItemController extends Controller
             'quantity'            => 'required|integer|min:1',
         ]);
 
+        $data['min_cpu'] = '';
+        $data['min_ram'] = 0;
+        $data['min_storage'] = 0;
+        $data['os_required'] = 'N/A';
+
         \App\Models\BiddingItem::create($data);
 
         return redirect()->back()->with('success', 'Item adicionado com sucesso!');

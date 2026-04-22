@@ -49,7 +49,7 @@
 
                     <div class="md:col-span-2">
                         <label class="block text-[10px] font-black text-slate-400 uppercase mb-1">Qtd</label>
-                        <input type="number" name="quantity" placeholder="0"
+                        <input type="number" name="quantity" placeholder="0" min="1"
                             class="w-full px-4 py-2 rounded-lg border border-gray-200 focus:ring-2 focus:ring-red-500 transition text-sm" required>
                     </div>
 
