@@ -12,13 +12,15 @@ class BiddingItemController extends Controller
         $data = $request->validate([
             'bidding_contract_id' => 'required|exists:bidding_contracts,id',
             'item_description'    => 'required|string',
-            'quantity'            => 'required|integer|min:1',
+            'quantity'            => 'required|integer', // Removi o limite aqui
         ]);
 
-        $data['min_cpu'] = '';
+        // Preenchendo campos que o banco exige mas não estão no form
+        $data['min_cpu'] = 'N/A';
         $data['min_ram'] = 0;
         $data['min_storage'] = 0;
         $data['os_required'] = 'N/A';
+        $data['reference_model'] = '';
 
         \App\Models\BiddingItem::create($data);
 

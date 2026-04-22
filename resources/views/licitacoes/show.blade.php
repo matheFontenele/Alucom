@@ -34,7 +34,7 @@
                 Itens Exigidos no Edital
             </h2>
 
-            {{-- Formulário de Adição (Sempre Visível) --}}
+            {{-- Formulário de Adição --}}
             <div class="bg-slate-50 rounded-2xl p-6 border border-dashed border-slate-300 mb-8">
                 <h3 class="text-sm font-bold text-slate-700 mb-4 uppercase tracking-wider">Novo Item Técnico</h3>
                 <form action="{{ route('licitacoes-itens.store') }}" method="POST" class="grid grid-cols-1 md:grid-cols-12 gap-4">
@@ -49,7 +49,8 @@
 
                     <div class="md:col-span-2">
                         <label class="block text-[10px] font-black text-slate-400 uppercase mb-1">Qtd</label>
-                        <input type="number" name="quantity" placeholder="0" min="1"
+                        {{-- Removido qualquer limitador e garantido largura suficiente --}}
+                        <input type="number" name="quantity" placeholder="0" min="1" step="1"
                             class="w-full px-4 py-2 rounded-lg border border-gray-200 focus:ring-2 focus:ring-red-500 transition text-sm" required>
                     </div>
 
@@ -67,11 +68,11 @@
                 <div class="group flex justify-between items-center p-4 bg-white border border-gray-100 rounded-2xl hover:border-red-200 transition-all shadow-sm">
                     <div class="flex items-center gap-4">
                         <div class="bg-red-50 text-red-600 font-black px-3 py-2 rounded-xl text-sm">
-                            {{ $item->quantity }}x
+                            {{ number_format($item->quantity, 0, ',', '.') }}x
                         </div>
                         <div>
                             <h4 class="font-bold text-slate-700 text-sm">{{ $item->item_description }}</h4>
-                            @if($item->min_cpu)
+                            @if($item->min_cpu && $item->min_cpu !== 'N/A')
                             <span class="text-[10px] text-slate-400 font-medium uppercase">{{ $item->min_cpu }} | {{ $item->min_ram }}GB RAM | {{ $item->min_storage }}GB SSD</span>
                             @endif
                         </div>
@@ -105,7 +106,7 @@
         </div>
     </div>
 
-    {{-- Coluna da Direita: Status e Configurações --}}
+    {{-- Coluna da Direita --}}
     <div class="space-y-6">
         <div class="bg-slate-900 rounded-3xl p-8 text-white shadow-xl shadow-slate-900/20">
             <h3 class="font-bold mb-6 flex items-center gap-2">
@@ -155,17 +156,6 @@
                 @endforelse
             </div>
         </div>
-
-        {{-- Notas --}}
-        @if($licitacao->maintenance_notes)
-        <div class="bg-amber-50 rounded-3xl p-8 border border-amber-100">
-            <h3 class="text-amber-800 font-bold mb-2 flex items-center gap-2 text-sm">
-                <i class="ph ph-warning-octagon text-lg"></i>
-                Notas de Manutenção
-            </h3>
-            <p class="text-amber-700 text-xs leading-relaxed">{{ $licitacao->maintenance_notes }}</p>
-        </div>
-        @endif
     </div>
 </div>
 @endsection

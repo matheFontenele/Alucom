@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('bidding_contract_id')->constrained()->onDelete('cascade');
             $table->string('item_description');    // Ex: Item 1 - Notebooks
-            $table->integer('quantity');           // 30
+            $table->bigInteger('quantity');          // 30
 
             // Requisitos Mínimos (Para consulta no banco)
             $table->string('min_cpu');             // Ex: i5 12th / Ryzen 5
