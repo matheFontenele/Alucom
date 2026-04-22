@@ -13,11 +13,11 @@ class BiddingSeeder extends Seeder
     {
         // 1. Criar o Contrato consolidado (Sem extension_years que causava o erro)
         $contract = BiddingContract::create([
-            'contract_number'     => '2021.08.02.01-19', // Número da ARP/Contrato
+            'contract_number'     => '2021.08.02.01-19',
             'pregao_number'       => '001/2026',
             'uasg_organ'          => 'Conselho Regional de Psicologia - 8ª Região (CRP-PR)',
-            'object'              => 'Locação de equipamentos de informática (notebooks) para as(os) trabalhadoras(es) do CRP-PR...',
-            'max_monthly_billing' => 15000.00, // Teto mensal de faturamento (Exemplo)
+            'object'              => 'Locação de equipamentos de informática...',
+            'max_monthly_billing' => 15000.00,
             'validity_months'     => 12,
             'delivery_deadline'   => 30,
             'accepts_used'        => true,
@@ -26,15 +26,14 @@ class BiddingSeeder extends Seeder
             'end_date'            => now()->addMonths(12),
         ]);
 
-        // 2. Criar o Item principal seguindo os novos campos de faturamento
         BiddingItem::create([
             'bidding_contract_id' => $contract->id,
             'lote'                => 'LOTE I',
             'item_type'           => 'TIPO I',
-            'item_description'    => 'Notebooks e licenças (Lenovo V15 Gen 5) - Intel Core i5 12ª/13ª ou AMD Ryzen 5, 16GB RAM, 512GB SSD',
-            'unit_price'          => 450.00,        // R$ Unit Mês (Valor fictício para o seeder)
-            'contract_quantity'   => 30,            // Quantidade total contratada
-            'delivered_quantity'  => 15,            // Quantidade entregue (para testar o cálculo de faturamento)
+            'item_description'    => 'Notebooks e licenças (Lenovo V15 Gen 5)',
+            'unit_price'          => 450.00,
+            'contracted_quantity' => 30, // <-- AJUSTADO AQUI (com "ed")
+            'delivered_quantity'  => 15,
             'min_cpu'             => 'Intel Core i5',
             'min_ram'             => 16,
             'min_storage'         => 512,

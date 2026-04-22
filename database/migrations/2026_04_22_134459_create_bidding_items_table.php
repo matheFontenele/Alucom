@@ -20,7 +20,7 @@ return new class extends Migration
             $table->text('item_description');
             $table->decimal('unit_price', 10, 2)->default(0);      // R$ Unit Mês
             $table->integer('contracted_quantity')->default(0);    // Quantidade em contrato
-            $table->integer('delivered_quantity')->default(0);     // Quantidade entregue (faturamento)
+            $table->integer('contracted_quantity')->default(0);
 
             // Especificações Técnicas (Tornadas Opcionais)
             $table->string('min_cpu')->nullable();
