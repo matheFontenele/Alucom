@@ -26,45 +26,71 @@
 <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
     {{-- Coluna da Esquerda: Itens Técnicos --}}
     <div class="lg:col-span-2 space-y-6">
+
+        {{-- Card de Cadastro e Listagem de Itens --}}
         <div class="bg-white rounded-3xl p-8 shadow-sm border border-gray-100">
             <h2 class="text-lg font-bold text-slate-800 mb-6 flex items-center gap-2">
                 <i class="ph ph-list-numbers text-red-500"></i>
                 Itens Exigidos no Edital
             </h2>
 
-            @forelse($licitacao->items as $item)
-            <div class="border-b border-gray-100 last:border-0 pb-6 mb-6 last:pb-0 last:mb-0">
-                <div class="flex justify-between items-start mb-4">
-                    <div>
-                        <h4 class="font-bold text-slate-700">{{ $item->item_description }}</h4>
-                        <span class="text-xs text-slate-400 font-medium">Quantidade: {{ $item->quantity }} unidades</span>
-                    </div>
-                    {{-- Badge de Match (Lógica para implementar futuramente) --}}
-                    <span class="bg-blue-100 text-blue-700 text-[10px] font-black px-2 py-1 rounded uppercase tracking-tighter">Match Sugerido</span>
-                </div>
+            {{-- Formulário de Adição (Sempre Visível) --}}
+            <div class="bg-slate-50 rounded-2xl p-6 border border-dashed border-slate-300 mb-8">
+                <h3 class="text-sm font-bold text-slate-700 mb-4 uppercase tracking-wider">Novo Item Técnico</h3>
+                <form action="{{ route('licitacoes-itens.store') }}" method="POST" class="grid grid-cols-1 md:grid-cols-12 gap-4">
+                    @csrf
+                    <input type="hidden" name="bidding_contract_id" value="{{ $licitacao->id }}">
 
-                <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-                    <div class="p-3 bg-gray-50 rounded-xl border border-gray-100">
-                        <span class="text-[10px] text-slate-400 block uppercase font-black tracking-tight">Processador</span>
-                        <span class="text-sm font-bold text-slate-700">{{ $item->min_cpu }}</span>
+                    <div class="md:col-span-8">
+                        <label class="block text-[10px] font-black text-slate-400 uppercase mb-1">Descrição do Item (Especificações)</label>
+                        <input type="text" name="item_description" placeholder="Ex: Computador i5, 8GB RAM, SSD 240GB + Monitor 19"
+                            class="w-full px-4 py-2 rounded-lg border border-gray-200 focus:ring-2 focus:ring-red-500 transition text-sm" required>
                     </div>
-                    <div class="p-3 bg-gray-50 rounded-xl border border-gray-100">
-                        <span class="text-[10px] text-slate-400 block uppercase font-black tracking-tight">Memória RAM</span>
-                        <span class="text-sm font-bold text-slate-700">{{ $item->min_ram }}GB</span>
+
+                    <div class="md:col-span-2">
+                        <label class="block text-[10px] font-black text-slate-400 uppercase mb-1">Qtd</label>
+                        <input type="number" name="quantity" placeholder="0"
+                            class="w-full px-4 py-2 rounded-lg border border-gray-200 focus:ring-2 focus:ring-red-500 transition text-sm" required>
                     </div>
-                    <div class="p-3 bg-gray-50 rounded-xl border border-gray-100">
-                        <span class="text-[10px] text-slate-400 block uppercase font-black tracking-tight">Armazenamento</span>
-                        <span class="text-sm font-bold text-slate-700">{{ $item->min_storage }}GB SSD</span>
+
+                    <div class="md:col-span-2 flex items-end">
+                        <button type="submit" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-2 rounded-lg transition flex items-center justify-center gap-2 text-sm shadow-lg shadow-red-200">
+                            <i class="ph ph-plus-bold"></i> Add
+                        </button>
                     </div>
-                    <div class="p-3 bg-gray-50 rounded-xl border border-gray-100">
-                        <span class="text-[10px] text-slate-400 block uppercase font-black tracking-tight">Sistema</span>
-                        <span class="text-sm font-bold text-slate-700">{{ $item->os_required }}</span>
-                    </div>
-                </div>
+                </form>
             </div>
-            @empty
-            <p class="text-slate-400 text-sm italic">Nenhum item técnico cadastrado para este edital.</p>
-            @endforelse
+
+            {{-- Listagem de Itens Cadastrados --}}
+            <div class="space-y-4">
+                @forelse($licitacao->items as $item)
+                <div class="group flex justify-between items-center p-4 bg-white border border-gray-100 rounded-2xl hover:border-red-200 transition-all shadow-sm">
+                    <div class="flex items-center gap-4">
+                        <div class="bg-red-50 text-red-600 font-black px-3 py-2 rounded-xl text-sm">
+                            {{ $item->quantity }}x
+                        </div>
+                        <div>
+                            <h4 class="font-bold text-slate-700 text-sm">{{ $item->item_description }}</h4>
+                            @if($item->min_cpu)
+                            <span class="text-[10px] text-slate-400 font-medium uppercase">{{ $item->min_cpu }} | {{ $item->min_ram }}GB RAM | {{ $item->min_storage }}GB SSD</span>
+                            @endif
+                        </div>
+                    </div>
+
+                    <form action="{{ route('licitacoes-itens.destroy', $item->id) }}" method="POST" onsubmit="return confirm('Excluir este item?')">
+                        @csrf @method('DELETE')
+                        <button type="submit" class="p-2 text-slate-300 hover:text-red-600 transition">
+                            <i class="ph ph-trash text-lg"></i>
+                        </button>
+                    </form>
+                </div>
+                @empty
+                <div class="text-center py-8">
+                    <i class="ph ph-package text-4xl text-slate-200 mb-2"></i>
+                    <p class="text-slate-400 text-sm italic">Nenhum item técnico cadastrado ainda.</p>
+                </div>
+                @endforelse
+            </div>
         </div>
 
         {{-- Objeto do Edital --}}
@@ -79,9 +105,8 @@
         </div>
     </div>
 
-    {{-- Coluna da Direita: Status, Acessórios e Prazos --}}
+    {{-- Coluna da Direita: Status e Configurações --}}
     <div class="space-y-6">
-        {{-- Card de Configurações Gerais --}}
         <div class="bg-slate-900 rounded-3xl p-8 text-white shadow-xl shadow-slate-900/20">
             <h3 class="font-bold mb-6 flex items-center gap-2">
                 <i class="ph ph-sliders-horizontal text-red-500"></i>
@@ -109,18 +134,17 @@
             </ul>
         </div>
 
-        {{-- Card de Acessórios (Checklist) --}}
+        {{-- Acessórios --}}
         <div class="bg-white rounded-3xl p-8 shadow-sm border border-gray-100">
             <h2 class="text-lg font-bold text-slate-800 mb-6 flex items-center gap-2">
                 <i class="ph ph-plug-connected text-amber-500"></i>
                 Acessórios Inclusos
             </h2>
-
             <div class="space-y-3">
                 @forelse($licitacao->accessories as $accessory)
-                <div class="flex items-center justify-between p-3 {{ $accessory->included ? 'bg-emerald-50 border-emerald-100' : 'bg-gray-50 border-gray-100' }} border rounded-xl transition-all">
+                <div class="flex items-center justify-between p-3 {{ $accessory->included ? 'bg-emerald-50 border-emerald-100' : 'bg-gray-50 border-gray-100' }} border rounded-xl">
                     <div class="flex items-center gap-3">
-                        <i class="ph {{ $accessory->included ? 'ph-check-circle text-emerald-600 font-bold' : 'ph-minus-circle text-slate-300' }} text-xl"></i>
+                        <i class="ph {{ $accessory->included ? 'ph-check-circle text-emerald-600' : 'ph-minus-circle text-slate-300' }} text-xl"></i>
                         <span class="text-sm font-bold {{ $accessory->included ? 'text-emerald-900' : 'text-slate-400' }}">
                             {{ $accessory->name }}
                         </span>
@@ -132,16 +156,14 @@
             </div>
         </div>
 
-        {{-- Card de Manutenção / Notas --}}
+        {{-- Notas --}}
         @if($licitacao->maintenance_notes)
         <div class="bg-amber-50 rounded-3xl p-8 border border-amber-100">
             <h3 class="text-amber-800 font-bold mb-2 flex items-center gap-2 text-sm">
                 <i class="ph ph-warning-octagon text-lg"></i>
                 Notas de Manutenção
             </h3>
-            <p class="text-amber-700 text-xs leading-relaxed">
-                {{ $licitacao->maintenance_notes }}
-            </p>
+            <p class="text-amber-700 text-xs leading-relaxed">{{ $licitacao->maintenance_notes }}</p>
         </div>
         @endif
     </div>
