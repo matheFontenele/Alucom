@@ -30,6 +30,7 @@ class CadastroEquipamentosSeeder extends Seeder
                         'categoria_id' => $item->categoria_id,
                         'estoque_id'   => $estoqueBase->id,
                         'tipo'         => 'equipamento',
+                        'nome'         => $item->nome,
                         'serial'       => Str::upper(Str::random(10)),
                         'tombo'        => rand(10000, 99999), // Com Tombo
                         'status'       => 'Disponivel',
@@ -59,6 +60,7 @@ class CadastroEquipamentosSeeder extends Seeder
                         'categoria_id' => $item->categoria_id,
                         'estoque_id'   => $estoqueBase->id,
                         'tipo'         => 'insumo',
+                        'nome'         => $item->nome,
                         'serial'       => 'LOTE-' . rand(100, 999),
                         'tombo'        => null,
                         'status'       => 'Disponivel',
