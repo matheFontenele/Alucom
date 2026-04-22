@@ -38,18 +38,18 @@
                                 <select name="equipamentos[0][catalogo_id]" required class="w-full border-none bg-transparent font-bold text-sm focus:ring-0">
                                     <option value="">Selecione um modelo...</option>
                                     @foreach($modelosCatalogo as $modelo)
-                                        @if(!$modelo->ehInsumo())
-                                        <option value="{{ $modelo->id }}">{{ $modelo->nome }} ({{ $modelo->fabricante }})</option>
-                                        @endif
+                                    @if(!$modelo->ehInsumo())
+                                    <option value="{{ $modelo->id }}">{{ $modelo->nome }} ({{ $modelo->fabricante }})</option>
+                                    @endif
                                     @endforeach
                                 </select>
                             </td>
                             <td class="p-1">
-                                <input type="text" name="equipamentos[0][tombo]" maxlength="5" required placeholder="00000" 
+                                <input type="text" name="equipamentos[0][tombo]" maxlength="5" placeholder="00000"
                                     class="w-full border-none bg-transparent font-mono font-bold text-sm focus:ring-0 text-blue-600 placeholder:text-slate-300">
                             </td>
                             <td class="p-1">
-                                <input type="text" name="equipamentos[0][serial]" required placeholder="S/N" 
+                                <input type="text" name="equipamentos[0][serial]" required placeholder="S/N"
                                     class="w-full border-none bg-transparent font-bold text-sm focus:ring-0 placeholder:text-slate-300">
                             </td>
                             <td class="p-1">

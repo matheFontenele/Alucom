@@ -91,7 +91,7 @@ class EquipamentoController extends Controller
             'estoque_id' => 'required|exists:estoques,id',
             'equipamentos' => 'required|array|min:1',
             'equipamentos.*.catalogo_id' => 'required|exists:catalogo,id',
-            'equipamentos.*.tombo' => 'required|size:5|distinct|unique:equipamentos,tombo',
+            'equipamentos.*.tombo' => 'nullable|distinct|unique:equipamentos,tombo',
             'equipamentos.*.serial' => 'required|distinct|unique:equipamentos,serial',
             'equipamentos.*.status' => 'required|string',
             'equipamentos.*.situacao' => 'required|string',
@@ -215,6 +215,34 @@ class EquipamentoController extends Controller
 
         $equipamento->update($data);
         return redirect()->back()->with('success', 'Cadastro atualizado!');
+    }
+
+    public function pendentesTombamento()
+    {
+        $equipamentos = Equipamento::pendentesTombamento()
+            ->with(['catalogo', 'estoque'])
+            ->latest()
+            ->paginate(20);
+
+        return view('equipamentos.pendentes_tombamento', compact('equipamentos'));
+    }
+
+    public function aplicarTombamento(Request $request)
+    {
+        $request->validate([
+            'tombos' => 'required|array',
+            'tombos.*' => 'nullable|unique:equipamentos,tombo'
+        ]);
+
+        $count = 0;
+        foreach ($request->tombos as $id => $numeroTombo) {
+            if (!empty($numeroTombo)) {
+                Equipamento::where('id', $id)->update(['tombo' => $numeroTombo]);
+                $count++;
+            }
+        }
+
+        return redirect()->back()->with('success', "$count equipamentos tombados com sucesso!");
     }
 
     public function destroy(Equipamento $equipamento)

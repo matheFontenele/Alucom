@@ -5,7 +5,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Artisan;
 
-// Importação dos Controllers Originais
+// Importação dos Controllers
 use App\Http\Controllers\GuiaAdiController;
 use App\Http\Controllers\ClientesController;
 use App\Http\Controllers\EstoqueController;
@@ -19,8 +19,6 @@ use App\Http\Controllers\VeiculoController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\DashboardController;
-
-// Importação dos Novos Controllers de Licitação
 use App\Http\Controllers\BiddingContractController;
 use App\Http\Controllers\BiddingItemController;
 use App\Http\Controllers\BiddingAccessoryController;
@@ -53,7 +51,7 @@ Route::middleware(['auth'])->group(function () {
     Route::resource('estoques', EstoqueController::class);
     Route::resource('catalogos', CatalogoController::class);
 
-    // --- LICITAÇÕES (NOVO MENU) ---
+    // --- LICITAÇÕES ---
     Route::resource('licitacoes', BiddingContractController::class);
     Route::resource('licitacoes-itens', BiddingItemController::class);
     Route::resource('licitacoes-acessorios', BiddingAccessoryController::class);
@@ -62,6 +60,10 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/equipamentos/mass-entry', [EquipamentoController::class, 'massEntry'])->name('equipamentos.mass_entry');
     Route::get('/insumos/mass-entry', [EquipamentoController::class, 'massEntryInsumo'])->name('insumos.mass_entry');
     Route::post('/equipamentos/store-mass', [EquipamentoController::class, 'storeMass'])->name('equipamentos.store_mass');
+
+    // ROTAS DE TOMBAMENTO POSTERIOR
+    Route::get('/equipamentos/pendentes-tombamento', [EquipamentoController::class, 'pendentesTombamento'])->name('equipamentos.pendentes');
+    Route::post('/equipamentos/aplicar-tombamento', [EquipamentoController::class, 'aplicarTombamento'])->name('equipamentos.aplicar_tombamento');
 
     Route::resource('equipamentos', EquipamentoController::class);
 
@@ -80,7 +82,6 @@ Route::middleware(['auth'])->group(function () {
     Route::resource('movimentacoes', MovimentacaoController::class);
     Route::resource('veiculos', VeiculoController::class);
 
-    // Rota de Impressão de Rotas
     Route::get('/rotas/{id}/imprimir', [RotaController::class, 'imprimir'])->name('rotas.imprimir');
 
     // --- GERENCIAMENTO (MENU 3) ---
@@ -102,37 +103,22 @@ Route::middleware(['auth'])->group(function () {
 // ---------------------------------------------------------
 // 3. MANUTENÇÃO E DEBUG
 // ---------------------------------------------------------
-
-Route::get('/popular-banco', function () {
-    try {
-        Artisan::call('db:seed', ['--force' => true]);
-        return "Seeders executados! <br><pre>" . Artisan::output() . "</pre>";
-    } catch (\Exception $e) {
-        return "Erro: " . $e->getMessage();
-    }
-});
-
-Route::get('/debug-seed', function () {
-    try {
-        // Limpa cache de rotas e configurações
-        Artisan::call('optimize:clear');
-
-        // O fresh apaga tudo e recria as tabelas (incluindo as de licitação agora)
-        Artisan::call('migrate:fresh', ['--force' => true]);
-
-        // Chamamos o Seeder principal que deve conter o BiddingSeeder
-        Artisan::call('db:seed', ['--force' => true]);
-
-        return "Banco resetado e TODOS os seeders (incluindo Licitações e Usuários) foram executados! <br><pre>" . Artisan::output() . "</pre>";
-    } catch (\Exception $e) {
-        return "Erro ao rodar debug-seed: " . $e->getMessage();
-    }
-});
-
-Route::get('/limpar-rota', function () {
+Route::get('/limpar-sistema', function () {
+    Artisan::call('optimize:clear');
     Artisan::call('route:clear');
     Artisan::call('config:clear');
     Artisan::call('view:clear');
     Artisan::call('cache:clear');
-    return "Todos os caches do Laravel foram limpos!";
+    return "Todos os caches foram limpos com sucesso!";
+})->name('debug.clear');
+
+Route::get('/debug-seed', function () {
+    try {
+        Artisan::call('optimize:clear');
+        Artisan::call('migrate:fresh', ['--force' => true]);
+        Artisan::call('db:seed', ['--force' => true]);
+        return "Banco resetado e Seeders aplicados! <br><pre>" . Artisan::output() . "</pre>";
+    } catch (\Exception $e) {
+        return "Erro ao rodar debug-seed: " . $e->getMessage();
+    }
 });
