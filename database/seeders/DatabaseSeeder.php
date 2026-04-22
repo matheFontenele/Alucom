@@ -1,6 +1,7 @@
 <?php
 
 namespace Database\Seeders;
+
 use Illuminate\Support\Facades\Hash;
 
 use App\Models\User;
@@ -15,6 +16,7 @@ class DatabaseSeeder extends Seeder
     {
         $this->call([
             ClientesSeeder::class,             // 1º Clientes
+            BiddingSeeder::class,
             EstoqueSeeder::class,              // 2º Estoques
             TecnicosSeeder::class,             // 4º Técnicos
             CatalogoSeeder::class,             // 5º Catálogo (Base para Equipamentos)

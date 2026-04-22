@@ -72,6 +72,26 @@
                 </div>
             </div>
 
+            {{-- Grupo: Licitações (Visível para Direção, Gerência e Operação) --}}
+            @if(in_array(Auth::user()->funcao, ['Direção', 'Gerência', 'Operação']))
+            <div class="px-4">
+                <button @click="openMenu = (openMenu === 'licitacao' ? '' : 'licitacao')"
+                    class="w-full flex items-center justify-between p-3 rounded-lg hover:bg-slate-800 transition group"
+                    :class="openMenu === 'licitacao' ? 'text-white bg-slate-800/50' : ''">
+                    <div class="flex items-center gap-3">
+                        <i class="ph ph-file-text text-xl text-amber-500"></i>
+                        <span class="text-sm font-bold uppercase tracking-wider">Licitações</span>
+                    </div>
+                    <i class="ph ph-caret-down transition-transform duration-300" :class="openMenu === 'licitacao' ? 'rotate-180' : ''"></i>
+                </button>
+
+                <div x-show="openMenu === 'licitacao'" x-cloak x-collapse class="mt-1 space-y-1 ml-4 border-l border-slate-700 pl-2">
+                    <x-nav-link href="{{ route('licitacoes.index') }}" active="{{ request()->routeIs('licitacoes.*') }}" icon="ph-folders" label="Contratos / Editais" />
+                    <x-nav-link href="#" active="{{ request()->routeIs('licitacoes.pendentes') }}" icon="ph-clock-countdown" label="Prazos Ativos" />
+                </div>
+            </div>
+            @endif
+
             {{-- Grupo: Logística (Filtro por função) --}}
             @if(in_array(Auth::user()->funcao, ['Direção', 'Gerência', 'Logística', 'Motorista']))
             <div class="px-4">
