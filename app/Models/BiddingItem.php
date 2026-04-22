@@ -8,17 +8,28 @@ class BiddingItem extends Model
 {
     protected $fillable = [
         'bidding_contract_id',
+        'lote',
+        'item_type',
         'item_description',
-        'quantity',
+        'unit_price',
+        'contracted_quantity',
+        'delivered_quantity',
         'min_cpu',
         'min_ram',
         'min_storage',
         'os_required',
-        'reference_model'
+        'billing_reference_id'
     ];
 
-    public function contract()
+    // Calcula o subtotal deste item específico
+    public function getSubtotalAttribute()
     {
-        return $this->belongsTo(BiddingContract::class, 'bidding_contract_id');
+        return $this->delivered_quantity * $this->unit_price;
+    }
+
+    // Calcula o saldo de equipamentos que ainda podem ser entregues
+    public function getEquipmentBalanceAttribute()
+    {
+        return $this->contracted_quantity - $this->delivered_quantity;
     }
 }

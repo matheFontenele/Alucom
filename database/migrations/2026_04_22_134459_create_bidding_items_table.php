@@ -6,33 +6,38 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
         Schema::create('bidding_items', function (Blueprint $table) {
             $table->id();
             $table->foreignId('bidding_contract_id')->constrained()->onDelete('cascade');
-            $table->string('item_description');    // Ex: Item 1 - Notebooks
-            $table->bigInteger('quantity');          // 30
 
-            // Requisitos Mínimos (Para consulta no banco)
-            $table->string('min_cpu');             // Ex: i5 12th / Ryzen 5
-            $table->integer('min_ram');            // 16
-            $table->integer('min_storage');        // 512
-            $table->string('os_required');         // Windows 11 Pro
+            // Categorização da Planilha
+            $table->string('lote')->nullable();      // Ex: LOTE I
+            $table->string('item_type')->nullable(); // Ex: TIPO II
 
-            // Modelo de Referência (O que você definiu: Lenovo V15)
-            $table->string('reference_model')->nullable();
+            // Descrição e Valores
+            $table->text('item_description');
+            $table->decimal('unit_price', 10, 2)->default(0);      // R$ Unit Mês
+            $table->integer('contracted_quantity')->default(0);    // Quantidade em contrato
+            $table->integer('delivered_quantity')->default(0);     // Quantidade entregue (faturamento)
+
+            // Especificações Técnicas (Tornadas Opcionais)
+            $table->string('min_cpu')->nullable();
+            $table->integer('min_ram')->nullable();
+            $table->integer('min_storage')->nullable();
+            $table->string('os_required')->nullable();
+
+            // Referência de Faturamento (Upgrade de Item)
+            // Permite que um Micro seja cobrado com o valor de um Notebook
+            $table->foreignId('billing_reference_id')->nullable()
+                ->constrained('bidding_items')
+                ->onDelete('set null');
 
             $table->timestamps();
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
         Schema::dropIfExists('bidding_items');

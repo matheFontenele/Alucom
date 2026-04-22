@@ -6,35 +6,34 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
         Schema::create('bidding_contracts', function (Blueprint $table) {
             $table->id();
-            $table->string('pregao_number');       // Ex: 001/2026
-            $table->string('uasg_organ');         // Ex: CRP-PR
-            $table->text('object');               // Locação de notebooks...
+            $table->string('contract_number')->nullable(); // Ex: 2021.08.02.01-19
+            $table->string('pregao_number');               // Ex: 001/2026
+            $table->string('uasg_organ');                  // Ex: AMT Caucaia
+            $table->text('object');                        // Descrição do objeto
 
-            // Prazos
-            $table->integer('validity_months');    // 12 meses
-            $table->integer('extension_years');   // 10 anos (conforme lei 14.133)
-            $table->integer('delivery_deadline'); // 30 dias (o prazo que você aceitou)
+            // Controle Financeiro e Prazos
+            $table->decimal('max_monthly_billing', 12, 2)->default(0); // Teto: R$ 7.432,50
+            $table->integer('validity_months');                        // Vigência em meses
+            $table->integer('delivery_deadline');                      // Dias para entrega
 
-            // Regras de Negócio (Flags)
+            // Datas de Vigência
+            $table->date('start_date')->nullable();
+            $table->date('end_date')->nullable();
+
+            // Configurações e Notas
             $table->boolean('accepts_used')->default(true);
             $table->boolean('requires_office')->default(true);
-            $table->boolean('requires_bivolt')->default(false);
+            $table->text('maintenance_notes')->nullable();
+            $table->text('addendum_summary')->nullable(); // Resumo dos aditivos
 
-            $table->text('maintenance_notes')->nullable(); // Detalhes sobre peças originais
             $table->timestamps();
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
         Schema::dropIfExists('bidding_contracts');
