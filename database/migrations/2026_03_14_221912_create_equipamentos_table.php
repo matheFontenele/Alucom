@@ -13,31 +13,45 @@ return new class extends Migration
     {
         Schema::create('equipamentos', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('categoria_id')->constrained();
-            $table->foreignId('subcategoria_id')->nullable()->constrained();
-            $table->foreignId('cliente_id')->nullable()->constrained('clientes');
-            $table->foreignId('estoque_id')->nullable()->constrained('estoques');
+
+            // Relacionamentos
+            $table->foreignId('categoria_id')->constrained()->onDelete('cascade');
+            $table->foreignId('subcategoria_id')->nullable()->constrained()->onDelete('set null');
+            $table->foreignId('cliente_id')->nullable()->constrained('clientes')->onDelete('set null');
+            $table->foreignId('estoque_id')->nullable()->constrained('estoques')->onDelete('set null');
             $table->foreignId('catalogo_id')->nullable()->constrained('catalogo')->onDelete('set null');
 
-            // Identificadores
+            // Identificadores e Classificação
             $table->string('tipo')->default('equipamento'); // equipamento ou insumo
             $table->string('nome');
             $table->string('tombo')->unique()->nullable();
-            $table->string('serial')->unique()->nullable();
+            $table->string('serial')->nullable();
 
             // Status e Rastreio
-            $table->string('status'); // Alugado, Devolução, Disponivel, Manutenção, Reservado
-            $table->string('situacao')->nullable(); // No Cliente, Em Rota, Aguardando Coleta, etc.
+            // Status: Alugado, Devolução, Disponivel, Manutenção, Reservado
+            $table->string('status')->default('Disponivel');
 
-            // Campos que você pediu: Cor e Observações
-            $table->string('cor')->nullable(); // Para Toners/Tintas
-            $table->text('observacoes')->nullable(); // Notas gerais ou cor detalhada
+            // Situação: No Cliente, Em Rota, Aguardando Coleta, Novo, Usado
+            $table->string('situacao')->nullable();
+            $table->string('condicao')->nullable()->default('Novo');
 
+            // Atributos Específicos
+            $table->string('cor')->nullable(); // Para Toners/Tintas (Preto, Ciano, etc.)
+            $table->text('observacoes')->nullable();
+
+            // Datas
             $table->timestamp('data_movimentacao')->nullable();
             $table->timestamps();
+
+            // Índices para performance (Opcional, mas recomendado para PostgreSQL)
+            $table->index(['tipo', 'status']);
+            $table->index('tombo');
         });
     }
 
+    /**
+     * Reverse the migrations.
+     */
     public function down(): void
     {
         Schema::dropIfExists('equipamentos');
