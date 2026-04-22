@@ -1,40 +1,33 @@
 <?php
 
-namespace App\Models;
+namespace App\Http\Controllers;
 
-use Illuminate\Database\Eloquent\Model;
+use Illuminate\Http\Request;
+use App\Models\BiddingItem;
+use App\Models\BiddingContract;
 
-class BiddingItem extends Model
+class BiddingItemController extends Controller
 {
-    protected $fillable = [
-        'bidding_contract_id',
-        'lote',
-        'item_type',
-        'item_description',
-        'unit_price',
-        'contract_quantity', // O total do contrato
-        'delivered_quantity', // O que está instalado/faturando
-        'min_cpu',
-        'min_ram',
-        'min_storage',
-        'os_required',
-        'billing_reference_id'
-    ];
-
-    public function contract()
+    public function store(Request $request)
     {
-        return $this->belongsTo(BiddingContract::class, 'bidding_contract_id');
+        $data = $request->validate([
+            'bidding_contract_id' => 'required|exists:bidding_contracts,id',
+            'item_description'    => 'required|string',
+            'lote'                => 'nullable|string',
+            'item_type'           => 'nullable|string',
+            'contracted_quantity' => 'required|integer',
+            'delivered_quantity'  => 'required|integer',
+            'unit_price'          => 'required|numeric',
+        ]);
+
+        BiddingItem::create($data);
+
+        return redirect()->back()->with('success', 'Item adicionado com sucesso!');
     }
 
-    // Valor da linha na planilha (Qtd Entregue x Preço Unitário)
-    public function getSubtotalAttribute()
+    public function destroy(BiddingItem $item)
     {
-        return $this->delivered_quantity * $this->unit_price;
-    }
-
-    // Quanto ainda pode ser entregue deste item
-    public function getEquipmentBalanceAttribute()
-    {
-        return $this->contract_quantity - $this->delivered_quantity;
+        $item->delete();
+        return redirect()->back()->with('success', 'Item removido com sucesso!');
     }
 }
