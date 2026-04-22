@@ -8,7 +8,9 @@
     </div>
     <div class="text-right">
         <p class="text-slate-400 text-xs font-bold uppercase">Vigência Final</p>
-        <p class="text-slate-700 font-bold">{{ $licitacao->end_date ? $licitacao->end_date->format('d/m/Y') : 'Não definida' }}</p>
+        <p class="text-slate-700 font-bold">
+            {{ $licitacao->end_date ? \Carbon\Carbon::parse($licitacao->end_date)->format('d/m/Y') : 'Não definida' }}
+        </p>
     </div>
 </div>
 

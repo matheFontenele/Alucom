@@ -23,6 +23,11 @@ class BiddingContract extends Model
         'addendum_summary'
     ];
 
+    protected $casts = [
+        'start_date' => 'date',
+        'end_date' => 'date',
+    ];
+
     // Relacionamento com os itens
     public function items()
     {
