@@ -197,8 +197,43 @@
         document.getElementById('match-description-target').innerText = "Vincular equipamento para: " + description;
         document.getElementById('modal-match').classList.remove('hidden');
 
-        // Simulação de busca por palavra-chave (Aqui você faria o fetch para o Controller)
-        // searchStock(description); 
+        const container = document.getElementById('stock-suggestions-container');
+        container.innerHTML = '<p class="text-sm text-slate-400 p-4">Buscando no catálogo...</p>';
+
+        // Faz a chamada real para o servidor
+        fetch(`/api/sugestoes-estoque?q=${encodeURIComponent(description)}`)
+            .then(response => response.json())
+            .then(data => {
+                container.innerHTML = '';
+
+                if (data.length === 0) {
+                    container.innerHTML = '<p class="text-sm text-orange-500 p-4 font-bold">Nenhuma sugestão exata encontrada.</p>';
+                    return;
+                }
+
+                data.forEach(item => {
+                    const div = document.createElement('div');
+                    div.className = "flex items-center justify-between p-4 border border-slate-100 bg-slate-50 rounded-2xl hover:border-emerald-300 transition-all cursor-pointer group";
+                    div.innerHTML = `
+                    <div>
+                        <p class="font-bold text-slate-800 text-sm">${item.nome}</p>
+                        <p class="text-[10px] text-slate-400 uppercase">${item.categoria ? item.categoria.nome : 'Sem Categoria'}</p>
+                    </div>
+                    <button onclick="vincularModelo('${item.nome}')" class="bg-white border border-slate-200 text-slate-600 px-3 py-1 rounded-lg text-[10px] font-black group-hover:bg-emerald-500 group-hover:text-white group-hover:border-emerald-500">
+                        SELECIONAR
+                    </button>
+                `;
+                    container.appendChild(div);
+                });
+            })
+            .catch(error => {
+                container.innerHTML = '<p class="text-sm text-red-500 p-4">Erro ao carregar sugestões.</p>';
+            });
+    }
+
+    function vincularModelo(nomeModelo) {
+        document.getElementById('manual-model-input').value = nomeModelo;
+        // Aqui você pode chamar o confirmManualModel() automaticamente se desejar
     }
 
     function confirmManualModel() {

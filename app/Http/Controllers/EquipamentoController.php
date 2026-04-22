@@ -245,6 +245,19 @@ class EquipamentoController extends Controller
         return redirect()->back()->with('success', "$count equipamentos tombados com sucesso!");
     }
 
+    public function buscarSugestoesEstoque(Request $request)
+    {
+        $termo = $request->q;
+
+        // Busca no catálogo itens que tenham nome parecido com a descrição do edital
+        $sugestoes = Catalogo::where('nome', 'like', "%{$termo}%")
+            ->with('categoria')
+            ->limit(5)
+            ->get();
+
+        return response()->json($sugestoes);
+    }
+
     public function destroy(Equipamento $equipamento)
     {
         $equipamento->delete();

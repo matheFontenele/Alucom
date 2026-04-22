@@ -98,6 +98,8 @@ Route::middleware(['auth'])->group(function () {
             return Subcategoria::where('categoria_id', $categoriaId)->get();
         });
     });
+
+    Route::get('/api/sugestoes-estoque', [EquipamentoController::class, 'buscarSugestoesEstoque'])->name('api.sugestoes_estoque');
 });
 
 // ---------------------------------------------------------
