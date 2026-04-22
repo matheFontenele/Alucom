@@ -26,11 +26,13 @@ class BiddingContractController extends Controller
             'uasg_organ'        => 'required|string',
             'object'            => 'required|string',
             'delivery_deadline' => 'required|integer',
-            'validity_months'   => 'nullable|integer',
+            'validity_months'   => 'required|integer',
+            'extension_years'   => 'nullable|integer',
         ]);
 
         // Se validity_months for nulo, define 12 como padrão para não quebrar o banco
         $data['validity_months'] = $request->input('validity_months', 12);
+        $data['extension_years'] = $request->input('extension_years', 0);
 
         $data['accepts_used'] = $request->has('accepts_used');
         $data['requires_office'] = $request->has('requires_office');
