@@ -32,7 +32,7 @@ class BiddingSeeder extends Seeder
             'item_type'           => 'TIPO I',
             'item_description'    => 'Notebooks e licenças (Lenovo V15 Gen 5)',
             'unit_price'          => 450.00,
-            'contracted_quantity' => 30, // <-- AJUSTADO AQUI (com "ed")
+            'contracted_quantity' => 30,
             'delivered_quantity'  => 15,
             'min_cpu'             => 'Intel Core i5',
             'min_ram'             => 16,
@@ -40,7 +40,7 @@ class BiddingSeeder extends Seeder
             'os_required'         => 'Windows 11 Pro',
         ]);
 
-        // 3. Criar Acessórios (Certifique-se de que a tabela e o model existem)
+        // 3. Criar Acessórios
         $acessorios = [
             ['name' => 'Mouse USB Óptico', 'included' => true],
             ['name' => 'Teclado ABNT2', 'included' => true],

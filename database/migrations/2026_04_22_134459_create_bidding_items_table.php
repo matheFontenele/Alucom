@@ -19,17 +19,16 @@ return new class extends Migration
             // Descrição e Valores
             $table->text('item_description');
             $table->decimal('unit_price', 10, 2)->default(0);      // R$ Unit Mês
-            $table->integer('contracted_quantity')->default(0);    // Quantidade em contrato
-            $table->integer('contracted_quantity')->default(0);
+            $table->integer('contracted_quantity')->default(0);    // Quantidade total em contrato
+            $table->integer('delivered_quantity')->default(0);     // Quantidade entregue/faturando
 
-            // Especificações Técnicas (Tornadas Opcionais)
+            // Especificações Técnicas (Opcionais)
             $table->string('min_cpu')->nullable();
             $table->integer('min_ram')->nullable();
             $table->integer('min_storage')->nullable();
             $table->string('os_required')->nullable();
 
             // Referência de Faturamento (Upgrade de Item)
-            // Permite que um Micro seja cobrado com o valor de um Notebook
             $table->foreignId('billing_reference_id')->nullable()
                 ->constrained('bidding_items')
                 ->onDelete('set null');

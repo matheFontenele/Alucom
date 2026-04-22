@@ -21,13 +21,16 @@ class BiddingItem extends Model
         'billing_reference_id'
     ];
 
-    // Calcula o subtotal deste item específico
+    // Faz com que o subtotal e saldo apareçam automaticamente ao converter para Array/JSON
+    protected $appends = ['subtotal', 'equipment_balance'];
+
+    // Calcula o subtotal (Qtd Entregue x Preço Unitário)
     public function getSubtotalAttribute()
     {
         return $this->delivered_quantity * $this->unit_price;
     }
 
-    // Calcula o saldo de equipamentos que ainda podem ser entregues
+    // Calcula o saldo de equipamentos (Total - Entregue)
     public function getEquipmentBalanceAttribute()
     {
         return $this->contracted_quantity - $this->delivered_quantity;
