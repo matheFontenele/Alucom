@@ -10,21 +10,31 @@ class BiddingItemController extends Controller
 {
     public function store(Request $request)
     {
-        $data = $request->validate([
-            'bidding_contract_id' => 'required|exists:bidding_contracts,id',
-            'item_description'    => 'required|string',
-            'lote'                => 'nullable|string',
-            'item_type'           => 'nullable|string',
-            'contracted_quantity' => 'required|integer',
-            'delivered_quantity'  => 'required|integer',
-            'unit_price'          => 'required|numeric',
+        // Validação para arrays
+        $request->validate([
+            'bidding_contract_id'   => 'required|exists:bidding_contracts,id',
+            'item_description.*'    => 'required|string',
+            'contracted_quantity.*' => 'required|integer',
+            'unit_price.*'          => 'required|numeric',
         ]);
 
-        BiddingItem::create($data);
+        $contract_id = $request->bidding_contract_id;
+        $descricoes = $request->item_description;
 
-        return redirect()->back()->with('success', 'Item adicionado com sucesso!');
+        foreach ($descricoes as $index => $descricao) {
+            \App\Models\BiddingItem::create([
+                'bidding_contract_id' => $contract_id,
+                'lote'                => $request->lote[$index],
+                'item_type'           => $request->item_type[$index],
+                'item_description'    => $descricao,
+                'contracted_quantity' => $request->contracted_quantity[$index],
+                'unit_price'          => $request->unit_price[$index],
+                'delivered_quantity'  => 0, // Inicia zerado
+            ]);
+        }
+
+        return redirect()->back()->with('success', 'Itens adicionados com sucesso!');
     }
-
     public function destroy(BiddingItem $item)
     {
         $item->delete();

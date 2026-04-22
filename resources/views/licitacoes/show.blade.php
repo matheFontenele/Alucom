@@ -14,7 +14,7 @@
     </div>
 </div>
 
-{{-- CARDS DE RESUMO FINANCEIRO (Baseado na sua planilha) --}}
+{{-- CARDS DE RESUMO FINANCEIRO --}}
 <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
     <div class="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm">
         <p class="text-slate-400 text-xs font-black uppercase mb-1">Teto Contratual</p>
@@ -33,8 +33,8 @@
 <div class="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden">
     <div class="p-8 border-b border-gray-50 flex justify-between items-center">
         <h2 class="font-bold text-slate-800">Itens e Quantidades</h2>
-        <button onclick="document.getElementById('modal-item').classList.toggle('hidden')" class="bg-slate-800 text-white px-4 py-2 rounded-xl text-sm font-bold">
-            + Adicionar Item
+        <button onclick="document.getElementById('modal-item').classList.remove('hidden')" class="bg-slate-800 text-white px-4 py-2 rounded-xl text-sm font-bold shadow-lg hover:bg-slate-700 transition">
+            + Adicionar Itens (Lotes)
         </button>
     </div>
 
@@ -50,13 +50,13 @@
             </tr>
         </thead>
         <tbody class="divide-y divide-gray-50">
-            @foreach($licitacao->items as $item)
+            @forelse($licitacao->items as $item)
             <tr class="hover:bg-slate-50/50 transition">
                 <td class="px-8 py-4 text-xs font-bold text-slate-500">{{ $item->lote }} / {{ $item->item_type }}</td>
                 <td class="px-8 py-4">
-                    <p class="text-sm font-bold text-slate-700">{{ Str::limit($item->item_description, 50) }}</p>
+                    <p class="text-sm font-bold text-slate-700">{{ $item->item_description }}</p>
                 </td>
-                <td class="px-8 py-4 text-center font-bold text-slate-600">{{ $item->contract_quantity }}</td>
+                <td class="px-8 py-4 text-center font-bold text-slate-600">{{ $item->contracted_quantity }}</td>
                 <td class="px-8 py-4 text-center">
                     <span class="bg-red-50 text-red-600 px-3 py-1 rounded-lg font-black text-xs">
                         {{ $item->delivered_quantity }}
@@ -65,49 +65,98 @@
                 <td class="px-8 py-4 text-right text-sm text-slate-600">R$ {{ number_format($item->unit_price, 2, ',', '.') }}</td>
                 <td class="px-8 py-4 text-right font-black text-slate-800 text-sm">R$ {{ number_format($item->subtotal, 2, ',', '.') }}</td>
             </tr>
-            @endforeach
+            @empty
+            <tr>
+                <td colspan="6" class="px-8 py-12 text-center text-slate-400 italic">Nenhum item cadastrado. Clique em "+ Adicionar Item".</td>
+            </tr>
+            @endforelse
         </tbody>
     </table>
 </div>
 
-{{-- MODAL SIMPLES PARA ADICIONAR ITEM --}}
-<div id="modal-item" class="hidden fixed inset-0 bg-slate-900/50 backdrop-blur-sm flex items-center justify-center p-4">
-    <div class="bg-white rounded-3xl p-8 max-w-2xl w-full">
-        <h3 class="text-xl font-bold mb-6">Novo Item Técnico</h3>
-        <form action="{{ route('licitacoes-itens.store') }}" method="POST">
+{{-- MODAL PARA ADICIONAR MÚLTIPLOS ITENS --}}
+<div id="modal-item" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+    <div class="bg-white rounded-3xl shadow-2xl max-w-5xl w-full max-h-[90vh] overflow-hidden flex flex-col">
+        <div class="p-8 border-b border-gray-100 flex justify-between items-center">
+            <div>
+                <h3 class="text-xl font-black text-slate-800">Adicionar Itens ao Contrato</h3>
+                <p class="text-sm text-slate-500">Preencha as informações dos lotes e itens técnicos.</p>
+            </div>
+            <button onclick="document.getElementById('modal-item').classList.add('hidden')" class="text-slate-400 hover:text-slate-600">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                </svg>
+            </button>
+        </div>
+
+        <form action="{{ route('licitacoes-itens.store') }}" method="POST" class="flex flex-col overflow-hidden">
             @csrf
             <input type="hidden" name="bidding_contract_id" value="{{ $licitacao->id }}">
-            <div class="grid grid-cols-2 gap-4">
-                <div class="col-span-2">
-                    <label class="block text-[10px] font-black uppercase text-slate-400">Descrição</label>
-                    <input type="text" name="item_description" class="w-full border-gray-200 rounded-xl" required>
-                </div>
-                <div>
-                    <label class="block text-[10px] font-black uppercase text-slate-400">Lote</label>
-                    <input type="text" name="lote" placeholder="LOTE I" class="w-full border-gray-200 rounded-xl">
-                </div>
-                <div>
-                    <label class="block text-[10px] font-black uppercase text-slate-400">Tipo</label>
-                    <input type="text" name="item_type" placeholder="TIPO II" class="w-full border-gray-200 rounded-xl">
-                </div>
-                <div>
-                    <label class="block text-[10px] font-black uppercase text-slate-400">Qtd Contrato</label>
-                    <input type="number" name="contract_quantity" class="w-full border-gray-200 rounded-xl" required>
-                </div>
-                <div>
-                    <label class="block text-[10px] font-black uppercase text-slate-400">Qtd Instalada (Faturamento)</label>
-                    <input type="number" name="delivered_quantity" class="w-full border-gray-200 rounded-xl" value="0">
-                </div>
-                <div class="col-span-2">
-                    <label class="block text-[10px] font-black uppercase text-slate-400">Valor Unitário Mensal (R$)</label>
-                    <input type="number" step="0.01" name="unit_price" class="w-full border-gray-200 rounded-xl" required>
+
+            <div class="p-8 overflow-y-auto space-y-4" id="wrapper-itens">
+                {{-- Linha de Item (Template) --}}
+                <div class="grid grid-cols-12 gap-3 p-4 bg-slate-50 rounded-2xl border border-slate-100 relative item-row">
+                    <div class="col-span-2">
+                        <label class="block text-[10px] font-black uppercase text-slate-400 mb-1">Lote</label>
+                        <input type="text" name="lote[]" placeholder="LOTE I" class="w-full border-gray-200 rounded-xl text-sm">
+                    </div>
+                    <div class="col-span-2">
+                        <label class="block text-[10px] font-black uppercase text-slate-400 mb-1">Tipo</label>
+                        <input type="text" name="item_type[]" placeholder="TIPO II" class="w-full border-gray-200 rounded-xl text-sm">
+                    </div>
+                    <div class="col-span-5">
+                        <label class="block text-[10px] font-black uppercase text-slate-400 mb-1">Descrição do Item</label>
+                        <input type="text" name="item_description[]" placeholder="Ex: Notebook I5 16GB" class="w-full border-gray-200 rounded-xl text-sm" required>
+                    </div>
+                    <div class="col-span-3 text-right">
+                        <label class="block text-[10px] font-black uppercase text-slate-400 mb-1">Valor Unit. (R$)</label>
+                        <input type="number" step="0.01" name="unit_price[]" placeholder="0,00" class="w-full border-gray-200 rounded-xl text-sm text-right" required>
+                    </div>
+                    <div class="col-span-3">
+                        <label class="block text-[10px] font-black uppercase text-slate-400 mb-1">Qtd Contrato</label>
+                        <input type="number" name="contracted_quantity[]" class="w-full border-gray-200 rounded-xl text-sm" required>
+                    </div>
+                    <div class="col-span-3">
+                        <label class="block text-[10px] font-black uppercase text-slate-400 mb-1">Qtd Entregue</label>
+                        <input type="number" name="delivered_quantity[]" value="0" class="w-full border-gray-200 rounded-xl text-sm">
+                    </div>
                 </div>
             </div>
-            <div class="mt-6 flex gap-3">
-                <button type="submit" class="bg-red-600 text-white px-6 py-2 rounded-xl font-bold">Salvar Item</button>
-                <button type="button" onclick="document.getElementById('modal-item').classList.toggle('hidden')" class="bg-slate-100 text-slate-600 px-6 py-2 rounded-xl font-bold">Cancelar</button>
+
+            <div class="p-8 bg-slate-50 border-t border-gray-100 flex justify-between items-center">
+                <button type="button" onclick="addItemRow()" class="text-red-600 font-bold text-sm hover:text-red-700 flex items-center">
+                    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                    </svg>
+                    Adicionar Mais Itens
+                </button>
+                <div class="flex gap-3">
+                    <button type="button" onclick="document.getElementById('modal-item').classList.add('hidden')" class="px-6 py-2 text-slate-500 font-bold">Cancelar</button>
+                    <button type="submit" class="bg-red-600 text-white px-8 py-2 rounded-xl font-bold shadow-lg shadow-red-100 hover:bg-red-700 transition">
+                        Salvar Todos os Itens
+                    </button>
+                </div>
             </div>
         </form>
     </div>
 </div>
+
+<script>
+    function addItemRow() {
+        const wrapper = document.getElementById('wrapper-itens');
+        const firstRow = wrapper.querySelector('.item-row');
+        const newRow = firstRow.cloneNode(true);
+
+        // Limpa os valores dos inputs clonados
+        newRow.querySelectorAll('input').forEach(input => {
+            if (input.name !== 'delivered_quantity[]') {
+                input.value = '';
+            } else {
+                input.value = '0';
+            }
+        });
+
+        wrapper.appendChild(newRow);
+    }
+</script>
 @endsection
