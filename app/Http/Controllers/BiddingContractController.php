@@ -22,17 +22,23 @@ class BiddingContractController extends Controller
     public function store(Request $request)
     {
         $data = $request->validate([
-            'pregao_number' => 'required|string',
-            'uasg_organ' => 'required|string',
-            'object' => 'required|string',
+            'pregao_number'     => 'required|string',
+            'uasg_organ'        => 'required|string',
+            'object'            => 'required|string',
             'delivery_deadline' => 'required|integer',
+            'validity_months'   => 'nullable|integer',
         ]);
 
-        BiddingContract::create($request->all());
+        // O checkbox no HTML envia valor se marcado, tratamos aqui:
+        $data['accepts_used'] = $request->has('accepts_used');
+        $data['requires_office'] = $request->has('requires_office');
 
-        return redirect()->route('licitacoes.index')->with('success', 'Edital cadastrado com sucesso!');
+        $licitacao = BiddingContract::create($data);
+
+        // Redireciona para o 'show' para o usuário começar a inserir os itens de hardware
+        return redirect()->route('licitacoes.show', $licitacao->id)
+            ->with('success', 'Edital criado! Agora adicione os itens técnicos.');
     }
-
     public function show($id)
     {
         // Carrega o contrato com seus itens técnicos
