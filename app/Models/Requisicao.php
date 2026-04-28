@@ -46,4 +46,9 @@ class Requisicao extends Model
     {
         return $this->belongsTo(Estoque::class, 'estoque_id');
     }
+
+    public function catalogo(): BelongsTo
+    {
+        return $this->belongsTo(Catalogo::class, 'catalogo_id');
+    }
 }

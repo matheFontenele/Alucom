@@ -9,9 +9,9 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('requisicoes', function (Blueprint $table) {
-            $table->id(); 
+            $table->id();
             $table->string('oficio')->default('Sem Oficio');
-            $table->string('solicitante'); 
+            $table->string('solicitante');
             $table->date('data_solicitacao');
             $table->date('previsao_envio')->nullable();
             $table->enum('envio', ['Coleta', 'Rota', 'Transportadora']);
@@ -19,7 +19,7 @@ return new class extends Migration
 
             // Relacionamentos
             $table->foreignId('cliente_id')->constrained('clientes');
-            $table->foreignId('catalogo_id')->constrained('catalogo'); 
+            $table->foreignId('catalogo_id')->constrained('catalogo');
             $table->foreignId('estoque_id')->constrained('estoques');
 
             $table->string('estado');
@@ -27,6 +27,8 @@ return new class extends Migration
 
             $table->enum('etiqueta', ['Alucom', 'Moreia', 'IP', 'ZapLoc']);
             $table->integer('quantidade');
+            $table->string('item_descricao');
+            $table->string('categoria')->default('Equipamento');
             $table->enum('tipo_solicitacao', ['Substituição', 'Novo']);
             $table->string('patrimonio_substituido')->nullable();
             $table->string('patrimonio_novo')->nullable();
@@ -34,10 +36,10 @@ return new class extends Migration
             // Campos de Separação
             $table->integer('quantidade_separada')->nullable();
             $table->date('data_separacao')->nullable();
-            $table->string('separado_por')->nullable(); 
+            $table->string('separado_por')->nullable();
             $table->boolean('baixa_sistema')->default(false);
             $table->text('observacao_separacao')->nullable();
-            $table->string('situacao')->default('Pendente'); 
+            $table->string('situacao')->default('Pendente');
 
             $table->timestamps();
         });

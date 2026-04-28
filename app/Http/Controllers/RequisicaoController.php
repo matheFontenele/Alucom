@@ -61,7 +61,8 @@ class RequisicaoController extends Controller
         // Validação básica para os dados do cliente (comuns a todos)
         $request->validate([
             'cliente_id' => 'required',
-            'item_nome.*' => 'required', // Valida cada nome de item no array
+            'item_nome.*' => 'required',
+            'estoque_id' => 'required',
         ]);
 
         $itens = $request->input('item_nome');
@@ -79,6 +80,7 @@ class RequisicaoController extends Controller
                     'etiqueta'         => $request->etiqueta,
                     'previsao_envio'   => $request->previsao_envio,
                     'envio'            => $request->envio,
+                    'catalogo_id'      => $request->item_catalogo_id[$index] ?? 1,
 
                     // Dados da "Planilha"
                     'item_descricao'   => $nome,
