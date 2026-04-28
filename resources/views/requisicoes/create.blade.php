@@ -19,7 +19,7 @@
 
             {{-- SEÇÃO 1: DADOS FIXOS (CABECALHO DA REQUISIÇÃO) --}}
             <div class="bg-gray-50 p-6 rounded-2xl border border-gray-100 space-y-6">
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
                     <div>
                         <label class="block text-xs font-black uppercase text-gray-400 mb-1">Ofício</label>
                         <input type="text" name="oficio" placeholder="Ex: 0336/2025" class="w-full border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500">
@@ -31,6 +31,16 @@
                             @foreach($estoques as $estoque)
                             <option value="{{ $estoque->id }}">{{ $estoque->nome }}</option>
                             @endforeach
+                        </select>
+                    </div>
+                    {{-- NOVO CAMPO: TIPO DE ENVIO (Obrigatório para evitar erro 23502) --}}
+                    <div>
+                        <label class="block text-xs font-black uppercase text-blue-600 mb-1">Tipo de Envio *</label>
+                        <select name="envio" class="w-full border-blue-200 bg-white rounded-xl focus:ring-2 focus:ring-blue-500" required>
+                            <option value="">Selecione...</option>
+                            <option value="Rota">Rota</option>
+                            <option value="Coleta">Coleta</option>
+                            <option value="Transportadora">Transportadora</option>
                         </select>
                     </div>
                     <div>
@@ -127,6 +137,7 @@
                                     {{-- Patrimônio --}}
                                     <td class="p-0 border-r">
                                         <input type="text" :name="'item_patrimonio['+index+']'"
+                                            :required="row.tipo === 'Substituição'"
                                             :disabled="row.tipo === 'Novo'"
                                             :class="row.tipo === 'Novo' ? 'bg-gray-50 cursor-not-allowed italic text-gray-300' : 'bg-white text-blue-600 font-bold'"
                                             class="w-full border-none focus:ring-0 p-3 text-sm placeholder-gray-200 bg-transparent"
@@ -162,7 +173,6 @@
 </div>
 
 <script>
-    // Gerenciamento da Tabela com Alpine.js
     function requisicaoRapida() {
         return {
             rows: [{
@@ -181,7 +191,6 @@
         }
     }
 
-    // Lógica de automação de dados do Cliente
     document.getElementById('cliente_select').addEventListener('change', function() {
         const option = this.options[this.selectedIndex];
         document.getElementById('cidade_input').value = option.getAttribute('data-cidade') || '';
