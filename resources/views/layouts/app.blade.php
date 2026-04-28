@@ -72,6 +72,7 @@
 
             <hr class="mx-6 border-slate-800 my-2">
 
+            {{--
             {{-- Grupo: Licitações --}}
             @if(in_array(Auth::user()->funcao, ['Direção', 'Gerência', 'Operação']))
             <div class="px-4">
@@ -131,6 +132,7 @@
                 </div>
             </div>
             @endif
+            --}}
         </div>
 
         {{-- Perfil (Fixo no rodapé do aside) --}}
