@@ -80,6 +80,7 @@ class RequisicaoController extends Controller
                     'etiqueta'         => $request->etiqueta,
                     'previsao_envio'   => $request->previsao_envio,
                     'envio'            => $request->envio,
+                    'estoque_id'       => $request->estoque_id,
                     'catalogo_id'      => $request->item_catalogo_id[$index] ?? 1,
 
                     // Dados da "Planilha"
