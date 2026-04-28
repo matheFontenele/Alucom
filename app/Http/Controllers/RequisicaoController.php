@@ -14,17 +14,18 @@ use Illuminate\Support\Facades\DB;
 class RequisicaoController extends Controller
 {
     /**
-     * Exibe a lista de requisições
+     * Exibe a lista de requisições com status atualizados
      */
     public function index()
     {
-        $requisicoes = Requisicao::with(['cliente', 'estoque'])->orderBy('created_at', 'desc')->paginate(10);
+        // Carrega apenas relações existentes: cliente e estoque
+        $requisicoes = Requisicao::with(['cliente', 'estoque'])
+            ->orderBy('created_at', 'desc')
+            ->paginate(15);
+
         return view('requisicoes.index', compact('requisicoes'));
     }
 
-    /**
-     * Formulário de criação de nova requisição
-     */
     public function create()
     {
         $clientes = Clientes::orderBy('nome')->get();
@@ -34,9 +35,6 @@ class RequisicaoController extends Controller
         return view('requisicoes.create', compact('clientes', 'estoques', 'catalogo'));
     }
 
-    /**
-     * API: Retorna itens do catálogo que possuem saldo no estoque selecionado
-     */
     public function getItensPorEstoque($estoqueId)
     {
         $itens = Catalogo::whereHas('equipamentos', function ($q) use ($estoqueId) {
@@ -53,12 +51,8 @@ class RequisicaoController extends Controller
         return response()->json($itens);
     }
 
-    /**
-     * Salva a nova requisição
-     */
     public function store(Request $request)
     {
-        // Validação básica para os dados do cliente (comuns a todos)
         $request->validate([
             'cliente_id' => 'required',
             'item_nome.*' => 'required',
@@ -70,7 +64,7 @@ class RequisicaoController extends Controller
         DB::transaction(function () use ($request, $itens) {
             foreach ($itens as $index => $nome) {
                 Requisicao::create([
-                    'situacao'         => 'Pendente',
+                    'situacao'         => 'Pendente', // Status inicial padrão
                     'oficio'           => $request->oficio ?? 'Sem Oficio',
                     'solicitante'      => auth()->user()->name,
                     'data_solicitacao' => now(),
@@ -82,8 +76,6 @@ class RequisicaoController extends Controller
                     'envio'            => $request->envio,
                     'estoque_id'       => $request->estoque_id,
                     'catalogo_id'      => $request->item_catalogo_id[$index] ?? 1,
-
-                    // Dados da "Planilha"
                     'item_descricao'   => $nome,
                     'quantidade'       => $request->item_qtd[$index] ?? 1,
                     'categoria'        => $request->item_categoria[$index] ?? 'Equipamento',
@@ -96,20 +88,22 @@ class RequisicaoController extends Controller
     }
 
     /**
-     * Detalhes da requisição
+     * Detalhes da requisição (Corrigido erro de RelationNotFound)
      */
     public function show($id)
     {
-        $requisicao = Requisicao::with(['cliente', 'item', 'estoque'])->findOrFail($id);
+        // Removido 'item' do with()
+        $requisicao = Requisicao::with(['cliente', 'estoque'])->findOrFail($id);
         return view('requisicoes.show', compact('requisicao'));
     }
 
     /**
-     * Tela de Separação de Materiais
+     * Tela de Separação de Materiais (Corrigido erro de RelationNotFound)
      */
     public function separacao($id)
     {
-        $requisicao = Requisicao::with(['cliente', 'item'])->findOrFail($id);
+        // Removido 'item' do with()
+        $requisicao = Requisicao::with(['cliente'])->findOrFail($id);
 
         $tombosDisponiveis = Equipamento::where('catalogo_id', $requisicao->catalogo_id)
             ->where('estoque_id', $requisicao->estoque_id)
@@ -120,9 +114,6 @@ class RequisicaoController extends Controller
         return view('requisicoes.separacao', compact('requisicao', 'tombosDisponiveis'));
     }
 
-    /**
-     * Finaliza a separação e inicia o rastreio (Status: Separado)
-     */
     public function separarUpdate(Request $request, $id)
     {
         $requisicao = Requisicao::with(['cliente', 'estoque'])->findOrFail($id);
@@ -132,13 +123,10 @@ class RequisicaoController extends Controller
         }
 
         return DB::transaction(function () use ($request, $requisicao) {
-
-            // 1. Determina o Tipo de Movimentação para o Histórico
             $tipoMov = ($requisicao->tipo_solicitacao === 'Substituição') ? 'Substituição' : 'Aluguel';
 
-            // 2. Atualiza os dados da Requisição
             $requisicao->update([
-                'situacao'             => 'Finalizada', // Indica que saiu da fila de pendentes
+                'situacao'             => 'Atendida', // Atualiza para Atendida após separar
                 'quantidade_separada'  => $request->quantidade_separada,
                 'data_separacao'       => $request->data_separacao,
                 'separado_por'         => $request->separado_por,
@@ -147,35 +135,32 @@ class RequisicaoController extends Controller
                 'patrimonio_novo'      => $request->patrimonio_novo,
             ]);
 
-            // 3. Processa o Equipamento Físico e gera o primeiro marco de movimentação
             if ($request->baixa_sistema == '1') {
                 $equipamentoFisico = Equipamento::where('tombo', $request->patrimonio_novo)->first();
 
                 if ($equipamentoFisico) {
-                    // CRIA O REGISTRO DE MOVIMENTAÇÃO QUE O ROTA-CONTROLLER VAI BUSCAR DEPOIS
                     Movimentacao::create([
                         'equipamento_id'    => $equipamentoFisico->id,
                         'requisicao_id'     => $requisicao->id,
                         'tipo'              => $tipoMov,
-                        'situacao'          => 'Separado', // REGRA DE OURO: Deve ser exatamente "Separado"
+                        'situacao'          => 'Separado',
                         'origem'            => $requisicao->estoque->nome ?? 'Estoque Central',
                         'destino'           => 'Aguardando Rota',
                         'data_movimentacao' => now(),
-                        'observacao'        => "Item separado. Aguardando transporte. Req #{$requisicao->id}."
+                        'observacao'        => "Item separado. Req #{$requisicao->id}."
                     ]);
 
-                    // ATUALIZA O EQUIPAMENTO NO CADASTRO GERAL
                     $equipamentoFisico->update([
                         'status'            => 'Alugado',
-                        'situacao'          => 'Separado', // Alinha o sub-status do equipamento
+                        'situacao'          => 'Separado',
                         'cliente_id'        => $requisicao->cliente_id,
-                        'estoque_id'        => null, // Sai do estoque e fica "na mão" do sistema
+                        'estoque_id'        => null,
                         'data_movimentacao' => now(),
                     ]);
                 }
             }
 
-            return redirect()->route('requisicoes.index')->with('success', 'Separação concluída! O item agora está disponível para ser incluído em uma rota.');
+            return redirect()->route('requisicoes.index')->with('success', 'Separação concluída!');
         });
     }
 }

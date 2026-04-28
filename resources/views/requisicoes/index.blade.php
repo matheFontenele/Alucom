@@ -29,60 +29,51 @@
                 <tbody class="divide-y divide-gray-100">
                     @forelse($requisicoes as $req)
                     <tr class="hover:bg-gray-50 transition-colors">
-                        {{-- ID --}}
                         <td class="px-4 py-4 text-center font-bold text-gray-900">
                             #{{ str_pad($req->id, 4, '0', STR_PAD_LEFT) }}
                         </td>
-
-                        {{-- Ofício e Solicitante --}}
                         <td class="px-4 py-4">
                             <div class="font-bold text-gray-800">{{ $req->oficio }}</div>
                             <div class="text-xs text-gray-400 italic">Por: {{ $req->solicitante }}</div>
                         </td>
-
-                        {{-- Cliente e Local --}}
                         <td class="px-4 py-4">
                             <div class="text-gray-800 font-medium">{{ $req->cliente->nome ?? 'N/A' }}</div>
                             <div class="text-xs text-gray-500">{{ $req->cidade }} - {{ $req->estado }}</div>
                         </td>
-
-                        {{-- Item e Tipo --}}
                         <td class="px-4 py-4">
                             <div class="text-blue-900 font-bold">{{ $req->quantidade }}x {{ $req->item_descricao }}</div>
                             <span class="text-[10px] px-2 py-0.5 rounded-full bg-gray-100 border {{ $req->tipo_solicitacao == 'Substituição' ? 'text-amber-600 border-amber-200' : 'text-green-600 border-green-200' }}">
                                 {{ $req->tipo_solicitacao }}
                             </span>
                         </td>
-
-                        {{-- Status de Envio (Logística) --}}
                         <td class="px-4 py-4 text-center">
                             <span class="px-2 py-1 rounded text-xs font-bold bg-blue-50 text-blue-700 border border-blue-100">
                                 {{ $req->envio }}
                             </span>
                             <div class="text-[10px] text-gray-400 mt-1">
-                                {{ $req->previsao_envio ? \Carbon\Carbon::parse($req->previsao_envio)->format('d/m/Y') : 'Sem data' }}
+                                Prev: {{ $req->previsao_envio ? \Carbon\Carbon::parse($req->previsao_envio)->format('d/m/Y') : '--' }}
                             </div>
                         </td>
 
-                        {{-- NOVA COLUNA DE STATUS DO PROCESSO --}}
+                        {{-- COLUNA DE STATUS COM CORES --}}
                         <td class="px-4 py-4 text-center">
                             @php
-                            $statusStyle = match($req->situacao) {
-                            'Pendente' => 'bg-gray-100 text-gray-600 border-gray-200',
-                            'Atendida' => 'bg-green-100 text-green-700 border-green-200',
-                            'Parcialmente' => 'bg-blue-100 text-blue-700 border-blue-200',
-                            'Solicitado Compra' => 'bg-orange-100 text-orange-700 border-orange-200',
-                            default => 'bg-gray-100 text-gray-600 border-gray-200'
+                            $statusClasses = match($req->situacao) {
+                            'Pendente' => 'bg-amber-50 text-amber-600 border-amber-200',
+                            'Atendida' => 'bg-green-50 text-green-700 border-green-200',
+                            'Parcialmente' => 'bg-blue-50 text-blue-700 border-blue-200',
+                            'Solicitado Compra' => 'bg-purple-50 text-purple-700 border-purple-200',
+                            'Finalizada' => 'bg-gray-100 text-gray-600 border-gray-200',
+                            default => 'bg-gray-50 text-gray-500 border-gray-200'
                             };
                             @endphp
-                            <span class="px-3 py-1 rounded-full text-xs font-black uppercase border {{ $statusStyle }}">
+                            <span class="px-3 py-1 rounded-full text-[11px] font-bold uppercase border {{ $statusClasses }}">
                                 {{ $req->situacao }}
                             </span>
                         </td>
 
-                        {{-- Ações Simplificadas --}}
                         <td class="px-4 py-4 text-right">
-                            <div class="flex justify-end items-center gap-4">
+                            <div class="flex justify-end items-center gap-3">
                                 <a href="{{ route('requisicoes.show', $req->id) }}" class="text-gray-400 hover:text-blue-600 transition-colors" title="Ver Detalhes">
                                     <i class="ph ph-eye text-2xl"></i>
                                 </a>
