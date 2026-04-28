@@ -58,35 +58,38 @@ class RequisicaoController extends Controller
      */
     public function store(Request $request)
     {
+        // Validação básica para os dados do cliente (comuns a todos)
         $request->validate([
-            'cliente_id'   => 'required',
-            'catalogo_id'  => 'required',
-            'estoque_id'   => 'required',
-            'quantidade'   => 'required|integer|min:1',
-            'envio'        => 'required',
-            'etiqueta'     => 'required',
+            'cliente_id' => 'required',
+            'item_nome.*' => 'required', // Valida cada nome de item no array
         ]);
 
-        Requisicao::create([
-            'situacao'               => 'Pendente',
-            'oficio'                 => $request->oficio ?? 'Sem Oficio',
-            'solicitante'            => auth()->user() ? auth()->user()->name : 'Admin',
-            'data_solicitacao'       => now(),
-            'previsao_envio'         => $request->previsao_envio,
-            'envio'                  => $request->envio ?? 'Coleta',
-            'nfe'                    => $request->nfe ?? 'Sem NF',
-            'cliente_id'             => $request->cliente_id,
-            'catalogo_id'            => $request->catalogo_id,
-            'estoque_id'             => $request->estoque_id,
-            'estado'                 => $request->estado,
-            'cidade'                 => $request->cidade,
-            'etiqueta'               => $request->etiqueta ?? 'Alucom',
-            'quantidade'             => $request->quantidade,
-            'tipo_solicitacao'       => $request->tipo_solicitacao,
-            'patrimonio_substituido' => $request->tipo_solicitacao === 'Substituição' ? $request->patrimonio_substituido : null,
-        ]);
+        $itens = $request->input('item_nome');
 
-        return redirect()->route('requisicoes.index')->with('success', 'Requisição criada com sucesso!');
+        DB::transaction(function () use ($request, $itens) {
+            foreach ($itens as $index => $nome) {
+                Requisicao::create([
+                    'situacao'         => 'Pendente',
+                    'oficio'           => $request->oficio ?? 'Sem Oficio',
+                    'solicitante'      => auth()->user()->name,
+                    'data_solicitacao' => now(),
+                    'cliente_id'       => $request->cliente_id,
+                    'cidade'           => $request->cidade,
+                    'estado'           => $request->estado,
+                    'etiqueta'         => $request->etiqueta,
+                    'previsao_envio'   => $request->previsao_envio,
+                    'envio'            => $request->envio,
+
+                    // Dados da "Planilha"
+                    'item_descricao'   => $nome,
+                    'quantidade'       => $request->item_qtd[$index] ?? 1,
+                    'categoria'        => $request->item_categoria[$index] ?? 'Equipamento',
+                    'tipo_solicitacao' => $request->item_tipo[$index] ?? 'Novo',
+                ]);
+            }
+        });
+
+        return redirect()->route('requisicoes.index')->with('success', count($itens) . ' itens registrados com sucesso!');
     }
 
     /**

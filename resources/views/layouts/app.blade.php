@@ -34,104 +34,41 @@
 <body class="bg-gray-50 flex font-sans text-slate-900 overflow-x-hidden h-screen">
 
     {{-- Menu Lateral --}}
-    <aside x-data="{ 
-        openMenu: '{{ request()->routeIs('guia-adi.*', 'clientes.*', 'catalogos.*', 'equipamentos.*', 'tecnicos.*', 'estoques.*') ? 'operacao' : (request()->routeIs('requisicoes.*', 'rotas.*', 'movimentacoes.*', 'veiculos.*') ? 'logistica' : (request()->routeIs('usuarios.*') ? 'gerenciamento' : '')) }}' 
-    }" class="w-64 flex-shrink-0 bg-slate-900 h-screen text-slate-300 flex flex-col shadow-xl sticky top-0 z-20 transition-all duration-300 overflow-y-auto">
+    <aside x-data="{ openMenu: '' }" class="w-64 flex-shrink-0 bg-slate-900 h-screen text-slate-300 flex flex-col shadow-xl sticky top-0 z-20 transition-all duration-300 overflow-y-auto">
 
         <div class="p-6 text-white font-bold text-2xl border-b border-slate-800 flex items-center gap-2">
             <i class="ph ph-package text-red-500"></i> AS - Sistema
         </div>
 
         <div class="flex-1 py-4 space-y-2">
-            <div class="px-4 mb-4">
+
+            {{-- Dashboard --}}
+            <div class="px-4">
                 <a href="{{ route('dashboard') }}"
                     class="flex items-center gap-3 p-3 rounded-lg transition group {{ request()->routeIs('dashboard') ? 'bg-red-600 text-white shadow-lg shadow-red-900/40' : 'hover:bg-slate-800 text-slate-300' }}">
                     <i class="ph ph-house text-xl {{ request()->routeIs('dashboard') ? 'text-white' : 'text-red-500' }}"></i>
-                    <span class="text-sm font-bold uppercase tracking-wider">Início / Dashboard</span>
+                    <span class="text-sm font-bold uppercase tracking-wider">Dashboard</span>
                 </a>
             </div>
-            {{-- Grupo: Operações (Visível para todos os logados) --}}
-            <div class="px-4">
-                <button @click="openMenu = (openMenu === 'operacao' ? '' : 'operacao')"
-                    class="w-full flex items-center justify-between p-3 rounded-lg hover:bg-slate-800 transition group"
-                    :class="openMenu === 'operacao' ? 'text-white bg-slate-800/50' : ''">
-                    <div class="flex items-center gap-3">
-                        <i class="ph ph-cpu text-xl text-red-500"></i>
-                        <span class="text-sm font-bold uppercase tracking-wider">Operações</span>
-                    </div>
-                    <i class="ph ph-caret-down transition-transform duration-300" :class="openMenu === 'operacao' ? 'rotate-180' : ''"></i>
-                </button>
 
-                <div x-show="openMenu === 'operacao'" x-cloak x-collapse class="mt-1 space-y-1 ml-4 border-l border-slate-700 pl-2">
-                    <x-nav-link href="{{ route('guia-adi.index') }}" active="{{ request()->routeIs('guia-adi.*') }}" icon="ph-printer" label="Guia Impressoras" />
-                    <x-nav-link href="{{ route('clientes.index') }}" active="{{ request()->routeIs('clientes.*') }}" icon="ph-building-office" label="Clientes" />
-                    <x-nav-link href="{{ route('catalogos.index') }}" active="{{ request()->routeIs('catalogos.*') }}" icon="ph-book-open-text" label="Catálogo" />
-                    <x-nav-link href="{{ route('equipamentos.index') }}" active="{{ request()->routeIs('equipamentos.*') }}" icon="ph-hard-drives" label="Equipamentos" />
-                    <x-nav-link href="{{ route('tecnicos.index') }}" active="{{ request()->routeIs('tecnicos.*') }}" icon="ph-wrench" label="Técnicos" />
-                    <x-nav-link href="{{ route('estoques.index') }}" active="{{ request()->routeIs('estoques.*') }}" icon="ph-archive" label="Estoques" />
-                </div>
+            {{-- Requisições --}}
+            <div class="px-4">
+                <a href="{{ route('requisicoes.index') }}"
+                    class="flex items-center gap-3 p-3 rounded-lg transition group {{ request()->routeIs('requisicoes.*') ? 'bg-red-600 text-white shadow-lg shadow-red-900/40' : 'hover:bg-slate-800 text-slate-300' }}">
+                    <i class="ph ph-clipboard-text text-xl {{ request()->routeIs('requisicoes.*') ? 'text-white' : 'text-red-500' }}"></i>
+                    <span class="text-sm font-bold uppercase tracking-wider">Requisições</span>
+                </a>
             </div>
 
-            {{-- Grupo: Licitações (Visível para Direção, Gerência e Operação) --}}
-            @if(in_array(Auth::user()->funcao, ['Direção', 'Gerência', 'Operação']))
+            {{-- Guia de Impressoras --}}
             <div class="px-4">
-                <button @click="openMenu = (openMenu === 'licitacao' ? '' : 'licitacao')"
-                    class="w-full flex items-center justify-between p-3 rounded-lg hover:bg-slate-800 transition group"
-                    :class="openMenu === 'licitacao' ? 'text-white bg-slate-800/50' : ''">
-                    <div class="flex items-center gap-3">
-                        <i class="ph ph-file-text text-xl text-amber-500"></i>
-                        <span class="text-sm font-bold uppercase tracking-wider">Licitações</span>
-                    </div>
-                    <i class="ph ph-caret-down transition-transform duration-300" :class="openMenu === 'licitacao' ? 'rotate-180' : ''"></i>
-                </button>
-
-                <div x-show="openMenu === 'licitacao'" x-cloak x-collapse class="mt-1 space-y-1 ml-4 border-l border-slate-700 pl-2">
-                    <x-nav-link href="{{ route('licitacoes.index') }}" active="{{ request()->routeIs('licitacoes.*') }}" icon="ph-folders" label="Contratos / Editais" />
-                    <x-nav-link href="#" active="{{ request()->routeIs('licitacoes.pendentes') }}" icon="ph-clock-countdown" label="Prazos Ativos" />
-                </div>
+                <a href="{{ route('guia-adi.index') }}"
+                    class="flex items-center gap-3 p-3 rounded-lg transition group {{ request()->routeIs('guia-adi.*') ? 'bg-red-600 text-white shadow-lg shadow-red-900/40' : 'hover:bg-slate-800 text-slate-300' }}">
+                    <i class="ph ph-printer text-xl {{ request()->routeIs('guia-adi.*') ? 'text-white' : 'text-red-500' }}"></i>
+                    <span class="text-sm font-bold uppercase tracking-wider">Guia Impressoras</span>
+                </a>
             </div>
-            @endif
 
-            {{-- Grupo: Logística (Filtro por função) --}}
-            @if(in_array(Auth::user()->funcao, ['Direção', 'Gerência', 'Logística', 'Motorista']))
-            <div class="px-4">
-                <button @click="openMenu = (openMenu === 'logistica' ? '' : 'logistica')"
-                    class="w-full flex items-center justify-between p-3 rounded-lg hover:bg-slate-800 transition group"
-                    :class="openMenu === 'logistica' ? 'text-white bg-slate-800/50' : ''">
-                    <div class="flex items-center gap-3">
-                        <i class="ph ph-truck text-xl text-blue-500"></i>
-                        <span class="text-sm font-bold uppercase tracking-wider">Logística</span>
-                    </div>
-                    <i class="ph ph-caret-down transition-transform duration-300" :class="openMenu === 'logistica' ? 'rotate-180' : ''"></i>
-                </button>
-
-                <div x-show="openMenu === 'logistica'" x-cloak x-collapse class="mt-1 space-y-1 ml-4 border-l border-slate-700 pl-2">
-                    <x-nav-link href="{{ route('requisicoes.index') }}" active="{{ request()->routeIs('requisicoes.*') }}" icon="ph-clipboard-text" label="Requisições" />
-                    <x-nav-link href="{{ route('rotas.index') }}" active="{{ request()->routeIs('rotas.*') }}" icon="ph-map-trifold" label="Rotas" />
-                    <x-nav-link href="{{ route('movimentacoes.index') }}" active="{{ request()->routeIs('movimentacoes.*') }}" icon="ph-arrows-clockwise" label="Movimentações" />
-                    <x-nav-link href="{{ route('veiculos.index') }}" active="{{ request()->routeIs('veiculos.*') }}" icon="ph-car" label="Veículos" />
-                </div>
-            </div>
-            @endif
-
-            {{-- Grupo: Gerenciamento (Apenas Direção e Gerência) --}}
-            @if(in_array(Auth::user()->funcao, ['Direção', 'Gerência']))
-            <div class="px-4">
-                <button @click="openMenu = (openMenu === 'gerenciamento' ? '' : 'gerenciamento')"
-                    class="w-full flex items-center justify-between p-3 rounded-lg hover:bg-slate-800 transition group"
-                    :class="openMenu === 'gerenciamento' ? 'text-white bg-slate-800/50' : ''">
-                    <div class="flex items-center gap-3">
-                        <i class="ph ph-gear text-xl text-emerald-500"></i>
-                        <span class="text-sm font-bold uppercase tracking-wider">Gerenciamento</span>
-                    </div>
-                    <i class="ph ph-caret-down transition-transform duration-300" :class="openMenu === 'gerenciamento' ? 'rotate-180' : ''"></i>
-                </button>
-
-                <div x-show="openMenu === 'gerenciamento'" x-cloak x-collapse class="mt-1 space-y-1 ml-4 border-l border-slate-700 pl-2">
-                    <x-nav-link href="{{ route('usuarios.index') }}" active="{{ request()->routeIs('usuarios.*') }}" icon="ph-users-three" label="Usuários" />
-                </div>
-            </div>
-            @endif
         </div>
 
         {{-- Perfil --}}
@@ -146,6 +83,82 @@
                 </div>
             </div>
         </div>
+    </aside>
+
+    {{-- Grupo: Licitações (Visível para Direção, Gerência e Operação) --}}
+    @if(in_array(Auth::user()->funcao, ['Direção', 'Gerência', 'Operação']))
+    <div class="px-4">
+        <button @click="openMenu = (openMenu === 'licitacao' ? '' : 'licitacao')"
+            class="w-full flex items-center justify-between p-3 rounded-lg hover:bg-slate-800 transition group"
+            :class="openMenu === 'licitacao' ? 'text-white bg-slate-800/50' : ''">
+            <div class="flex items-center gap-3">
+                <i class="ph ph-file-text text-xl text-amber-500"></i>
+                <span class="text-sm font-bold uppercase tracking-wider">Licitações</span>
+            </div>
+            <i class="ph ph-caret-down transition-transform duration-300" :class="openMenu === 'licitacao' ? 'rotate-180' : ''"></i>
+        </button>
+
+        <div x-show="openMenu === 'licitacao'" x-cloak x-collapse class="mt-1 space-y-1 ml-4 border-l border-slate-700 pl-2">
+            <x-nav-link href="{{ route('licitacoes.index') }}" active="{{ request()->routeIs('licitacoes.*') }}" icon="ph-folders" label="Contratos / Editais" />
+            <x-nav-link href="#" active="{{ request()->routeIs('licitacoes.pendentes') }}" icon="ph-clock-countdown" label="Prazos Ativos" />
+        </div>
+    </div>
+    @endif
+
+    {{-- Grupo: Logística (Filtro por função) --}}
+    @if(in_array(Auth::user()->funcao, ['Direção', 'Gerência', 'Logística', 'Motorista']))
+    <div class="px-4">
+        <button @click="openMenu = (openMenu === 'logistica' ? '' : 'logistica')"
+            class="w-full flex items-center justify-between p-3 rounded-lg hover:bg-slate-800 transition group"
+            :class="openMenu === 'logistica' ? 'text-white bg-slate-800/50' : ''">
+            <div class="flex items-center gap-3">
+                <i class="ph ph-truck text-xl text-blue-500"></i>
+                <span class="text-sm font-bold uppercase tracking-wider">Logística</span>
+            </div>
+            <i class="ph ph-caret-down transition-transform duration-300" :class="openMenu === 'logistica' ? 'rotate-180' : ''"></i>
+        </button>
+
+        <div x-show="openMenu === 'logistica'" x-cloak x-collapse class="mt-1 space-y-1 ml-4 border-l border-slate-700 pl-2">
+            <x-nav-link href="{{ route('requisicoes.index') }}" active="{{ request()->routeIs('requisicoes.*') }}" icon="ph-clipboard-text" label="Requisições" />
+            <x-nav-link href="{{ route('rotas.index') }}" active="{{ request()->routeIs('rotas.*') }}" icon="ph-map-trifold" label="Rotas" />
+            <x-nav-link href="{{ route('movimentacoes.index') }}" active="{{ request()->routeIs('movimentacoes.*') }}" icon="ph-arrows-clockwise" label="Movimentações" />
+            <x-nav-link href="{{ route('veiculos.index') }}" active="{{ request()->routeIs('veiculos.*') }}" icon="ph-car" label="Veículos" />
+        </div>
+    </div>
+    @endif
+
+    {{-- Grupo: Gerenciamento (Apenas Direção e Gerência) --}}
+    @if(in_array(Auth::user()->funcao, ['Direção', 'Gerência']))
+    <div class="px-4">
+        <button @click="openMenu = (openMenu === 'gerenciamento' ? '' : 'gerenciamento')"
+            class="w-full flex items-center justify-between p-3 rounded-lg hover:bg-slate-800 transition group"
+            :class="openMenu === 'gerenciamento' ? 'text-white bg-slate-800/50' : ''">
+            <div class="flex items-center gap-3">
+                <i class="ph ph-gear text-xl text-emerald-500"></i>
+                <span class="text-sm font-bold uppercase tracking-wider">Gerenciamento</span>
+            </div>
+            <i class="ph ph-caret-down transition-transform duration-300" :class="openMenu === 'gerenciamento' ? 'rotate-180' : ''"></i>
+        </button>
+
+        <div x-show="openMenu === 'gerenciamento'" x-cloak x-collapse class="mt-1 space-y-1 ml-4 border-l border-slate-700 pl-2">
+            <x-nav-link href="{{ route('usuarios.index') }}" active="{{ request()->routeIs('usuarios.*') }}" icon="ph-users-three" label="Usuários" />
+        </div>
+    </div>
+    @endif
+    </div>
+
+    {{-- Perfil --}}
+    <div class="p-4 border-t border-slate-800 bg-slate-900/50">
+        <div class="flex items-center gap-3 p-2 bg-slate-800/40 rounded-xl border border-slate-700/50">
+            <div class="w-10 h-10 rounded-lg bg-red-600 flex items-center justify-center text-white font-black shadow-lg uppercase">
+                {{ substr(Auth::user()->name ?? 'U', 0, 1) }}
+            </div>
+            <div class="flex flex-col overflow-hidden">
+                <span class="text-sm font-bold text-white truncate">{{ Auth::user()->name ?? 'Usuário' }}</span>
+                <span class="text-[10px] text-slate-500 uppercase font-bold tracking-wider">{{ Auth::user()->funcao ?? 'Acesso' }}</span>
+            </div>
+        </div>
+    </div>
     </aside>
 
     {{-- Lado Direito --}}
