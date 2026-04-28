@@ -2,16 +2,63 @@
 
 @section('content')
 <div class="container mx-auto p-6">
+    {{-- CABEÇALHO --}}
     <div class="flex justify-between items-center mb-6">
         <h1 class="text-2xl font-bold text-gray-800 flex items-center gap-2">
             <i class="ph ph-clipboard-text text-blue-900"></i>
             Requisições de Equipamentos & Insumos
         </h1>
-        <a href="{{ route('requisicoes.create') }}" class="bg-blue-900 text-white px-4 py-2 rounded-lg shadow hover:bg-blue-800 flex items-center gap-2">
+        <a href="{{ route('requisicoes.create') }}" class="bg-blue-900 text-white px-4 py-2 rounded-lg shadow hover:bg-blue-800 flex items-center gap-2 transition-all">
             <i class="ph ph-plus-circle"></i> Nova Solicitação
         </a>
     </div>
 
+    {{-- BARRA DE FILTROS --}}
+    <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100 mb-6">
+        <form action="{{ route('requisicoes.index') }}" method="GET" class="grid grid-cols-1 md:grid-cols-4 lg:grid-cols-5 gap-4 items-end">
+
+            {{-- Filtro: Cliente/Local --}}
+            <div>
+                <label class="block text-[10px] font-black text-slate-400 uppercase mb-2">Cliente / Local</label>
+                <input type="text" name="cliente" value="{{ request('cliente') }}"
+                    placeholder="Ex: Fundo Municipal..."
+                    class="w-full bg-slate-50 border-gray-200 rounded-lg text-xs font-bold focus:ring-blue-500 focus:border-blue-500">
+            </div>
+
+            {{-- Filtro: Item --}}
+            <div>
+                <label class="block text-[10px] font-black text-slate-400 uppercase mb-2">Item / Descrição</label>
+                <input type="text" name="item" value="{{ request('item') }}"
+                    placeholder="Ex: Toner..."
+                    class="w-full bg-slate-50 border-gray-200 rounded-lg text-xs font-bold focus:ring-blue-500 focus:border-blue-500">
+            </div>
+
+            {{-- Filtro: Status --}}
+            <div>
+                <label class="block text-[10px] font-black text-slate-400 uppercase mb-2">Status</label>
+                <select name="status" class="w-full bg-slate-50 border-gray-200 rounded-lg text-xs font-bold focus:ring-blue-500 focus:border-blue-500">
+                    <option value="">Todos os Status</option>
+                    <option value="Pendente" {{ request('status') == 'Pendente' ? 'selected' : '' }}>Pendente</option>
+                    <option value="Atendida" {{ request('status') == 'Atendida' ? 'selected' : '' }}>Atendida</option>
+                    <option value="Parcialmente" {{ request('status') == 'Parcialmente' ? 'selected' : '' }}>Parcialmente</option>
+                    <option value="Solicitado Compra" {{ request('status') == 'Solicitado Compra' ? 'selected' : '' }}>Solicitado Compra</option>
+                    <option value="Finalizada" {{ request('status') == 'Finalizada' ? 'selected' : '' }}>Finalizada</option>
+                </select>
+            </div>
+
+            {{-- Botões de Ação --}}
+            <div class="lg:col-span-2 flex gap-2">
+                <button type="submit" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-black text-[10px] uppercase py-3 rounded-lg transition-all flex items-center justify-center gap-2">
+                    <i class="ph ph-magnifying-glass text-base"></i> Filtrar
+                </button>
+                <a href="{{ route('requisicoes.index') }}" class="px-4 bg-slate-100 hover:bg-slate-200 text-slate-500 font-black text-[10px] uppercase py-3 rounded-lg transition-all flex items-center justify-center" title="Limpar Filtros">
+                    <i class="ph ph-arrows-counter-clockwise text-base"></i>
+                </a>
+            </div>
+        </form>
+    </div>
+
+    {{-- TABELA DE RESULTADOS --}}
     <div class="bg-white shadow-md rounded-xl overflow-hidden border border-gray-100">
         <div class="overflow-x-auto">
             <table class="w-full text-sm text-left text-gray-500">
@@ -55,7 +102,6 @@
                             </div>
                         </td>
 
-                        {{-- COLUNA DE STATUS COM CORES --}}
                         <td class="px-4 py-4 text-center">
                             @php
                             $statusClasses = match($req->situacao) {
@@ -85,8 +131,9 @@
                     </tr>
                     @empty
                     <tr>
-                        <td colspan="7" class="px-4 py-8 text-center text-gray-400 italic">
-                            Nenhuma requisição encontrada.
+                        <td colspan="7" class="px-4 py-12 text-center">
+                            <i class="ph ph-magnifying-glass text-5xl text-gray-200 block mb-3 mx-auto"></i>
+                            <span class="text-gray-400 italic">Nenhum resultado encontrado para os filtros aplicados.</span>
                         </td>
                     </tr>
                     @endforelse
@@ -94,9 +141,10 @@
             </table>
         </div>
 
+        {{-- PAGINAÇÃO --}}
         @if($requisicoes->hasPages())
         <div class="px-4 py-3 bg-gray-50 border-t">
-            {{ $requisicoes->links() }}
+            {{ $requisicoes->appends(request()->all())->links() }}
         </div>
         @endif
     </div>

@@ -51,7 +51,7 @@ Route::middleware(['auth'])->group(function () {
     Route::resource('estoques', EstoqueController::class);
     Route::resource('catalogos', CatalogoController::class);
 
-    // --- LICITAÇÕES ---
+    // --- LICITAÇÕES (CONTRATOS E ITENS) ---
     Route::resource('licitacoes', BiddingContractController::class);
     Route::resource('licitacoes-itens', BiddingItemController::class);
     Route::resource('licitacoes-acessorios', BiddingAccessoryController::class);
@@ -84,26 +84,30 @@ Route::middleware(['auth'])->group(function () {
 
     Route::get('/rotas/{id}/imprimir', [RotaController::class, 'imprimir'])->name('rotas.imprimir');
 
-    // --- GERENCIAMENTO (MENU 3) ---
+    // --- GERENCIAMENTO (MENU 3 - ACESSO RESTRITO) ---
     Route::middleware(['funcao:Direção,Gerência'])->group(function () {
         Route::resource('usuarios', UserController::class)->parameters([
             'usuarios' => 'usuario'
         ]);
     });
 
-    // --- APIs INTERNAS ---
+    // --- APIs INTERNAS (PARA MODAIS E SELECTS DINÂMICOS) ---
     Route::prefix('api')->group(function () {
+        // Busca itens específicos de um estoque
         Route::get('/estoques/{estoque}/itens', [RequisicaoController::class, 'getItensPorEstoque']);
+
+        // Busca subcategorias via AJAX
         Route::get('/categorias/{categoria}/subcategorias', function ($categoriaId) {
             return Subcategoria::where('categoria_id', $categoriaId)->get();
         });
-    });
 
-    Route::get('/api/sugestoes-estoque', [EquipamentoController::class, 'buscarSugestoesEstoque'])->name('api.sugestoes_estoque');
+        // ROTA ADICIONADA: Busca sugestões de catálogo para Homologação de Licitação
+        Route::get('/sugestoes-estoque', [EquipamentoController::class, 'buscarSugestoesEstoque'])->name('api.sugestoes_estoque');
+    });
 });
 
 // ---------------------------------------------------------
-// 3. MANUTENÇÃO E DEBUG
+// 3. MANUTENÇÃO E DEBUG (UTILITÁRIOS)
 // ---------------------------------------------------------
 Route::get('/limpar-sistema', function () {
     Artisan::call('optimize:clear');

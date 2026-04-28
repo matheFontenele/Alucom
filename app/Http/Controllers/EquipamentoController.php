@@ -258,6 +258,8 @@ class EquipamentoController extends Controller
         return response()->json($sugestoes);
     }
 
+
+
     public function destroy(Equipamento $equipamento)
     {
         $equipamento->delete();
