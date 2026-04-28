@@ -37,19 +37,25 @@
                             <div class="text-xs text-gray-400 italic">Por: {{ $req->solicitante }}</div>
                         </td>
                         <td class="px-4 py-4">
-                            <div class="text-gray-800 font-medium">{{ $req->cliente->nome }}</div>
+                            {{-- Proteção contra cliente nulo --}}
+                            <div class="text-gray-800 font-medium">{{ $req->cliente->nome ?? 'Cliente não identificado' }}</div>
                             <div class="text-xs text-gray-500">{{ $req->cidade }} - {{ $req->estado }}</div>
                         </td>
                         <td class="px-4 py-4">
-                            <div class="text-blue-900 font-bold">{{ $req->quantidade }}x {{ $req->item->nome }}</div> <span class="text-[10px] px-2 py-0.5 rounded-full bg-gray-100 border {{ $req->tipo_solicitacao == 'Substituição' ? 'text-amber-600 border-amber-200' : 'text-green-600 border-green-200' }}">
+                            {{-- Corrigido: Usando item_descricao em vez de item->nome --}}
+                            <div class="text-blue-900 font-bold">{{ $req->quantidade }}x {{ $req->item_descricao }}</div>
+                            <span class="text-[10px] px-2 py-0.5 rounded-full bg-gray-100 border {{ $req->tipo_solicitacao == 'Substituição' ? 'text-amber-600 border-amber-200' : 'text-green-600 border-green-200' }}">
                                 {{ $req->tipo_solicitacao }}
                             </span>
                         </td>
                         <td class="px-4 py-4 text-center">
                             <span class="px-2 py-1 rounded text-xs font-bold bg-blue-50 text-blue-700 border border-blue-100">
-                                {{ $req->envio }}
+                                {{ $req->envio ?? 'Não definido' }}
                             </span>
-                            <div class="text-[10px] text-gray-400 mt-1">Prev: {{ \Carbon\Carbon::parse($req->previsao_envio)->format('d/m/Y') }}</div>
+                            {{-- Proteção contra data nula --}}
+                            <div class="text-[10px] text-gray-400 mt-1">
+                                Prev: {{ $req->previsao_envio ? \Carbon\Carbon::parse($req->previsao_envio)->format('d/m/Y') : '--' }}
+                            </div>
                         </td>
                         <td class="px-4 py-4 text-center">
                             @if($req->quantidade_separada)
@@ -62,7 +68,6 @@
                         </td>
                         <td class="px-4 py-4 text-right">
                             <div class="flex justify-end items-center gap-3">
-                                {{-- Botões de Visualizar e Editar --}}
                                 <a href="{{ route('requisicoes.show', $req->id) }}" class="text-gray-400 hover:text-blue-600" title="Ver Detalhes">
                                     <i class="ph ph-eye text-xl"></i>
                                 </a>
@@ -70,7 +75,6 @@
                                     <i class="ph ph-pencil-simple text-xl"></i>
                                 </a>
 
-                                {{-- Botão em Destaque: Separação --}}
                                 <a href="{{ route('requisicoes.separacao', $req->id) }}"
                                     class="flex items-center gap-2 bg-green-600 text-white px-3 py-1.5 rounded-lg text-xs font-bold hover:bg-green-700 shadow-sm transition-all transform hover:scale-105">
                                     <i class="ph ph-package text-sm"></i>
