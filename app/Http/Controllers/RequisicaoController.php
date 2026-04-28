@@ -18,7 +18,7 @@ class RequisicaoController extends Controller
      */
     public function index()
     {
-        $requisicoes = Requisicao::with(['cliente', 'item'])->orderBy('created_at', 'desc')->paginate(10);
+        $requisicoes = Requisicao::with(['cliente', 'estoque'])->orderBy('created_at', 'desc')->paginate(10);
         return view('requisicoes.index', compact('requisicoes'));
     }
 
