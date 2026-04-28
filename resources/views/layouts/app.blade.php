@@ -72,67 +72,6 @@
 
             <hr class="mx-6 border-slate-800 my-2">
 
-            {{--
-            {{-- Grupo: Licitações --}}
-            @if(in_array(Auth::user()->funcao, ['Direção', 'Gerência', 'Operação']))
-            <div class="px-4">
-                <button @click="openMenu = (openMenu === 'licitacao' ? '' : 'licitacao')"
-                    class="w-full flex items-center justify-between p-3 rounded-lg hover:bg-slate-800 transition group"
-                    :class="openMenu === 'licitacao' ? 'text-white bg-slate-800/50' : ''">
-                    <div class="flex items-center gap-3">
-                        <i class="ph ph-file-text text-xl text-amber-500"></i>
-                        <span class="text-sm font-bold uppercase tracking-wider">Licitações</span>
-                    </div>
-                    <i class="ph ph-caret-down transition-transform duration-300" :class="openMenu === 'licitacao' ? 'rotate-180' : ''"></i>
-                </button>
-
-                <div x-show="openMenu === 'licitacao'" x-cloak x-collapse class="mt-1 space-y-1 ml-4 border-l border-slate-700 pl-2">
-                    <a href="{{ route('licitacoes.index') }}" class="block p-2 text-xs font-bold hover:text-white transition">Contratos / Editais</a>
-                    <a href="#" class="block p-2 text-xs font-bold hover:text-white transition">Prazos Ativos</a>
-                </div>
-            </div>
-            @endif
-
-            {{-- Grupo: Logística --}}
-            @if(in_array(Auth::user()->funcao, ['Direção', 'Gerência', 'Logística', 'Motorista']))
-            <div class="px-4">
-                <button @click="openMenu = (openMenu === 'logistica' ? '' : 'logistica')"
-                    class="w-full flex items-center justify-between p-3 rounded-lg hover:bg-slate-800 transition group"
-                    :class="openMenu === 'logistica' ? 'text-white bg-slate-800/50' : ''">
-                    <div class="flex items-center gap-3">
-                        <i class="ph ph-truck text-xl text-blue-500"></i>
-                        <span class="text-sm font-bold uppercase tracking-wider">Logística</span>
-                    </div>
-                    <i class="ph ph-caret-down transition-transform duration-300" :class="openMenu === 'logistica' ? 'rotate-180' : ''"></i>
-                </button>
-
-                <div x-show="openMenu === 'logistica'" x-cloak x-collapse class="mt-1 space-y-1 ml-4 border-l border-slate-700 pl-2">
-                    <a href="{{ route('rotas.index') }}" class="block p-2 text-xs font-bold hover:text-white transition">Rotas</a>
-                    <a href="{{ route('movimentacoes.index') }}" class="block p-2 text-xs font-bold hover:text-white transition">Movimentações</a>
-                    <a href="{{ route('veiculos.index') }}" class="block p-2 text-xs font-bold hover:text-white transition">Veículos</a>
-                </div>
-            </div>
-            @endif
-
-            {{-- Grupo: Gerenciamento --}}
-            @if(in_array(Auth::user()->funcao, ['Direção', 'Gerência']))
-            <div class="px-4">
-                <button @click="openMenu = (openMenu === 'gerenciamento' ? '' : 'gerenciamento')"
-                    class="w-full flex items-center justify-between p-3 rounded-lg hover:bg-slate-800 transition group"
-                    :class="openMenu === 'gerenciamento' ? 'text-white bg-slate-800/50' : ''">
-                    <div class="flex items-center gap-3">
-                        <i class="ph ph-gear text-xl text-emerald-500"></i>
-                        <span class="text-sm font-bold uppercase tracking-wider">Gerenciamento</span>
-                    </div>
-                    <i class="ph ph-caret-down transition-transform duration-300" :class="openMenu === 'gerenciamento' ? 'rotate-180' : ''"></i>
-                </button>
-
-                <div x-show="openMenu === 'gerenciamento'" x-cloak x-collapse class="mt-1 space-y-1 ml-4 border-l border-slate-700 pl-2">
-                    <a href="{{ route('usuarios.index') }}" class="block p-2 text-xs font-bold hover:text-white transition">Usuários</a>
-                </div>
-            </div>
-            @endif
-            --}}
         </div>
 
         {{-- Perfil (Fixo no rodapé do aside) --}}
