@@ -34,14 +34,14 @@
 <body class="bg-gray-50 flex font-sans text-slate-900 overflow-x-hidden h-screen">
 
     {{-- Menu Lateral --}}
-    <aside x-data="{ openGuia: {{ request()->routeIs('guia.*') || request()->routeIs('guia-adi.*') ? 'true' : 'false' }} }"
+    {{-- Lógica atualizada para abrir o dropdown se qualquer rota de guia estiver ativa --}}
+    <aside x-data="{ openGuia: {{ request()->routeIs('guia-adi.*') || request()->routeIs('guia-energia.*') || request()->routeIs('guia-computadores.*') || request()->routeIs('guia-monitores.*') ? 'true' : 'false' }} }"
         class="w-64 flex-shrink-0 bg-slate-900 h-screen text-slate-300 flex flex-col shadow-xl sticky top-0 z-20 transition-all duration-300">
 
         <div class="p-6 text-white font-bold text-2xl border-b border-slate-800 flex items-center gap-2">
             <i class="ph ph-package text-red-500"></i> AS - Sistema
         </div>
 
-        {{-- Área de Scroll do Menu --}}
         <div class="flex-1 py-4 space-y-2 overflow-y-auto">
 
             {{-- Dashboard --}}
@@ -67,7 +67,7 @@
             {{-- GRUPO: GUIAS TÉCNICOS (DROPDOWN) --}}
             <div class="px-4">
                 <button @click="openGuia = !openGuia"
-                    class="w-full flex items-center justify-between p-3 rounded-lg transition group hover:bg-slate-800 {{ request()->routeIs('guia.*') || request()->routeIs('guia-adi.*') ? 'bg-slate-800/50 border border-slate-700/50' : '' }}">
+                    class="w-full flex items-center justify-between p-3 rounded-lg transition group hover:bg-slate-800 {{ request()->routeIs('guia-*') ? 'bg-slate-800/50 border border-slate-700/50' : '' }}">
                     <div class="flex items-center gap-3">
                         <i class="ph ph-book-open text-xl text-red-500"></i>
                         <span class="text-sm font-bold uppercase tracking-wider">Guias Técnicos</span>
@@ -77,29 +77,34 @@
 
                 {{-- Itens do Submenu --}}
                 <div x-show="openGuia" x-collapse x-cloak class="mt-2 ml-4 space-y-1 border-l border-slate-800">
+
+                    {{-- Impressoras --}}
                     <a href="{{ route('guia-adi.index') }}"
                         class="flex items-center gap-3 p-2 pl-6 rounded-r-lg text-[11px] font-bold uppercase hover:text-white transition {{ request()->routeIs('guia-adi.*') ? 'text-red-500 border-l-2 border-red-500' : 'text-slate-500' }}">
                         <i class="ph ph-printer"></i> Impressoras
                     </a>
 
-                    <a href="#" class="flex items-center gap-3 p-2 pl-6 rounded-r-lg text-[11px] font-bold uppercase hover:text-white transition text-slate-500 group">
+                    {{-- Energia --}}
+                    <a href="{{ route('guia-energia.index') }}"
+                        class="flex items-center gap-3 p-2 pl-6 rounded-r-lg text-[11px] font-bold uppercase hover:text-white transition {{ request()->routeIs('guia-energia.*') ? 'text-amber-500 border-l-2 border-amber-500' : 'text-slate-500' }} group">
                         <i class="ph ph-lightning group-hover:text-amber-500 transition-colors"></i> Energia
                     </a>
 
-                    <a href="#" class="flex items-center gap-3 p-2 pl-6 rounded-r-lg text-[11px] font-bold uppercase hover:text-white transition text-slate-500 group">
+                    {{-- Computadores --}}
+                    <a href="{{ route('guia-computadores.index') }}"
+                        class="flex items-center gap-3 p-2 pl-6 rounded-r-lg text-[11px] font-bold uppercase hover:text-white transition {{ request()->routeIs('guia-computadores.*') ? 'text-blue-400 border-l-2 border-blue-400' : 'text-slate-500' }} group">
                         <i class="ph ph-desktop group-hover:text-blue-400 transition-colors"></i> Computadores
                     </a>
 
-                    <a href="#" class="flex items-center gap-3 p-2 pl-6 rounded-r-lg text-[11px] font-bold uppercase hover:text-white transition text-slate-500 group">
+                    {{-- Monitores --}}
+                    <a href="{{ route('guia-monitores.index') }}"
+                        class="flex items-center gap-3 p-2 pl-6 rounded-r-lg text-[11px] font-bold uppercase hover:text-white transition {{ request()->routeIs('guia-monitores.*') ? 'text-cyan-400 border-l-2 border-cyan-400' : 'text-slate-500' }} group">
                         <i class="ph ph-monitor group-hover:text-cyan-400 transition-colors"></i> Monitores
                     </a>
 
+                    {{-- Placeholder para futuros guias --}}
                     <a href="#" class="flex items-center gap-3 p-2 pl-6 rounded-r-lg text-[11px] font-bold uppercase hover:text-white transition text-slate-500 group">
                         <i class="ph ph-mouse group-hover:text-purple-400 transition-colors"></i> Periféricos
-                    </a>
-
-                    <a href="#" class="flex items-center gap-3 p-2 pl-6 rounded-r-lg text-[11px] font-bold uppercase hover:text-white transition text-slate-500 group">
-                        <i class="ph ph-drop group-hover:text-emerald-400 transition-colors"></i> Insumos
                     </a>
                 </div>
             </div>
@@ -108,7 +113,7 @@
 
         </div>
 
-        {{-- Perfil (Fixo no rodapé) --}}
+        {{-- Perfil --}}
         <div class="p-4 border-t border-slate-800 bg-slate-900/50">
             <div class="flex items-center gap-3 p-2 bg-slate-800/40 rounded-xl border border-slate-700/50">
                 <div class="w-10 h-10 rounded-lg bg-red-600 flex items-center justify-center text-white font-black shadow-lg uppercase">
@@ -122,7 +127,7 @@
         </div>
     </aside>
 
-    {{-- Lado Direito --}}
+    {{-- Conteúdo Principal --}}
     <div class="flex-1 flex flex-col min-w-0 h-screen">
         <header class="h-16 bg-white border-b border-gray-200 flex items-center justify-between px-8 sticky top-0 z-10 shadow-sm flex-shrink-0">
             <div class="flex items-center gap-2">
@@ -130,7 +135,6 @@
                 <span class="text-slate-600 font-semibold tracking-tight uppercase text-sm">@yield('subtitle', 'Visão Geral')</span>
             </div>
 
-            {{-- Logout --}}
             <div class="flex items-center gap-5 text-slate-400">
                 <form id="logout-form" action="{{ route('logout') }}" method="POST" class="hidden">
                     @csrf
