@@ -7,6 +7,11 @@ use Illuminate\Support\Facades\Artisan;
 
 // Importação dos Controllers
 use App\Http\Controllers\GuiaAdiController;
+// NOVOS CONTROLLERS ADICIONADOS:
+use App\Http\Controllers\GuiaEnergiaController;
+use App\Http\Controllers\GuiaComputadorController;
+use App\Http\Controllers\GuiaMonitorController;
+
 use App\Http\Controllers\ClientesController;
 use App\Http\Controllers\EstoqueController;
 use App\Http\Controllers\EquipamentoController;
@@ -45,7 +50,12 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
     // --- OPERAÇÕES (MENU 1) ---
+    // GUIAS TÉCNICOS (PADRÃO TABELAS SEPARADAS)
     Route::resource('guia-adi', GuiaAdiController::class);
+    Route::resource('guia-energia', GuiaEnergiaController::class);
+    Route::resource('guia-computadores', GuiaComputadorController::class);
+    Route::resource('guia-monitores', GuiaMonitorController::class);
+
     Route::resource('clientes', ClientesController::class);
     Route::resource('tecnicos', TecnicosController::class);
     Route::resource('estoques', EstoqueController::class);
@@ -95,15 +105,10 @@ Route::middleware(['auth'])->group(function () {
 
     // --- APIs INTERNAS (PARA MODAIS E SELECTS DINÂMICOS) ---
     Route::prefix('api')->group(function () {
-        // Busca itens específicos de um estoque
         Route::get('/estoques/{estoque}/itens', [RequisicaoController::class, 'getItensPorEstoque']);
-
-        // Busca subcategorias via AJAX
         Route::get('/categorias/{categoria}/subcategorias', function ($categoriaId) {
             return Subcategoria::where('categoria_id', $categoriaId)->get();
         });
-
-        // ROTA ADICIONADA: Busca sugestões de catálogo para Homologação de Licitação
         Route::get('/sugestoes-estoque', [EquipamentoController::class, 'buscarSugestoesEstoque'])->name('api.sugestoes_estoque');
     });
 });
