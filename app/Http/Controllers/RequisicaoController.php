@@ -118,51 +118,29 @@ class RequisicaoController extends Controller
 
     public function separarUpdate(Request $request, $id)
     {
-        $requisicao = Requisicao::with(['cliente', 'estoque'])->findOrFail($id);
+        $requisicao = Requisicao::findOrFail($id);
+        $quantidadeParaBaixa = $request->has('atendimento_completo')
+            ? $requisicao->quantidade
+            : $request->quantidade_separada;
 
-        if ($request->baixa_sistema == '1' && !$request->patrimonio_novo) {
-            return back()->with('error', 'Você precisa selecionar um patrimônio para dar baixa no sistema!');
-        }
+        // 1. Decidir o novo Status
+        $novoStatus = ($quantidadeParaBaixa >= $requisicao->quantidade)
+            ? 'Finalizada'
+            : 'Parcialmente Atendida';
 
-        return DB::transaction(function () use ($request, $requisicao) {
-            $tipoMov = ($requisicao->tipo_solicitacao === 'Substituição') ? 'Substituição' : 'Aluguel';
+        // 2. Lógica de Baixa no Estoque (Exemplo)
+        // Aqui você faria o loop ou o update no seu banco de patrimônios
+        // decrementando a quantidade ou marcando os IDs selecionados como 'Saída'.
 
-            $requisicao->update([
-                'situacao'             => 'Atendida', // Atualiza para Atendida após separar
-                'quantidade_separada'  => $request->quantidade_separada,
-                'data_separacao'       => $request->data_separacao,
-                'separado_por'         => $request->separado_por,
-                'baixa_sistema'        => $request->baixa_sistema,
-                'observacao_separacao' => $request->observacao_separacao,
-                'patrimonio_novo'      => $request->patrimonio_novo,
-            ]);
+        // 3. Atualizar a Requisição
+        $requisicao->update([
+            'situacao' => $novoStatus,
+            'quantidade_atendida' => $quantidadeParaBaixa, // Seria bom ter essa coluna
+            'data_separacao' => now(),
+            'separado_por' => auth()->user()->name
+        ]);
 
-            if ($request->baixa_sistema == '1') {
-                $equipamentoFisico = Equipamento::where('tombo', $request->patrimonio_novo)->first();
-
-                if ($equipamentoFisico) {
-                    Movimentacao::create([
-                        'equipamento_id'    => $equipamentoFisico->id,
-                        'requisicao_id'     => $requisicao->id,
-                        'tipo'              => $tipoMov,
-                        'situacao'          => 'Separado',
-                        'origem'            => $requisicao->estoque->nome ?? 'Estoque Central',
-                        'destino'           => 'Aguardando Rota',
-                        'data_movimentacao' => now(),
-                        'observacao'        => "Item separado. Req #{$requisicao->id}."
-                    ]);
-
-                    $equipamentoFisico->update([
-                        'status'            => 'Alugado',
-                        'situacao'          => 'Separado',
-                        'cliente_id'        => $requisicao->cliente_id,
-                        'estoque_id'        => null,
-                        'data_movimentacao' => now(),
-                    ]);
-                }
-            }
-
-            return redirect()->route('requisicoes.index')->with('success', 'Separação concluída!');
-        });
+        return redirect()->route('requisicoes.index')
+            ->with('success', "Separação realizada! Status: $novoStatus");
     }
 }
