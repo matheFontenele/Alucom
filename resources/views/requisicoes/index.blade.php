@@ -126,7 +126,7 @@
                                 <a href="{{ route('requisicoes.edit', $req->id) }}" class="text-gray-400 hover:text-amber-600 transition-colors" title="Editar Requisição">
                                     <i class="ph ph-pencil-simple text-2xl"></i>
                                 </a>
-                                @if($requisicao->situacao === 'Pendente')
+                                @if($req->situacao === 'Pendente')
                                 <a href="{{ route('requisicoes.separacao', $requisicao->id) }}"
                                     class="p-2 bg-amber-100 text-amber-600 rounded-lg hover:bg-amber-200 transition"
                                     title="Separar Material">
