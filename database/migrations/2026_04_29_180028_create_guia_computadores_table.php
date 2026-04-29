@@ -11,18 +11,20 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('guia_computadores', function (Blueprint $table) {
-            $table->id();
-            $table->string('fabricante');
-            $table->string('marca_modelo');
-            $table->string('foto')->nullable();
-            $table->string('processador');
-            $table->string('memoria');
-            $table->string('armazenamento'); // Representa HD/SSD
-            $table->string('geracao');
-            $table->text('obs')->nullable();
-            $table->timestamps();
-        });;
+        if (!Schema::hasTable('guia_computadores')) {
+            Schema::create('guia_computadores', function (Blueprint $table) {
+                $table->id();
+                $table->string('fabricante');
+                $table->string('marca_modelo');
+                $table->string('foto')->nullable();
+                $table->string('processador');
+                $table->string('memoria');
+                $table->string('armazenamento'); // Representa HD/SSD
+                $table->string('geracao');
+                $table->text('obs')->nullable();
+                $table->timestamps();
+            });;
+        }
     }
 
     /**
