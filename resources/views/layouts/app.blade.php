@@ -79,7 +79,7 @@
                 <div x-show="openGuia" x-collapse x-cloak class="mt-2 ml-4 space-y-1 border-l border-slate-800">
                     <a href="{{ route('guia-adi.index') }}"
                         class="flex items-center gap-3 p-2 pl-6 rounded-r-lg text-[11px] font-bold uppercase hover:text-white transition {{ request()->routeIs('guia-adi.*') ? 'text-red-500 border-l-2 border-red-500' : 'text-slate-500' }}">
-                        <i class="ph ph-printer"></i> Impressoras (ADI)
+                        <i class="ph ph-printer"></i> Impressoras
                     </a>
 
                     <a href="#" class="flex items-center gap-3 p-2 pl-6 rounded-r-lg text-[11px] font-bold uppercase hover:text-white transition text-slate-500 group">
