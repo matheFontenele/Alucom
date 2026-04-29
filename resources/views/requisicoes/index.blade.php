@@ -126,11 +126,9 @@
                                 <a href="{{ route('requisicoes.edit', $req->id) }}" class="text-gray-400 hover:text-amber-600 transition-colors" title="Editar Requisição">
                                     <i class="ph ph-pencil-simple text-2xl"></i>
                                 </a>
-
-                                {{-- BOTÃO DE SEPARAÇÃO - CORRIGIDO PARA $req --}}
                                 @if($req->situacao === 'Pendente')
                                 <a href="{{ route('requisicoes.separacao', $req->id) }}"
-                                    class="p-1.5 bg-amber-100 text-amber-600 rounded-lg hover:bg-amber-200 transition-all flex items-center justify-center shadow-sm"
+                                    class="p-2 bg-amber-100 text-amber-600 rounded-lg hover:bg-amber-200 transition-all flex items-center justify-center shadow-sm"
                                     title="Separar Material">
                                     <i class="ph ph-package-open text-xl"></i>
                                 </a>
