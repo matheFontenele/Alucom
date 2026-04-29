@@ -34,7 +34,8 @@
 <body class="bg-gray-50 flex font-sans text-slate-900 overflow-x-hidden h-screen">
 
     {{-- Menu Lateral --}}
-    <aside x-data="{ openMenu: '' }" class="w-64 flex-shrink-0 bg-slate-900 h-screen text-slate-300 flex flex-col shadow-xl sticky top-0 z-20 transition-all duration-300">
+    <aside x-data="{ openGuia: {{ request()->routeIs('guia.*') || request()->routeIs('guia-adi.*') ? 'true' : 'false' }} }"
+        class="w-64 flex-shrink-0 bg-slate-900 h-screen text-slate-300 flex flex-col shadow-xl sticky top-0 z-20 transition-all duration-300">
 
         <div class="p-6 text-white font-bold text-2xl border-b border-slate-800 flex items-center gap-2">
             <i class="ph ph-package text-red-500"></i> AS - Sistema
@@ -61,20 +62,53 @@
                 </a>
             </div>
 
-            {{-- Guia de Impressoras --}}
+            <hr class="mx-6 border-slate-800 my-2 opacity-30">
+
+            {{-- GRUPO: GUIAS TÉCNICOS (DROPDOWN) --}}
             <div class="px-4">
-                <a href="{{ route('guia-adi.index') }}"
-                    class="flex items-center gap-3 p-3 rounded-lg transition group {{ request()->routeIs('guia-adi.*') ? 'bg-red-600 text-white shadow-lg shadow-red-900/40' : 'hover:bg-slate-800 text-slate-300' }}">
-                    <i class="ph ph-printer text-xl {{ request()->routeIs('guia-adi.*') ? 'text-white' : 'text-red-500' }}"></i>
-                    <span class="text-sm font-bold uppercase tracking-wider">Guia Impressoras</span>
-                </a>
+                <button @click="openGuia = !openGuia"
+                    class="w-full flex items-center justify-between p-3 rounded-lg transition group hover:bg-slate-800 {{ request()->routeIs('guia.*') || request()->routeIs('guia-adi.*') ? 'bg-slate-800/50 border border-slate-700/50' : '' }}">
+                    <div class="flex items-center gap-3">
+                        <i class="ph ph-book-open text-xl text-red-500"></i>
+                        <span class="text-sm font-bold uppercase tracking-wider">Guias Técnicos</span>
+                    </div>
+                    <i class="ph ph-caret-down text-xs transition-transform duration-300" :class="openGuia ? 'rotate-180' : ''"></i>
+                </button>
+
+                {{-- Itens do Submenu --}}
+                <div x-show="openGuia" x-collapse x-cloak class="mt-2 ml-4 space-y-1 border-l border-slate-800">
+                    <a href="{{ route('guia-adi.index') }}"
+                        class="flex items-center gap-3 p-2 pl-6 rounded-r-lg text-[11px] font-bold uppercase hover:text-white transition {{ request()->routeIs('guia-adi.*') ? 'text-red-500 border-l-2 border-red-500' : 'text-slate-500' }}">
+                        <i class="ph ph-printer"></i> Impressoras (ADI)
+                    </a>
+
+                    <a href="#" class="flex items-center gap-3 p-2 pl-6 rounded-r-lg text-[11px] font-bold uppercase hover:text-white transition text-slate-500 group">
+                        <i class="ph ph-lightning group-hover:text-amber-500 transition-colors"></i> Energia
+                    </a>
+
+                    <a href="#" class="flex items-center gap-3 p-2 pl-6 rounded-r-lg text-[11px] font-bold uppercase hover:text-white transition text-slate-500 group">
+                        <i class="ph ph-desktop group-hover:text-blue-400 transition-colors"></i> Computadores
+                    </a>
+
+                    <a href="#" class="flex items-center gap-3 p-2 pl-6 rounded-r-lg text-[11px] font-bold uppercase hover:text-white transition text-slate-500 group">
+                        <i class="ph ph-monitor group-hover:text-cyan-400 transition-colors"></i> Monitores
+                    </a>
+
+                    <a href="#" class="flex items-center gap-3 p-2 pl-6 rounded-r-lg text-[11px] font-bold uppercase hover:text-white transition text-slate-500 group">
+                        <i class="ph ph-mouse group-hover:text-purple-400 transition-colors"></i> Periféricos
+                    </a>
+
+                    <a href="#" class="flex items-center gap-3 p-2 pl-6 rounded-r-lg text-[11px] font-bold uppercase hover:text-white transition text-slate-500 group">
+                        <i class="ph ph-drop group-hover:text-emerald-400 transition-colors"></i> Insumos
+                    </a>
+                </div>
             </div>
 
             <hr class="mx-6 border-slate-800 my-2">
 
         </div>
 
-        {{-- Perfil (Fixo no rodapé do aside) --}}
+        {{-- Perfil (Fixo no rodapé) --}}
         <div class="p-4 border-t border-slate-800 bg-slate-900/50">
             <div class="flex items-center gap-3 p-2 bg-slate-800/40 rounded-xl border border-slate-700/50">
                 <div class="w-10 h-10 rounded-lg bg-red-600 flex items-center justify-center text-white font-black shadow-lg uppercase">
@@ -88,7 +122,7 @@
         </div>
     </aside>
 
-    {{-- Lado Direito (Conteúdo Principal) --}}
+    {{-- Lado Direito --}}
     <div class="flex-1 flex flex-col min-w-0 h-screen">
         <header class="h-16 bg-white border-b border-gray-200 flex items-center justify-between px-8 sticky top-0 z-10 shadow-sm flex-shrink-0">
             <div class="flex items-center gap-2">
