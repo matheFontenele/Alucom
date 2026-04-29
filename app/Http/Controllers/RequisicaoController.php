@@ -102,16 +102,18 @@ class RequisicaoController extends Controller
      */
     public function separacao($id)
     {
-        // Removido 'item' do with()
-        $requisicao = Requisicao::with(['cliente'])->findOrFail($id);
+        $requisicao = Requisicao::with(['cliente', 'estoque', 'catalogo'])->findOrFail($id);
 
+        // Busca itens disponíveis especificamente deste modelo no estoque da requisição
         $tombosDisponiveis = Equipamento::where('catalogo_id', $requisicao->catalogo_id)
             ->where('estoque_id', $requisicao->estoque_id)
             ->where('status', 'Disponivel')
             ->orderBy('tombo', 'asc')
             ->get();
 
-        return view('requisicoes.separacao', compact('requisicao', 'tombosDisponiveis'));
+        $estoqueVazio = $tombosDisponiveis->isEmpty();
+
+        return view('requisicoes.separacao', compact('requisicao', 'tombosDisponiveis', 'estoqueVazio'));
     }
 
     public function separarUpdate(Request $request, $id)
