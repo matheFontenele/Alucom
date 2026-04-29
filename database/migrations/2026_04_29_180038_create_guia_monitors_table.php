@@ -11,15 +11,18 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('guia_monitores', function (Blueprint $table) {
-            $table->id();
-            $table->string('fabricante');
-            $table->string('marca_modelo');
-            $table->string('foto')->nullable();
-            $table->string('polegadas');
-            $table->text('obs')->nullable();
-            $table->timestamps();
-        });
+        if (!Schema::hasTable('guia_monitores')) {
+
+            Schema::create('guia_monitores', function (Blueprint $table) {
+                $table->id();
+                $table->string('fabricante');
+                $table->string('marca_modelo');
+                $table->string('foto')->nullable();
+                $table->string('polegadas');
+                $table->text('obs')->nullable();
+                $table->timestamps();
+            });
+        }
     }
 
     /**
